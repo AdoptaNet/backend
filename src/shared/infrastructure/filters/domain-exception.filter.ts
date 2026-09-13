@@ -38,13 +38,21 @@ export class DomainExceptionFilter implements ExceptionFilter {
     if (name.includes('NotFound')) {
       return HttpStatus.NOT_FOUND;
     }
-    if (name.includes('AlreadyExists') || name.includes('Conflict')) {
+    if (
+      name.includes('AlreadyExists') ||
+      name.includes('Conflict') ||
+      name.includes('AlreadyInUse')
+    ) {
       return HttpStatus.CONFLICT;
     }
-    if (name.includes('Unauthorized')) {
+    if (
+      name.includes('Unauthorized') ||
+      name.includes('InvalidCredentials') ||
+      name.includes('InvalidCurrentPassword')
+    ) {
       return HttpStatus.UNAUTHORIZED;
     }
-    if (name.includes('Forbidden')) {
+    if (name.includes('Forbidden') || name.includes('RoleMismatch')) {
       return HttpStatus.FORBIDDEN;
     }
 

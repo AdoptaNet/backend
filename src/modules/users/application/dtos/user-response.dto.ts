@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
+import { AdopterProfileResponseDto } from './adopter-profile-response.dto';
+import { ShelterProfileResponseDto } from './shelter-profile-response.dto';
 
 export class UserResponseDto {
   @ApiProperty({ description: 'Internal user ID (UUID)' })
@@ -19,4 +21,20 @@ export class UserResponseDto {
 
   @ApiProperty({ description: 'Account creation date' })
   createdAt: Date;
+
+  @ApiProperty({
+    type: () => AdopterProfileResponseDto,
+    nullable: true,
+    required: false,
+    description: 'Perfil de adoptante si existe',
+  })
+  adopterProfile?: AdopterProfileResponseDto | null;
+
+  @ApiProperty({
+    type: () => ShelterProfileResponseDto,
+    nullable: true,
+    required: false,
+    description: 'Perfil de albergue si existe',
+  })
+  shelterProfile?: ShelterProfileResponseDto | null;
 }

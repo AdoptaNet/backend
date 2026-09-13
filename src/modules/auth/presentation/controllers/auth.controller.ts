@@ -18,7 +18,6 @@ import {
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
-import { UserResponseDto } from '../../../users/application/dtos/user-response.dto';
 import { User } from '../../../users/domain/entities/user.entity';
 import { AuthResponseDto } from '../../application/dtos/auth-response.dto';
 import { LoginDto } from '../../application/dtos/login.dto';
@@ -43,11 +42,18 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @ApiOperation({ summary: 'Registrar nuevo usuario con correo y contraseña' })
-  @ApiResponse({ status: 201, type: AuthResponseDto })
+  @ApiOperation({
+    summary: 'Registrar un nuevo usuario con email y contraseña',
+  })
+  @ApiResponse({
+    status: 201,
+    type: AuthResponseDto,
+    description: 'Usuario registrado exitosamente',
+  })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
   @ApiResponse({
     status: 409,
-    description: 'El correo electrónico ya está registrado',
+    description: 'El correo electrónico ya está en uso',
   })
   async register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
     return this.registerUseCase.execute(dto);
@@ -55,20 +61,32 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Iniciar sesión con correo y contraseña' })
-  @ApiResponse({ status: 200, type: AuthResponseDto })
-  @ApiResponse({ status: 400, description: 'Credenciales inválidas' })
+  @ApiOperation({
+    summary: 'Iniciar sesión con correo electrónico y contraseña',
+  })
+  @ApiResponse({
+    status: 200,
+    type: AuthResponseDto,
+    description: 'Autenticación exitosa',
+  })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
   async login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
     return this.loginUseCase.execute(dto);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Renovar tokens mediante el refresh token' })
-  @ApiResponse({ status: 200, type: AuthResponseDto })
+  @ApiOperation({ summary: 'Renovar tokens utilizando el refresh token' })
+  @ApiResponse({
+    status: 200,
+    type: AuthResponseDto,
+    description: 'Tokens renovados exitosamente',
+  })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
   @ApiResponse({
     status: 401,
-    description: 'Token de refresco inválido o expirado',
+    description: 'Refresh token inválido, expirado o revocado',
   })
   async refresh(@Body() dto: RefreshTokenDto): Promise<AuthResponseDto> {
     return this.refreshTokenUseCase.execute(dto);
@@ -85,23 +103,6 @@ export class AuthController {
   async logout(@CurrentUser() user: User): Promise<{ message: string }> {
     await this.logoutUseCase.execute(user);
     return { message: 'Sesión cerrada exitosamente' };
-  }
-
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
-  @ApiResponse({ status: 200, type: UserResponseDto })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  getMe(@CurrentUser() user: User): UserResponseDto {
-    return {
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      avatarUrl: user.avatarUrl,
-      role: user.role,
-      createdAt: user.createdAt,
-    };
   }
 
   @Get('google')

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
@@ -11,6 +12,10 @@ describe('GoogleLoginUseCase', () => {
   const mockUserRepository = {
     findByGoogleId: jest.fn(),
     findByEmail: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+  const mockAdopterProfileRepository = {
     create: jest.fn(),
     save: jest.fn(),
   };
@@ -28,6 +33,10 @@ describe('GoogleLoginUseCase', () => {
       providers: [
         GoogleLoginUseCase,
         { provide: UserRepository, useValue: mockUserRepository },
+        {
+          provide: AdopterProfileRepository,
+          useValue: mockAdopterProfileRepository,
+        },
         { provide: HashingService, useValue: mockHashingService },
         { provide: TokenService, useValue: mockTokenService },
       ],
@@ -36,7 +45,7 @@ describe('GoogleLoginUseCase', () => {
     useCase = module.get<GoogleLoginUseCase>(GoogleLoginUseCase);
   });
 
-  it('should create new user if neither googleId nor email exists', async () => {
+  it('should create new user and adopter profile if neither googleId nor email exists', async () => {
     mockUserRepository.findByGoogleId.mockResolvedValue(null);
     mockUserRepository.findByEmail.mockResolvedValue(null);
 
@@ -50,6 +59,11 @@ describe('GoogleLoginUseCase', () => {
 
     mockUserRepository.create.mockReturnValue(newUser);
     mockUserRepository.save.mockResolvedValue(savedUser);
+    mockAdopterProfileRepository.create.mockReturnValue({ userId: 'uuid-1' });
+    mockAdopterProfileRepository.save.mockResolvedValue({
+      id: 'prof-1',
+      userId: 'uuid-1',
+    });
     mockHashingService.hash.mockResolvedValue('hashed-refresh');
     mockTokenService.generateTokens.mockResolvedValue({
       accessToken: 'access',
@@ -70,6 +84,10 @@ describe('GoogleLoginUseCase', () => {
         email: 'newgoogle@example.com',
       }),
     );
+    expect(mockAdopterProfileRepository.create).toHaveBeenCalledWith({
+      userId: 'uuid-1',
+    });
+    expect(mockAdopterProfileRepository.save).toHaveBeenCalled();
   });
 
   it('should link googleId to existing user with same email', async () => {
@@ -99,5 +117,6 @@ describe('GoogleLoginUseCase', () => {
     expect(result.user.id).toBe('uuid-2');
     expect(existingUser.googleId).toBe('google-123');
     expect(existingUser.avatarUrl).toBe('https://avatar.jpg');
+    expect(mockAdopterProfileRepository.create).not.toHaveBeenCalled();
   });
 });
