@@ -16,8 +16,9 @@
 | **Backend Core (THIS REPO)** | NestJS 11 + TypeScript | `adopta-net` | REST API, business logic, data persistence, orchestration |
 | **ML Inference Service** | FastAPI | Separate repo | Hybrid recommendation model, matching/scoring |
 | **Database** | PostgreSQL (Supabase) | Managed | Relational data storage |
-| **Auth** | Supabase Auth (Google provider) | Managed | Authentication, JWT issuance |
+| **Auth** | Supabase Auth (Google OAuth + Email/Password) | Managed | Authentication, JWT issuance, password hashing |
 | **Image Storage** | Cloudinary | Managed | Pet photo upload and CDN delivery |
+| **Email Service** | Resend + React Email | Managed | Transactional email notifications |
 
 ### What This Backend Does
 
@@ -27,6 +28,7 @@
 - Validates Supabase Auth JWTs and synchronizes authenticated users to the local `users` table.
 - Orchestrates calls to the FastAPI ML service for pet-adopter recommendations.
 - Handles image uploads to Cloudinary via server-side SDK.
+- Sends transactional email notifications via Resend and React Email triggered by domain events.
 
 ### What This Backend Does NOT Do
 
@@ -106,11 +108,21 @@ src/
 │   │   ├── infrastructure/
 │   │   └── presentation/
 │   │
-│   └── media/                     # Image management (Cloudinary)
-│       ├── domain/
+│   ├── media/                     # Image management (Cloudinary)
+│   │   ├── domain/
+│   │   ├── application/
+│   │   ├── infrastructure/
+│   │   └── presentation/
+│   │
+│   └── notifications/             # Transactional emails & alerts (Resend + React Email)
+│       ├── domain/                #   Notification templates types, value objects
 │       ├── application/
+│       │   ├── listeners/         #   Domain event listeners (handles side effects asynchronously)
+│       │   └── interfaces/        #   EmailService abstract class
 │       ├── infrastructure/
-│       └── presentation/
+│       │   ├── services/          #   ResendEmailService (concrete implementation)
+│       │   └── templates/         #   React Email (.tsx) email templates
+│       └── presentation/          #   (optional test/webhook endpoints if needed)
 │
 └── database/
     └── migrations/                # TypeORM auto-generated migrations
@@ -168,6 +180,14 @@ Records filed after an adoption is approved to verify animal welfare. Scheduled 
 | Enums | `PascalCase` enum, `UPPER_SNAKE_CASE` values | `enum UserRole { ADOPTER, SHELTER, ADMIN }` |
 | Database tables | `snake_case`, plural | `pets`, `adoption_requests`, `users` |
 | Database columns | `snake_case` | `created_at`, `shelter_id` |
+
+> [!TIP]
+> **Automated Naming Strategy (`SnakePluralNamingStrategy`):**
+> The project configures a custom TypeORM naming strategy (`src/shared/infrastructure/database/naming.strategy.ts`).
+> - **Tables**: Automatically stripped of `OrmEntity`/`Entity` suffixes, converted to `snake_case`, and pluralized (e.g., `PetOrmEntity` → `pets`, `AdoptionRequestOrmEntity` → `adoption_requests`, `UserProfileOrmEntity` → `user_profiles`).
+> - **Columns**: Automatically converted from camelCase property names to `snake_case` (e.g., `birthDate` → `birth_date`, `shelterId` → `shelter_id`).
+> - **Foreign keys & relations**: Automatically formatted in `snake_case` (e.g., `user_id`, `pet_id`).
+> - **RULE**: Do **NOT** manually specify `@Entity('table_name')` or `@Column({ name: 'column_name' })`. Just use `@Entity()` and `@Column()`, letting the naming strategy handle it automatically.
 
 ### File Suffixes
 
@@ -247,15 +267,50 @@ export class PetNotFoundException extends DomainException {
 
 ---
 
-## 5. Authentication (Supabase Auth + Google)
+## 5. Authentication (Supabase Auth: Google OAuth + Email & Password)
 
-### Flow
+The platform supports dual authentication methods: **Google OAuth** and traditional **Email + Password**. Both flows are handled by Supabase Auth on the client side, producing identical JWTs for the backend.
 
-1. **Frontend** authenticates the user via Supabase Auth SDK (Google OAuth provider).
-2. Supabase issues a **JWT**.
-3. Frontend sends the JWT in the `Authorization: Bearer <token>` header with every API request.
-4. **Backend** validates the JWT using Supabase's public JWT secret (configured via `@nestjs/passport` with a JWT strategy).
-5. On first login, the backend **syncs** the authenticated user from `auth.users` (Supabase internal) to the local `public.users` table managed by TypeORM.
+### Dual Client Flow
+
+1. **Google OAuth**: Frontend calls `supabase.auth.signInWithOAuth({ provider: 'google' })`. No emails are triggered because Google automatically verifies user identity.
+2. **Email & Password**: 
+   - Sign up: Frontend calls `supabase.auth.signUp({ email, password })`.
+   - Sign in: Frontend calls `supabase.auth.signInWithPassword({ email, password })`.
+
+### Centralized Auth Emails (Supabase Auth "Send Email" Hook)
+
+Instead of letting Supabase send generic auth emails, the platform delegates **100% of email rendering and delivery to this NestJS backend**:
+
+```
+[User triggers Signup or Forgot Password in Frontend]
+                 │
+                 ▼
+[Supabase Auth generates secure token & hash]
+                 │
+                 ▼ triggers HTTP POST
+[Backend Webhook Endpoint: POST /auth/hooks/send-email]
+  - Validates SUPABASE_AUTH_HOOK_SECRET header
+  - Extracts email_action_type ('signup' | 'recovery'), token_hash, redirect_to
+                 │
+                 ▼
+[Notifications Module]
+  - Selects React Email template (<VerifyEmailTemplate /> or <ResetPasswordTemplate />)
+  - Constructs confirmation/reset link: ${redirect_to}?token_hash=${token_hash}&type=${action}
+  - Sends via Resend (custom domain: notificaciones@adoptanet.pe)
+```
+
+**Benefits:**
+- 100% of email templates live in this repo (`src/modules/notifications/infrastructure/templates/`) using **React Email**.
+- Unified branding, styling, Spanish localization, and tracking across both auth and business emails.
+
+### Backend Validation Flow
+
+Regardless of whether the user signed in with Google or Email/Password:
+1. Supabase issues a standardized **JWT** containing the user's UUID (`sub`), `email`, and metadata.
+2. Frontend attaches the JWT to the `Authorization: Bearer <token>` header on every request to this backend.
+3. **Backend** validates the JWT using the Supabase JWT secret via `@nestjs/passport` + `passport-jwt` strategy.
+4. On first login/request, the backend **syncs** the user from `auth.users` into our local `public.users` table managed by TypeORM.
 
 ### Key Environment Variables
 
@@ -263,6 +318,7 @@ export class PetNotFoundException extends DomainException {
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_ANON_KEY=eyJ...
 SUPABASE_JWT_SECRET=your-jwt-secret
+SUPABASE_AUTH_HOOK_SECRET=your-hook-secret
 ```
 
 ### Guards
@@ -291,6 +347,7 @@ DATABASE_NAME=postgres
 - `@nestjs/typeorm` with `TypeOrmModule.forRootAsync()` in `AppModule`.
 - **Synchronize: `false`** in all environments — use migrations.
 - Entities are registered per module using `TypeOrmModule.forFeature([...])`.
+- **Naming Strategy**: Uses `SnakePluralNamingStrategy` (`src/shared/infrastructure/database/naming.strategy.ts`) in both `DatabaseModule` and `data-source.ts`. Handles snake_case and English pluralization automatically.
 
 ### Migrations
 
@@ -378,7 +435,49 @@ CLOUDINARY_API_SECRET=xxx
 
 ---
 
-## 9. Configuration & Environment
+## 9. Transactional Emails & Notifications (Resend + React Email)
+
+### Architecture & Event-Driven Decoupling
+
+AdoptaNet uses **Resend** as the email delivery service and **React Email** (`@react-email/components`) for building typed, responsive email templates in TSX.
+
+To maintain strict Clean Architecture boundaries, use cases **never** call the email service directly. Instead, they emit **domain events** using `@nestjs/event-emitter`. Event listeners in the `notifications` module catch these events and trigger email delivery asynchronously:
+
+```
+[Use Case: UpdateAdoptionStatus] 
+       │
+       ▼ emits event
+[AdoptionStatusChangedEvent]
+       │
+       ▼ handled by
+[AdoptionNotificationListener (notifications module)]
+       │
+       ▼ calls
+[EmailService (abstract interface)]
+       │
+       ▼ implemented by
+[ResendEmailService (infrastructure)] ──> Resend API
+```
+
+### Transactional Email Use Cases
+
+1. **Adoption Request Status Change**: Sent to the adopter when a request is `under_review`, `approved`, or `rejected`.
+2. **New Adoption Request**: Sent to the shelter/rescuer when a new request is submitted for one of their pets.
+3. **Post-Adoption Follow-Up Reminder**: Sent to the adopter and shelter when a scheduled check-in is due.
+4. **Welcome Email**: Sent to a new user upon first registration/sync.
+5. **Account Verification Email (`VerifyEmailTemplate`)**: Sent upon email/password signup via the Supabase Auth "Send Email" Hook. Contains confirmation link with token hash.
+6. **Password Recovery Email (`ResetPasswordTemplate`)**: Sent when a user requests password reset via the Supabase Auth "Send Email" Hook. Contains secure reset link with token hash.
+
+### Key Environment Variables
+
+```
+RESEND_API_KEY=re_xxx
+EMAIL_FROM=AdoptaNet <notificaciones@adoptanet.pe>
+```
+
+---
+
+## 10. Configuration & Environment
 
 - Managed via `@nestjs/config` with `ConfigModule.forRoot({ isGlobal: true })`.
 - `.env` file at root (gitignored).
@@ -387,7 +486,7 @@ CLOUDINARY_API_SECRET=xxx
 
 ---
 
-## 10. API Documentation
+## 11. API Documentation
 
 - Swagger/OpenAPI generated automatically using `@nestjs/swagger`.
 - Available at `/api/docs` in development.
@@ -396,7 +495,7 @@ CLOUDINARY_API_SECRET=xxx
 
 ---
 
-## 11. Testing Strategy
+## 12. Testing Strategy
 
 ### Unit Tests
 
@@ -422,7 +521,7 @@ npm run test:e2e      # E2E tests
 
 ---
 
-## 12. Useful Commands
+## 13. Useful Commands
 
 ```bash
 # Development
@@ -450,7 +549,7 @@ npm run test:cov        # Coverage report
 
 ---
 
-## 13. Inviolable Rules
+## 14. Inviolable Rules
 
 > [!CAUTION]
 > These rules are **non-negotiable**. Any AI agent working on this codebase MUST respect all of them when proposing changes.
@@ -486,7 +585,7 @@ Dependencies point **inward** only:
 Always map to explicit response DTOs. ORM entities (TypeORM decorated classes) are internal to the infrastructure layer.
 
 ### Rule 4: External Services Behind Abstractions
-All communication with external services (ML microservice, Cloudinary, Supabase Auth) **must** go through an abstract interface defined in `application/interfaces/`, with the concrete implementation in `infrastructure/`.
+All communication with external services (ML microservice, Cloudinary, Resend, Supabase Auth) **must** go through an abstract interface defined in `application/interfaces/`, with the concrete implementation in `infrastructure/`.
 
 ### Rule 5: No Cross-Module Internal Imports
 Modules interact through their **public NestJS module API** (exported providers). Never import directly from another module's internal layers.
@@ -502,9 +601,12 @@ import { Pet } from '../pets/domain/entities/pet.entity';
 ### Rule 6: Repositories as Abstract Interfaces
 Repository interfaces are defined as **abstract classes** in `domain/repositories/`. Concrete TypeORM implementations live in `infrastructure/persistence/`. They are wired via NestJS DI custom providers.
 
+### Rule 7: Domain Events for Cross-Cutting Side Effects
+Core use cases (e.g., adoptions, user registration) must **NOT** directly call the email sending service. Instead, emit typed domain events via `@nestjs/event-emitter` (`EventEmitter2`). Event listeners in `notifications/application/listeners/` consume these events asynchronously, keeping the core domain completely decoupled from notification infrastructure.
+
 ---
 
-## 14. Tech Stack Summary
+## 15. Tech Stack Summary
 
 | Category | Technology | Version |
 |----------|------------|---------|
@@ -513,8 +615,10 @@ Repository interfaces are defined as **abstract classes** in `domain/repositorie
 | Language | TypeScript | 5.x |
 | ORM | TypeORM | Latest |
 | Database | PostgreSQL (Supabase) | — |
-| Auth | Supabase Auth (Google OAuth) | — |
+| Auth | Supabase Auth (Google OAuth + Email/Password) | — |
 | Image Storage | Cloudinary (server SDK) | — |
+| Email Service | Resend + React Email | — |
+| Event Bus | @nestjs/event-emitter | — |
 | ML Communication | HTTP via axios | — |
 | Validation | class-validator + class-transformer | — |
 | API Docs | @nestjs/swagger (OpenAPI) | — |
@@ -524,7 +628,7 @@ Repository interfaces are defined as **abstract classes** in `domain/repositorie
 
 ---
 
-## 15. Formatting & Linting
+## 16. Formatting & Linting
 
 - **Prettier**: single quotes, trailing commas (`all`), auto end-of-line.
 - **ESLint**: TypeScript recommended + type-checked rules. `no-explicit-any` is OFF. `no-floating-promises` and `no-unsafe-argument` are WARN.
