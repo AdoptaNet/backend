@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
+import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 
 export class RegisterDto {
   @ApiProperty({
@@ -33,4 +35,17 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   fullName?: string;
+
+  @ApiProperty({
+    enum: [UserRole.ADOPTER, UserRole.SHELTER],
+    example: UserRole.ADOPTER,
+    description: 'Rol del usuario (adopter o shelter)',
+    required: false,
+    default: UserRole.ADOPTER,
+  })
+  @IsIn([UserRole.ADOPTER, UserRole.SHELTER], {
+    message: 'El rol debe ser "adopter" o "shelter"',
+  })
+  @IsOptional()
+  role?: UserRole;
 }

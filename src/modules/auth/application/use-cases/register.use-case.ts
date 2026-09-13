@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
+import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 import { EmailAlreadyInUseException } from '../../domain/exceptions/email-already-in-use.exception';
@@ -11,6 +13,8 @@ import { TokenService } from '../interfaces/token.service';
 export class RegisterUseCase {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly adopterProfileRepository: AdopterProfileRepository,
+    private readonly shelterProfileRepository: ShelterProfileRepository,
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
   ) {}
@@ -22,15 +26,28 @@ export class RegisterUseCase {
     }
 
     const passwordHash = await this.hashingService.hash(dto.password);
+    const role = dto.role ?? UserRole.ADOPTER;
 
     const user = this.userRepository.create({
       email: dto.email.toLowerCase().trim(),
       passwordHash,
       fullName: dto.fullName ?? null,
-      role: UserRole.ADOPTER,
+      role,
     });
 
     const savedUser = await this.userRepository.save(user);
+
+    if (role === UserRole.SHELTER) {
+      const shelterProfile = this.shelterProfileRepository.create({
+        userId: savedUser.id,
+      });
+      await this.shelterProfileRepository.save(shelterProfile);
+    } else {
+      const adopterProfile = this.adopterProfileRepository.create({
+        userId: savedUser.id,
+      });
+      await this.adopterProfileRepository.save(adopterProfile);
+    }
 
     const tokens = await this.tokenService.generateTokens({
       sub: savedUser.id,
