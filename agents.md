@@ -12,20 +12,20 @@
 
 | Component | Tech | Repository | Responsibility |
 |-----------|------|------------|----------------|
-| **Frontend** | Next.js | Separate repo | UI, user interactions, Supabase Auth login flow |
-| **Backend Core (THIS REPO)** | NestJS 11 + TypeScript | `adopta-net` | REST API, business logic, data persistence, orchestration |
+| **Frontend** | Next.js | Separate repo | UI, user interactions, consumes NestJS REST API |
+| **Backend Core (THIS REPO)** | NestJS 11 + TypeScript | `adopta-net` | REST API, authentication (JWT + bcrypt + Google OAuth), business logic, data persistence, orchestration |
 | **ML Inference Service** | FastAPI | Separate repo | Hybrid recommendation model, matching/scoring |
-| **Database** | PostgreSQL (Supabase) | Managed | Relational data storage |
-| **Auth** | Supabase Auth (Google OAuth + Email/Password) | Managed | Authentication, JWT issuance, password hashing |
+| **Database** | PostgreSQL (Supabase / Managed) | Managed | Relational data storage |
+| **Realtime** | Supabase Realtime | Managed | WebSocket-based real-time chat subscriptions |
 | **Image Storage** | Cloudinary | Managed | Pet photo upload and CDN delivery |
 | **Email Service** | Resend + React Email | Managed | Transactional email notifications |
 
 ### What This Backend Does
 
 - Exposes REST API endpoints consumed by the Next.js frontend.
+- Handles full authentication lifecycle directly: registration, login, Google OAuth, password hashing (bcrypt), and JWT access/refresh token issuance.
 - Implements all business logic via Clean Architecture use cases.
 - Manages CRUD operations for pets, users, adoption requests, messages, and post-adoption follow-ups.
-- Validates Supabase Auth JWTs and synchronizes authenticated users to the local `users` table.
 - Orchestrates calls to the FastAPI ML service for pet-adopter recommendations.
 - Handles image uploads to Cloudinary via server-side SDK.
 - Sends transactional email notifications via Resend and React Email triggered by domain events.
@@ -34,7 +34,6 @@
 
 - Does NOT serve the frontend (Next.js runs independently).
 - Does NOT train or run ML models (delegated to the FastAPI microservice).
-- Does NOT handle authentication flows directly (Supabase Auth manages login/signup; this backend only validates JWTs).
 
 ---
 
@@ -73,8 +72,7 @@ src/
 │   │   │   ├── dtos/             #     CreateUserDto, UserResponseDto, etc.
 │   │   │   └── interfaces/       #     Interfaces for external service dependencies
 │   │   ├── infrastructure/
-│   │   │   ├── persistence/      #     TypeORM entities (ORM), repository implementations
-│   │   │   └── mappers/          #     Domain ↔ ORM entity mappers
+│   │   │   └── repositories/     #     Concrete repository implementations
 │   │   └── presentation/
 │   │       └── controllers/      #     UsersController
 │   │
@@ -132,9 +130,9 @@ src/
 
 | Layer | Contains | Can Depend On |
 |-------|----------|---------------|
-| **Domain** | Entities, value objects, abstract repository interfaces, domain exceptions, domain services | Nothing (pure, no framework imports) |
+| **Domain** | Entities (decorated with TypeORM), value objects, abstract repository interfaces, domain exceptions, domain services | Shared Domain |
 | **Application** | Use cases (service classes), input/output DTOs, abstract interfaces for external services | Domain only |
-| **Infrastructure** | TypeORM ORM entities, concrete repository implementations, external service clients (Cloudinary, ML HTTP client), mappers | Domain + Application |
+| **Infrastructure** | Concrete repository implementations, external service clients (Cloudinary, ML HTTP client) | Domain + Application |
 | **Presentation** | NestJS controllers, route decorators, module-specific guards/decorators | Application (for use cases + DTOs) |
 
 ---
@@ -143,8 +141,17 @@ src/
 
 ### User
 
-A single `User` entity with a `role` field (or `roles` array of enum values). Roles: `adopter`, `shelter`, `admin`.
+A single `User` entity extending `AuditableEntity` (includes `id`, `createdAt`, `updatedAt`, `deletedAt` for soft delete).
+Key fields:
+- `email`: User email (unique).
+- `passwordHash`: Bcrypt-hashed password (nullable for Google OAuth users).
+- `googleId`: Google OAuth subject ID (nullable for email/password users).
+- `fullName`: Display name (nullable).
+- `avatarUrl`: Profile picture URL (nullable).
+- `role`: Role enum (`adopter`, `shelter`, `admin`). Default: `adopter`.
+- `refreshTokenHash`: Hashed refresh token for secure session revocation/rotation (nullable).
 
+Profiles (1:1 relations):
 - **AdopterProfile** (1:1 with User) — lifestyle preferences, housing type, experience with pets, schedule, etc. Fed to the ML model for matching.
 - **ShelterProfile** (1:1 with User) — organization name, address, rescue capacity, verification status, etc.
 
@@ -193,14 +200,12 @@ Records filed after an adoption is approved to verify animal welfare. Scheduled 
 
 | Type | Suffix | Example |
 |------|--------|---------|
-| Domain entity | `.entity.ts` | `pet.entity.ts` |
-| ORM entity | `.orm-entity.ts` | `pet.orm-entity.ts` |
+| Entity | `.entity.ts` | `pet.entity.ts` |
 | Use case | `.use-case.ts` | `create-pet.use-case.ts` |
 | Controller | `.controller.ts` | `pets.controller.ts` |
 | Repository interface | `.repository.ts` | `pet.repository.ts` |
 | Repository implementation | `.typeorm-repository.ts` | `pet.typeorm-repository.ts` |
 | DTO | `.dto.ts` | `create-pet.dto.ts` |
-| Mapper | `.mapper.ts` | `pet.mapper.ts` |
 | Exception | `.exception.ts` | `pet-not-found.exception.ts` |
 | Module | `.module.ts` | `pets.module.ts` |
 | Test (unit) | `.spec.ts` | `create-pet.use-case.spec.ts` |
@@ -213,7 +218,7 @@ Each feature module follows this pattern:
 ```typescript
 // modules/pets/pets.module.ts
 @Module({
-  imports: [TypeOrmModule.forFeature([PetOrmEntity])],
+  imports: [TypeOrmModule.forFeature([Pet])],
   controllers: [PetsController],
   providers: [
     CreatePetUseCase,
@@ -267,64 +272,62 @@ export class PetNotFoundException extends DomainException {
 
 ---
 
-## 5. Authentication (Supabase Auth: Google OAuth + Email & Password)
+---
 
-The platform supports dual authentication methods: **Google OAuth** and traditional **Email + Password**. Both flows are handled by Supabase Auth on the client side, producing identical JWTs for the backend.
+## 5. Authentication (NestJS Native: Email/Password + Google OAuth + JWT)
 
-### Dual Client Flow
+The platform uses a **100% native NestJS authentication system**. The backend is the single source of truth for user identities, password hashing, OAuth orchestration, and session/token management. The Next.js frontend interacts exclusively with this backend's REST API.
 
-1. **Google OAuth**: Frontend calls `supabase.auth.signInWithOAuth({ provider: 'google' })`. No emails are triggered because Google automatically verifies user identity.
-2. **Email & Password**: 
-   - Sign up: Frontend calls `supabase.auth.signUp({ email, password })`.
-   - Sign in: Frontend calls `supabase.auth.signInWithPassword({ email, password })`.
+### Dual Authentication Methods
 
-### Centralized Auth Emails (Supabase Auth "Send Email" Hook)
+1. **Email & Password**:
+   - **Registration (`POST /auth/register`)**: Validates input DTO, hashes the password via `HashingService` (`bcrypt`), persists the `User` entity, and emits a `UserRegisteredEvent`.
+   - **Login (`POST /auth/login`)**: Validates credentials against `passwordHash`, issues an access token and a refresh token, and stores the hashed refresh token in the database.
+2. **Google OAuth (`passport-google-oauth20`)**:
+   - **Initiate (`GET /auth/google`)**: Triggers Passport Google authentication redirect.
+   - **Callback (`GET /auth/google/callback`)**: Receives the profile from Google. If the user does not exist, provisions a new `User` with `googleId` and `avatarUrl`. Issues tokens and redirects the user to the frontend with session tokens.
 
-Instead of letting Supabase send generic auth emails, the platform delegates **100% of email rendering and delivery to this NestJS backend**:
+### Token Strategy (Access + Refresh Token Rotation)
 
-```
-[User triggers Signup or Forgot Password in Frontend]
-                 │
-                 ▼
-[Supabase Auth generates secure token & hash]
-                 │
-                 ▼ triggers HTTP POST
-[Backend Webhook Endpoint: POST /auth/hooks/send-email]
-  - Validates SUPABASE_AUTH_HOOK_SECRET header
-  - Extracts email_action_type ('signup' | 'recovery'), token_hash, redirect_to
-                 │
-                 ▼
-[Notifications Module]
-  - Selects React Email template (<VerifyEmailTemplate /> or <ResetPasswordTemplate />)
-  - Constructs confirmation/reset link: ${redirect_to}?token_hash=${token_hash}&type=${action}
-  - Sends via Resend (custom domain: notificaciones@adoptanet.pe)
-```
+- **Access Token (JWT)**: Short-lived (e.g., 15 minutes). Carries user `sub` (UUID), `email`, and `role`. Verified on every protected request via `JwtStrategy` + `JwtAuthGuard`.
+- **Refresh Token (JWT)**: Long-lived (e.g., 7 days). Stored hashed (`refreshTokenHash`) in the `users` table for cryptographic revocation and token rotation on `POST /auth/refresh`.
+- **Logout (`POST /auth/logout`)**: Invalidates the active refresh token by clearing `refreshTokenHash`.
 
-**Benefits:**
-- 100% of email templates live in this repo (`src/modules/notifications/infrastructure/templates/`) using **React Email**.
-- Unified branding, styling, Spanish localization, and tracking across both auth and business emails.
+### Clean Architecture Decoupling
 
-### Backend Validation Flow
+- **Password Hashing**: Defined behind an abstract interface `HashingService` in `application/interfaces/hashing.service.ts` and implemented via `BcryptHashingService` in `infrastructure/services/`. Domain and application layers never depend directly on the `bcrypt` library.
+- **Transactional Auth Emails**: Registration verification and password reset emails are triggered by emitting typed domain events (`UserRegisteredEvent`, `PasswordResetRequestedEvent`) via `@nestjs/event-emitter`. The `notifications` module handles rendering (React Email) and delivery (Resend) asynchronously without coupling auth to email infrastructure.
 
-Regardless of whether the user signed in with Google or Email/Password:
-1. Supabase issues a standardized **JWT** containing the user's UUID (`sub`), `email`, and metadata.
-2. Frontend attaches the JWT to the `Authorization: Bearer <token>` header on every request to this backend.
-3. **Backend** validates the JWT using the Supabase JWT secret via `@nestjs/passport` + `passport-jwt` strategy.
-4. On first login/request, the backend **syncs** the user from `auth.users` into our local `public.users` table managed by TypeORM.
+### Endpoints Overview
+
+| Method | Endpoint | Description | Protected |
+|--------|----------|-------------|-----------|
+| `POST` | `/auth/register` | Register new user with email & password | No |
+| `POST` | `/auth/login` | Authenticate with email & password | No |
+| `GET` | `/auth/google` | Initiate Google OAuth redirect | No |
+| `GET` | `/auth/google/callback` | Google OAuth callback URL | No |
+| `POST` | `/auth/refresh` | Rotate tokens using valid refresh token | No |
+| `POST` | `/auth/logout` | Invalidate active refresh token | Yes (`JwtAuthGuard`) |
+| `GET` | `/auth/me` | Retrieve authenticated user profile | Yes (`JwtAuthGuard`) |
 
 ### Key Environment Variables
 
 ```
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_ANON_KEY=eyJ...
-SUPABASE_JWT_SECRET=your-jwt-secret
-SUPABASE_AUTH_HOOK_SECRET=your-hook-secret
+JWT_SECRET=your-jwt-access-secret
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_SECRET=your-jwt-refresh-secret
+JWT_REFRESH_EXPIRES_IN=7d
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+FRONTEND_URL=http://localhost:3001
 ```
 
-### Guards
+### Guards & Decorators
 
-- `JwtAuthGuard` — validates the JWT on protected routes.
-- `RolesGuard` + `@Roles('adopter', 'shelter')` decorator — restricts access by user role.
+- `JwtAuthGuard` — validates the access JWT on protected routes.
+- `RolesGuard` + `@Roles('adopter', 'shelter', 'admin')` decorator — restricts access by user role.
+- `@CurrentUser()` param decorator — injects the authenticated `User` into controller handlers.
 
 ---
 
@@ -581,11 +584,11 @@ Dependencies point **inward** only:
 - **Domain imports NOTHING from other layers.**
 - **Application NEVER imports from infrastructure or presentation.**
 
-### Rule 3: Never Return ORM Entities from Controllers
-Always map to explicit response DTOs. ORM entities (TypeORM decorated classes) are internal to the infrastructure layer.
+### Rule 3: Never Return Entities Directly from Controllers
+Always map to explicit response DTOs. Entities must never be returned directly from controller endpoints to prevent leaking internal fields or bypassing response contracts.
 
 ### Rule 4: External Services Behind Abstractions
-All communication with external services (ML microservice, Cloudinary, Resend, Supabase Auth) **must** go through an abstract interface defined in `application/interfaces/`, with the concrete implementation in `infrastructure/`.
+All communication with external services (ML microservice, Cloudinary, Resend) **must** go through an abstract interface defined in `application/interfaces/`, with the concrete implementation in `infrastructure/`.
 
 ### Rule 5: No Cross-Module Internal Imports
 Modules interact through their **public NestJS module API** (exported providers). Never import directly from another module's internal layers.
@@ -614,8 +617,9 @@ Core use cases (e.g., adoptions, user registration) must **NOT** directly call t
 | Framework | NestJS | 11.x |
 | Language | TypeScript | 5.x |
 | ORM | TypeORM | Latest |
-| Database | PostgreSQL (Supabase) | — |
-| Auth | Supabase Auth (Google OAuth + Email/Password) | — |
+| Database | PostgreSQL (Supabase / Managed) | — |
+| Realtime | Supabase Realtime (WebSockets) | — |
+| Auth | NestJS Native (Passport JWT + Google OAuth + bcrypt) | — |
 | Image Storage | Cloudinary (server SDK) | — |
 | Email Service | Resend + React Email | — |
 | Event Bus | @nestjs/event-emitter | — |
