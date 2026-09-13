@@ -1,9 +1,11 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
+import { MediaModule } from '../media/media.module';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
 import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-case';
 import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
+import { UpdateAvatarUseCase } from './application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from './application/use-cases/update-shelter-profile.use-case';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
 import { AdopterProfile } from './domain/entities/adopter-profile.entity';
@@ -21,6 +23,7 @@ import { UsersController } from './presentation/controllers/users.controller';
   imports: [
     TypeOrmModule.forFeature([User, AdopterProfile, ShelterProfile]),
     forwardRef(() => AuthModule),
+    MediaModule,
   ],
   controllers: [UsersController],
   providers: [
@@ -38,6 +41,7 @@ import { UsersController } from './presentation/controllers/users.controller';
     },
     GetMyProfileUseCase,
     UpdateUserUseCase,
+    UpdateAvatarUseCase,
     ChangePasswordUseCase,
     UpdateAdopterProfileUseCase,
     UpdateShelterProfileUseCase,

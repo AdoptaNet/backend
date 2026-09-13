@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MediaService } from '../../../media/application/interfaces/media.service';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { User } from '../../../users/domain/entities/user.entity';
@@ -34,6 +35,10 @@ describe('RegisterUseCase', () => {
     generateTokens: jest.fn(),
     verifyRefreshToken: jest.fn(),
   };
+  const mockMediaService = {
+    uploadImage: jest.fn(),
+    deleteImage: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -52,6 +57,7 @@ describe('RegisterUseCase', () => {
         },
         { provide: HashingService, useValue: mockHashingService },
         { provide: TokenService, useValue: mockTokenService },
+        { provide: MediaService, useValue: mockMediaService },
       ],
     }).compile();
 
@@ -154,5 +160,66 @@ describe('RegisterUseCase', () => {
       userId: 'uuid-2',
     });
     expect(mockShelterProfileRepository.save).toHaveBeenCalled();
+  });
+
+  it('should upload avatar to Cloudinary when avatarFile is provided in registration', async () => {
+    mockUserRepository.findByEmail.mockResolvedValue(null);
+    mockHashingService.hash
+      .mockResolvedValueOnce('hashed-password')
+      .mockResolvedValueOnce('hashed-refresh-token');
+
+    const avatarFile = {
+      mimetype: 'image/jpeg',
+      buffer: Buffer.from('avatar-bytes'),
+    } as Express.Multer.File;
+
+    mockMediaService.uploadImage.mockResolvedValue({
+      url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
+      publicId: 'adoptanet/avatars/avatar_123',
+    });
+
+    const createdUser = new User();
+    createdUser.email = 'avatar@example.com';
+    createdUser.role = UserRole.ADOPTER;
+    createdUser.avatarUrl =
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg';
+
+    const savedUser = new User();
+    Object.assign(savedUser, createdUser, {
+      id: 'uuid-3',
+      createdAt: new Date(),
+    });
+
+    mockUserRepository.create.mockReturnValue(createdUser);
+    mockUserRepository.save.mockResolvedValue(savedUser);
+    mockAdopterProfileRepository.create.mockReturnValue({ userId: 'uuid-3' });
+    mockAdopterProfileRepository.save.mockResolvedValue({
+      id: 'prof-3',
+      userId: 'uuid-3',
+    });
+    mockTokenService.generateTokens.mockResolvedValue({
+      accessToken: 'access-789',
+      refreshToken: 'refresh-789',
+    });
+
+    const result = await useCase.execute(
+      {
+        email: 'avatar@example.com',
+        password: 'Password123!',
+      },
+      avatarFile,
+    );
+
+    expect(mockMediaService.uploadImage).toHaveBeenCalledWith(avatarFile, {
+      folder: 'adoptanet/avatars',
+    });
+    expect(mockUserRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        avatarUrl: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
+      }),
+    );
+    expect(result.user.avatarUrl).toBe(
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
+    );
   });
 });

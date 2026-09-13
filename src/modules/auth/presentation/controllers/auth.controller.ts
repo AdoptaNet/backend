@@ -7,11 +7,16 @@ import {
   Post,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -42,8 +47,33 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @UseInterceptors(FileInterceptor('avatar'))
   @ApiOperation({
-    summary: 'Registrar un nuevo usuario con email y contraseña',
+    summary:
+      'Registrar un nuevo usuario con email, contraseña y avatar opcional',
+  })
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['email', 'password'],
+      properties: {
+        email: { type: 'string', example: 'usuario@ejemplo.com' },
+        password: { type: 'string', example: 'Password123!' },
+        fullName: { type: 'string', example: 'Juan Pérez' },
+        role: {
+          type: 'string',
+          enum: ['adopter', 'shelter'],
+          default: 'adopter',
+        },
+        avatar: {
+          type: 'string',
+          format: 'binary',
+          description:
+            'Foto de perfil (avatar) opcional (JPG, PNG, WEBP, máx 5MB)',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 201,
@@ -55,8 +85,11 @@ export class AuthController {
     status: 409,
     description: 'El correo electrónico ya está en uso',
   })
-  async register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
-    return this.registerUseCase.execute(dto);
+  async register(
+    @Body() dto: RegisterDto,
+    @UploadedFile() avatarFile?: Express.Multer.File,
+  ): Promise<AuthResponseDto> {
+    return this.registerUseCase.execute(dto, avatarFile);
   }
 
   @Post('login')

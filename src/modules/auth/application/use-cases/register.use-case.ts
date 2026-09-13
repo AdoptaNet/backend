@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { MediaService } from '../../../media/application/interfaces/media.service';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
@@ -17,12 +18,24 @@ export class RegisterUseCase {
     private readonly shelterProfileRepository: ShelterProfileRepository,
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
+    private readonly mediaService: MediaService,
   ) {}
 
-  async execute(dto: RegisterDto): Promise<AuthResponseDto> {
+  async execute(
+    dto: RegisterDto,
+    avatarFile?: Express.Multer.File,
+  ): Promise<AuthResponseDto> {
     const existingUser = await this.userRepository.findByEmail(dto.email);
     if (existingUser) {
       throw new EmailAlreadyInUseException(dto.email);
+    }
+
+    let avatarUrl: string | null = null;
+    if (avatarFile) {
+      const upload = await this.mediaService.uploadImage(avatarFile, {
+        folder: 'adoptanet/avatars',
+      });
+      avatarUrl = upload.url;
     }
 
     const passwordHash = await this.hashingService.hash(dto.password);
@@ -32,6 +45,7 @@ export class RegisterUseCase {
       email: dto.email.toLowerCase().trim(),
       passwordHash,
       fullName: dto.fullName ?? null,
+      avatarUrl,
       role,
     });
 
