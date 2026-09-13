@@ -99,7 +99,7 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(@nestjs/passport|@nestjs/config|@nestjs/jwt)/)"
+      "node_modules/(?!(@nestjs)/)"
     ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"

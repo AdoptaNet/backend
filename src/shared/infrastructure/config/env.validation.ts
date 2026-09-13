@@ -1,4 +1,4 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -23,6 +23,10 @@ export class EnvironmentVariables {
   @IsOptional()
   PORT: number = 3000;
 
+  @IsString()
+  @IsOptional()
+  APP_NAME: string = 'AdoptaNet API';
+
   // Database
   @IsString()
   DATABASE_HOST: string;
@@ -40,26 +44,45 @@ export class EnvironmentVariables {
   @IsString()
   DATABASE_NAME: string;
 
+  @Transform(({ obj, key }: { obj: Record<string, unknown>; key: string }) => {
+    const raw = obj[key];
+    return raw === 'true' || raw === true || raw === '1';
+  })
   @IsBoolean()
   @IsOptional()
   DATABASE_SSL: boolean = false;
 
-  // Supabase Auth
+  // JWT Configuration
   @IsString()
-  @IsOptional()
-  SUPABASE_URL?: string;
+  JWT_SECRET: string;
 
   @IsString()
   @IsOptional()
-  SUPABASE_ANON_KEY?: string;
+  JWT_EXPIRES_IN: string = '15m';
+
+  @IsString()
+  JWT_REFRESH_SECRET: string;
 
   @IsString()
   @IsOptional()
-  SUPABASE_JWT_SECRET?: string;
+  JWT_REFRESH_EXPIRES_IN: string = '7d';
+
+  // Google OAuth Configuration
+  @IsString()
+  @IsOptional()
+  GOOGLE_CLIENT_ID?: string;
 
   @IsString()
   @IsOptional()
-  SUPABASE_AUTH_HOOK_SECRET?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  GOOGLE_CALLBACK_URL?: string = 'http://localhost:3000/auth/google/callback';
+
+  @IsString()
+  @IsOptional()
+  FRONTEND_URL?: string = 'http://localhost:3001';
 
   // Cloudinary
   @IsString()

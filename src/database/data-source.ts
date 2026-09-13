@@ -11,7 +11,7 @@ export const dataSourceOptions: DataSourceOptions = {
   database: process.env.DATABASE_NAME || 'postgres',
   ssl:
     process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
-  entities: ['dist/**/*.orm-entity.js'],
+  entities: ['dist/**/*.entity.js'],
   migrations: ['dist/database/migrations/*.js'],
   synchronize: false,
   namingStrategy: new SnakePluralNamingStrategy(),

@@ -26,8 +26,9 @@ async function bootstrap() {
   app.useGlobalFilters(new DomainExceptionFilter());
 
   // Swagger OpenAPI Documentation
+  const appName = configService.get<string>('APP_NAME') ?? 'AdoptaNet API';
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('AdoptaNet API')
+    .setTitle(appName)
     .setDescription(
       'Core Backend REST API for rescued animal adoption and ML recommendation matching in Peru',
     )
@@ -41,7 +42,7 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') ?? 3000;
   await app.listen(port);
 
-  logger.log(`Application running on: http://localhost:${port}`);
+  logger.log(`${appName} running on: http://localhost:${port}`);
   logger.log(
     `Swagger documentation available at: http://localhost:${port}/api/docs`,
   );
