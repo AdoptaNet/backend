@@ -4,6 +4,7 @@ import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
 import { UpdateAdopterProfileUseCase } from '../../application/use-cases/update-adopter-profile.use-case';
+import { UpdateAvatarUseCase } from '../../application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from '../../application/use-cases/update-shelter-profile.use-case';
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { UsersController } from './users.controller';
@@ -12,6 +13,7 @@ describe('UsersController', () => {
   let controller: UsersController;
   const mockGetMyProfileUseCase = { execute: jest.fn() };
   const mockUpdateUserUseCase = { execute: jest.fn() };
+  const mockUpdateAvatarUseCase = { execute: jest.fn() };
   const mockChangePasswordUseCase = { execute: jest.fn() };
   const mockUpdateAdopterProfileUseCase = { execute: jest.fn() };
   const mockUpdateShelterProfileUseCase = { execute: jest.fn() };
@@ -24,6 +26,7 @@ describe('UsersController', () => {
       providers: [
         { provide: GetMyProfileUseCase, useValue: mockGetMyProfileUseCase },
         { provide: UpdateUserUseCase, useValue: mockUpdateUserUseCase },
+        { provide: UpdateAvatarUseCase, useValue: mockUpdateAvatarUseCase },
         { provide: ChangePasswordUseCase, useValue: mockChangePasswordUseCase },
         {
           provide: UpdateAdopterProfileUseCase,
@@ -66,6 +69,25 @@ describe('UsersController', () => {
 
     expect(result).toBe(updated);
     expect(mockUpdateUserUseCase.execute).toHaveBeenCalledWith('uuid-1', dto);
+  });
+
+  it('should call UpdateAvatarUseCase on updateAvatar', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const file = { mimetype: 'image/jpeg' } as Express.Multer.File;
+    const updated = {
+      id: 'uuid-1',
+      avatarUrl: 'https://res.cloudinary.com/avatar.jpg',
+    };
+    mockUpdateAvatarUseCase.execute.mockResolvedValue(updated);
+
+    const result = await controller.updateAvatar(user, file);
+
+    expect(result).toBe(updated);
+    expect(mockUpdateAvatarUseCase.execute).toHaveBeenCalledWith(
+      'uuid-1',
+      file,
+    );
   });
 
   it('should call ChangePasswordUseCase on changePassword', async () => {

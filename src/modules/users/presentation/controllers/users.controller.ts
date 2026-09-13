@@ -1,6 +1,18 @@
-import { Body, Controller, Get, Patch, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Put,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -17,6 +29,7 @@ import { UserResponseDto } from '../../application/dtos/user-response.dto';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
 import { UpdateAdopterProfileUseCase } from '../../application/use-cases/update-adopter-profile.use-case';
+import { UpdateAvatarUseCase } from '../../application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from '../../application/use-cases/update-shelter-profile.use-case';
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { User } from '../../domain/entities/user.entity';
@@ -29,6 +42,7 @@ export class UsersController {
   constructor(
     private readonly getMyProfileUseCase: GetMyProfileUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly updateAvatarUseCase: UpdateAvatarUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly updateAdopterProfileUseCase: UpdateAdopterProfileUseCase,
     private readonly updateShelterProfileUseCase: UpdateShelterProfileUseCase,
@@ -66,6 +80,43 @@ export class UsersController {
     @Body() dto: UpdateUserDto,
   ): Promise<UserResponseDto> {
     return this.updateUserUseCase.execute(user.id, dto);
+  }
+
+  @Patch('me/avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiOperation({
+    summary:
+      'Subir o actualizar foto de perfil (avatar) del usuario autenticado',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['avatar'],
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+          description: 'Archivo de imagen (JPG, PNG, WEBP, GIF, máx 5MB)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    type: UserResponseDto,
+    description: 'Avatar actualizado exitosamente',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Archivo inválido o excede el límite de tamaño',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async updateAvatar(
+    @CurrentUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<UserResponseDto> {
+    return this.updateAvatarUseCase.execute(user.id, file);
   }
 
   @Patch('me/password')

@@ -57,7 +57,7 @@ describe('AuthController', () => {
     const result = await controller.register(dto);
 
     expect(result).toBe(expectedResponse);
-    expect(mockRegisterUseCase.execute).toHaveBeenCalledWith(dto);
+    expect(mockRegisterUseCase.execute).toHaveBeenCalledWith(dto, undefined);
   });
 
   it('should call LoginUseCase on login', async () => {

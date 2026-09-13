@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { MediaModule } from '../media/media.module';
 import { UsersModule } from '../users/users.module';
 import { HashingService } from './application/interfaces/hashing.service';
 import { TokenService } from './application/interfaces/token.service';
@@ -23,6 +24,7 @@ import { AuthController } from './presentation/controllers/auth.controller';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
     forwardRef(() => UsersModule),
+    MediaModule,
   ],
   controllers: [AuthController],
   providers: [
