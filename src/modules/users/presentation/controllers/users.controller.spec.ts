@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../domain/entities/user.entity';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
+import { DeleteAvatarUseCase } from '../../application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
 import { UpdateAdopterProfileUseCase } from '../../application/use-cases/update-adopter-profile.use-case';
 import { UpdateAvatarUseCase } from '../../application/use-cases/update-avatar.use-case';
@@ -14,6 +15,7 @@ describe('UsersController', () => {
   const mockGetMyProfileUseCase = { execute: jest.fn() };
   const mockUpdateUserUseCase = { execute: jest.fn() };
   const mockUpdateAvatarUseCase = { execute: jest.fn() };
+  const mockDeleteAvatarUseCase = { execute: jest.fn() };
   const mockChangePasswordUseCase = { execute: jest.fn() };
   const mockUpdateAdopterProfileUseCase = { execute: jest.fn() };
   const mockUpdateShelterProfileUseCase = { execute: jest.fn() };
@@ -27,6 +29,7 @@ describe('UsersController', () => {
         { provide: GetMyProfileUseCase, useValue: mockGetMyProfileUseCase },
         { provide: UpdateUserUseCase, useValue: mockUpdateUserUseCase },
         { provide: UpdateAvatarUseCase, useValue: mockUpdateAvatarUseCase },
+        { provide: DeleteAvatarUseCase, useValue: mockDeleteAvatarUseCase },
         { provide: ChangePasswordUseCase, useValue: mockChangePasswordUseCase },
         {
           provide: UpdateAdopterProfileUseCase,
@@ -88,6 +91,18 @@ describe('UsersController', () => {
       'uuid-1',
       file,
     );
+  });
+
+  it('should call DeleteAvatarUseCase on deleteAvatar', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const updated = { id: 'uuid-1', avatarUrl: null };
+    mockDeleteAvatarUseCase.execute.mockResolvedValue(updated);
+
+    const result = await controller.deleteAvatar(user);
+
+    expect(result).toBe(updated);
+    expect(mockDeleteAvatarUseCase.execute).toHaveBeenCalledWith('uuid-1');
   });
 
   it('should call ChangePasswordUseCase on changePassword', async () => {

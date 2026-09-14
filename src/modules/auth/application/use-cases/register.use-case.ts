@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MediaService } from '../../../media/application/interfaces/media.service';
+import { UploadImageUseCase } from '../../../media/application/use-cases/upload-image.use-case';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
@@ -18,7 +18,7 @@ export class RegisterUseCase {
     private readonly shelterProfileRepository: ShelterProfileRepository,
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
-    private readonly mediaService: MediaService,
+    private readonly uploadImageUseCase: UploadImageUseCase,
   ) {}
 
   async execute(
@@ -33,7 +33,7 @@ export class RegisterUseCase {
     let avatarUrl: string | null = null;
     let avatarKey: string | null = null;
     if (avatarFile) {
-      const upload = await this.mediaService.uploadImage(avatarFile, {
+      const upload = await this.uploadImageUseCase.execute(avatarFile, {
         folder: 'avatars',
       });
       avatarUrl = upload.url;

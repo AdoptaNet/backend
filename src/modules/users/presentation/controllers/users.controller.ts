@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Put,
@@ -19,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { MAX_IMAGE_SIZE_BYTES } from '../../../media/application/constants/image-upload.constants';
 import { ChangePasswordDto } from '../../application/dtos/change-password.dto';
 import { AdopterProfileResponseDto } from '../../application/dtos/adopter-profile-response.dto';
 import { ShelterProfileResponseDto } from '../../application/dtos/shelter-profile-response.dto';
@@ -27,6 +29,7 @@ import { UpdateShelterProfileDto } from '../../application/dtos/update-shelter-p
 import { UpdateUserDto } from '../../application/dtos/update-user.dto';
 import { UserResponseDto } from '../../application/dtos/user-response.dto';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
+import { DeleteAvatarUseCase } from '../../application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
 import { UpdateAdopterProfileUseCase } from '../../application/use-cases/update-adopter-profile.use-case';
 import { UpdateAvatarUseCase } from '../../application/use-cases/update-avatar.use-case';
@@ -43,6 +46,7 @@ export class UsersController {
     private readonly getMyProfileUseCase: GetMyProfileUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly updateAvatarUseCase: UpdateAvatarUseCase,
+    private readonly deleteAvatarUseCase: DeleteAvatarUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly updateAdopterProfileUseCase: UpdateAdopterProfileUseCase,
     private readonly updateShelterProfileUseCase: UpdateShelterProfileUseCase,
@@ -65,8 +69,7 @@ export class UsersController {
 
   @Patch('me')
   @ApiOperation({
-    summary:
-      'Actualizar información básica del usuario (nombre completo, avatar)',
+    summary: 'Actualizar nombre completo del usuario',
   })
   @ApiResponse({
     status: 200,
@@ -83,7 +86,9 @@ export class UsersController {
   }
 
   @Patch('me/avatar')
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', { limits: { fileSize: MAX_IMAGE_SIZE_BYTES } }),
+  )
   @ApiOperation({
     summary:
       'Subir o actualizar foto de perfil (avatar) del usuario autenticado',
@@ -117,6 +122,20 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<UserResponseDto> {
     return this.updateAvatarUseCase.execute(user.id, file);
+  }
+
+  @Delete('me/avatar')
+  @ApiOperation({
+    summary: 'Eliminar foto de perfil (avatar) del usuario autenticado',
+  })
+  @ApiResponse({
+    status: 200,
+    type: UserResponseDto,
+    description: 'Avatar eliminado exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async deleteAvatar(@CurrentUser() user: User): Promise<UserResponseDto> {
+    return this.deleteAvatarUseCase.execute(user.id);
   }
 
   @Patch('me/password')
