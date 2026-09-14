@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AuthModule } from './modules/auth/auth.module';
 import { MediaModule } from './modules/media/media.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { UsersModule } from './modules/users/users.module';
 import { validate } from './shared/infrastructure/config/env.validation';
 import { DatabaseModule } from './shared/infrastructure/database/database.module';
@@ -18,6 +19,7 @@ import { DatabaseModule } from './shared/infrastructure/database/database.module
     UsersModule,
     AuthModule,
     MediaModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [],

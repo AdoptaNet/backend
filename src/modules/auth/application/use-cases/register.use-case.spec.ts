@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UploadImageUseCase } from '../../../media/application/use-cases/upload-image.use-case';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
@@ -5,6 +6,7 @@ import { ShelterProfileRepository } from '../../../users/domain/repositories/she
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
+import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { EmailAlreadyInUseException } from '../../domain/exceptions/email-already-in-use.exception';
 import { HashingService } from '../interfaces/hashing.service';
 import { TokenService } from '../interfaces/token.service';
@@ -12,6 +14,9 @@ import { RegisterUseCase } from './register.use-case';
 
 describe('RegisterUseCase', () => {
   let useCase: RegisterUseCase;
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
   const mockUserRepository = {
     findByEmail: jest.fn(),
     create: jest.fn(),
@@ -57,6 +62,7 @@ describe('RegisterUseCase', () => {
         { provide: HashingService, useValue: mockHashingService },
         { provide: TokenService, useValue: mockTokenService },
         { provide: UploadImageUseCase, useValue: mockUploadImageUseCase },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -116,6 +122,13 @@ describe('RegisterUseCase', () => {
       userId: 'uuid-1',
     });
     expect(mockAdopterProfileRepository.save).toHaveBeenCalled();
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+      UserRegisteredEvent.EVENT_NAME,
+      expect.objectContaining({
+        email: 'test@example.com',
+        role: UserRole.ADOPTER,
+      }),
+    );
   });
 
   it('should register a new shelter user and create initial shelter profile when role is shelter', async () => {
