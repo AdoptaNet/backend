@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { MAX_IMAGE_SIZE_BYTES } from '../../application/constants/image-upload.constants';
 import { UploadMediaResponseDto } from '../../application/dtos/upload-media-response.dto';
 import { UploadImageUseCase } from '../../application/use-cases/upload-image.use-case';
 
@@ -29,7 +30,9 @@ export class MediaController {
 
   @Post('upload')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: MAX_IMAGE_SIZE_BYTES } }),
+  )
   @ApiOperation({
     summary: 'Subir una imagen a Cloudinary (avatares, mascotas, etc.)',
   })
@@ -61,7 +64,7 @@ export class MediaController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<UploadMediaResponseDto> {
     return this.uploadImageUseCase.execute(file, {
-      folder: 'adoptanet/general',
+      folder: 'general',
     });
   }
 }

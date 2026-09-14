@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { CurrentUser } from '../../../../shared/presentation/decorators/current-user.decorator';
+import { MAX_IMAGE_SIZE_BYTES } from '../../../media/application/constants/image-upload.constants';
 import { User } from '../../../users/domain/entities/user.entity';
 import { AuthResponseDto } from '../../application/dtos/auth-response.dto';
 import { LoginDto } from '../../application/dtos/login.dto';
@@ -47,7 +48,9 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', { limits: { fileSize: MAX_IMAGE_SIZE_BYTES } }),
+  )
   @ApiOperation({
     summary:
       'Registrar un nuevo usuario con email, contraseña y avatar opcional',

@@ -38,7 +38,7 @@ describe('UpdateUserUseCase', () => {
     ).rejects.toThrow(UserNotFoundException);
   });
 
-  it('should update fullName and avatarUrl, then return profile from getMyProfileUseCase', async () => {
+  it('should update fullName, then return profile from getMyProfileUseCase', async () => {
     const user = new User();
     user.id = 'uuid-1';
     user.fullName = 'Old Name';
@@ -51,7 +51,7 @@ describe('UpdateUserUseCase', () => {
       id: 'uuid-1',
       email: 'user@test.com',
       fullName: 'New Name',
-      avatarUrl: 'https://avatar.com/photo.jpg',
+      avatarUrl: null,
       role: UserRole.ADOPTER,
       createdAt: new Date(),
     };
@@ -59,11 +59,10 @@ describe('UpdateUserUseCase', () => {
 
     const result = await useCase.execute('uuid-1', {
       fullName: 'New Name',
-      avatarUrl: 'https://avatar.com/photo.jpg',
     });
 
     expect(user.fullName).toBe('New Name');
-    expect(user.avatarUrl).toBe('https://avatar.com/photo.jpg');
+    expect(user.avatarUrl).toBeNull();
     expect(mockUserRepository.save).toHaveBeenCalledWith(user);
     expect(result).toBe(expectedProfile);
   });

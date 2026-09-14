@@ -1,27 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { MediaService } from '../../../media/application/interfaces/media.service';
 import { UserNotFoundException } from '../../domain/exceptions/user-not-found.exception';
 import { UserRepository } from '../../domain/repositories/user.repository';
-import { UpdateUserDto } from '../dtos/update-user.dto';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { GetMyProfileUseCase } from './get-my-profile.use-case';
 
 @Injectable()
-export class UpdateUserUseCase {
+export class DeleteAvatarUseCase {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly mediaService: MediaService,
     private readonly getMyProfileUseCase: GetMyProfileUseCase,
   ) {}
 
-  async execute(userId: string, dto: UpdateUserDto): Promise<UserResponseDto> {
+  async execute(userId: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new UserNotFoundException(userId);
     }
 
-    if (dto.fullName !== undefined) {
-      user.fullName = dto.fullName;
+    if (user.avatarKey) {
+      await this.mediaService.deleteImage(user.avatarKey);
     }
 
+    user.avatarUrl = null;
+    user.avatarKey = null;
     await this.userRepository.save(user);
 
     return this.getMyProfileUseCase.execute(userId);
