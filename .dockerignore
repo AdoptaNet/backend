@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.env
+.env.*
+!.env.example
+supabase
+test
+.vscode
+.prettierrc
+eslint.config.mjs
+README.md
+agents.md
+*.spec.ts
