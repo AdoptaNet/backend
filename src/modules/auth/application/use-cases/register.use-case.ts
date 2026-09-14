@@ -31,11 +31,13 @@ export class RegisterUseCase {
     }
 
     let avatarUrl: string | null = null;
+    let avatarKey: string | null = null;
     if (avatarFile) {
       const upload = await this.mediaService.uploadImage(avatarFile, {
-        folder: 'adoptanet/avatars',
+        folder: 'avatars',
       });
       avatarUrl = upload.url;
+      avatarKey = upload.publicId;
     }
 
     const passwordHash = await this.hashingService.hash(dto.password);
@@ -46,6 +48,7 @@ export class RegisterUseCase {
       passwordHash,
       fullName: dto.fullName ?? null,
       avatarUrl,
+      avatarKey,
       role,
     });
 

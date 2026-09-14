@@ -174,15 +174,16 @@ describe('RegisterUseCase', () => {
     } as Express.Multer.File;
 
     mockMediaService.uploadImage.mockResolvedValue({
-      url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
-      publicId: 'adoptanet/avatars/avatar_123',
+      url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+      publicId: 'firu-api/avatars/avatar_123',
     });
 
     const createdUser = new User();
     createdUser.email = 'avatar@example.com';
     createdUser.role = UserRole.ADOPTER;
     createdUser.avatarUrl =
-      'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg';
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp';
+    createdUser.avatarKey = 'firu-api/avatars/avatar_123';
 
     const savedUser = new User();
     Object.assign(savedUser, createdUser, {
@@ -211,15 +212,17 @@ describe('RegisterUseCase', () => {
     );
 
     expect(mockMediaService.uploadImage).toHaveBeenCalledWith(avatarFile, {
-      folder: 'adoptanet/avatars',
+      folder: 'avatars',
     });
     expect(mockUserRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        avatarUrl: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
+        avatarUrl:
+          'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+        avatarKey: 'firu-api/avatars/avatar_123',
       }),
     );
     expect(result.user.avatarUrl).toBe(
-      'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
     );
   });
 });

@@ -11,25 +11,53 @@ import { MediaUploadFailedException } from '../../domain/exceptions/media-upload
 @Injectable()
 export class CloudinaryMediaService extends MediaService {
   private readonly logger = new Logger(CloudinaryMediaService.name);
+  private readonly rootFolder: string;
+  private readonly cloudName: string;
 
   constructor(configService: ConfigService) {
     super();
+    this.cloudName = configService.get<string>('CLOUDINARY_CLOUD_NAME') ?? '';
+    this.rootFolder = CloudinaryMediaService.slugifyRootFolder(
+      configService.get<string>('APP_NAME') ?? 'app',
+    );
     cloudinary.config({
-      cloud_name: configService.get<string>('CLOUDINARY_CLOUD_NAME'),
+      cloud_name: this.cloudName,
       api_key: configService.get<string>('CLOUDINARY_API_KEY'),
       api_secret: configService.get<string>('CLOUDINARY_API_SECRET'),
     });
+  }
+
+  private static slugifyRootFolder(appName: string): string {
+    const slug = appName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return slug || 'app';
+  }
+
+  buildUrl(publicId: string): string {
+    if (!this.cloudName) {
+      throw new Error('CLOUDINARY_CLOUD_NAME is not configured');
+    }
+    return `https://res.cloudinary.com/${this.cloudName}/image/upload/${publicId}`;
   }
 
   async uploadImage(
     file: Express.Multer.File,
     options?: UploadFileOptions,
   ): Promise<UploadResult> {
+    const folder = options?.folder
+      ? `${this.rootFolder}/${options.folder}`
+      : this.rootFolder;
+
     return new Promise<UploadResult>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: options?.folder ?? 'adoptanet',
+          folder,
           resource_type: 'image',
+          format: 'webp',
+          quality: 'auto:good',
           transformation: options?.transformation,
         },
         (error, result?: UploadApiResponse) => {

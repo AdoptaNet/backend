@@ -61,7 +61,7 @@ export class MediaController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<UploadMediaResponseDto> {
     return this.uploadImageUseCase.execute(file, {
-      folder: 'adoptanet/general',
+      folder: 'general',
     });
   }
 }

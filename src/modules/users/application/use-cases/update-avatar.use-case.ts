@@ -23,10 +23,11 @@ export class UpdateAvatarUseCase {
     }
 
     const upload = await this.mediaService.uploadImage(file, {
-      folder: 'adoptanet/avatars',
+      folder: 'avatars',
     });
 
     user.avatarUrl = upload.url;
+    user.avatarKey = upload.publicId;
     await this.userRepository.save(user);
 
     return this.getMyProfileUseCase.execute(userId);

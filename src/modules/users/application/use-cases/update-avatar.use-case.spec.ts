@@ -46,6 +46,7 @@ describe('UpdateAvatarUseCase', () => {
     const user = new User();
     user.id = 'uuid-1';
     user.avatarUrl = null;
+    user.avatarKey = null;
 
     const file = {
       mimetype: 'image/jpeg',
@@ -54,22 +55,27 @@ describe('UpdateAvatarUseCase', () => {
 
     mockUserRepository.findById.mockResolvedValue(user);
     mockMediaService.uploadImage.mockResolvedValue({
-      url: 'https://res.cloudinary.com/avatar.jpg',
-      publicId: 'adoptanet/avatars/123',
+      url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+      publicId: 'firu-api/avatars/123',
     });
     mockUserRepository.save.mockResolvedValue(user);
     mockGetMyProfileUseCase.execute.mockResolvedValue({
       id: 'uuid-1',
-      avatarUrl: 'https://res.cloudinary.com/avatar.jpg',
+      avatarUrl: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
     });
 
     const result = await useCase.execute('uuid-1', file);
 
     expect(mockMediaService.uploadImage).toHaveBeenCalledWith(file, {
-      folder: 'adoptanet/avatars',
+      folder: 'avatars',
     });
-    expect(user.avatarUrl).toBe('https://res.cloudinary.com/avatar.jpg');
+    expect(user.avatarUrl).toBe(
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+    );
+    expect(user.avatarKey).toBe('firu-api/avatars/123');
     expect(mockUserRepository.save).toHaveBeenCalledWith(user);
-    expect(result.avatarUrl).toBe('https://res.cloudinary.com/avatar.jpg');
+    expect(result.avatarUrl).toBe(
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+    );
   });
 });
