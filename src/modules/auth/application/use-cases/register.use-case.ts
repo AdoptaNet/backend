@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UploadImageUseCase } from '../../../media/application/use-cases/upload-image.use-case';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
+import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { EmailAlreadyInUseException } from '../../domain/exceptions/email-already-in-use.exception';
 import { AuthResponseDto } from '../dtos/auth-response.dto';
 import { RegisterDto } from '../dtos/register.dto';
@@ -19,6 +21,7 @@ export class RegisterUseCase {
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
     private readonly uploadImageUseCase: UploadImageUseCase,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(
@@ -76,6 +79,16 @@ export class RegisterUseCase {
       tokens.refreshToken,
     );
     await this.userRepository.save(savedUser);
+
+    this.eventEmitter.emit(
+      UserRegisteredEvent.EVENT_NAME,
+      new UserRegisteredEvent(
+        savedUser.id,
+        savedUser.email,
+        savedUser.fullName,
+        savedUser.role,
+      ),
+    );
 
     return {
       user: {

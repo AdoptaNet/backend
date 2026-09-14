@@ -1,14 +1,19 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
+import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { HashingService } from '../interfaces/hashing.service';
 import { TokenService } from '../interfaces/token.service';
 import { GoogleLoginUseCase } from './google-login.use-case';
 
 describe('GoogleLoginUseCase', () => {
   let useCase: GoogleLoginUseCase;
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
   const mockUserRepository = {
     findByGoogleId: jest.fn(),
     findByEmail: jest.fn(),
@@ -39,6 +44,7 @@ describe('GoogleLoginUseCase', () => {
         },
         { provide: HashingService, useValue: mockHashingService },
         { provide: TokenService, useValue: mockTokenService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -88,6 +94,13 @@ describe('GoogleLoginUseCase', () => {
       userId: 'uuid-1',
     });
     expect(mockAdopterProfileRepository.save).toHaveBeenCalled();
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+      UserRegisteredEvent.EVENT_NAME,
+      expect.objectContaining({
+        email: 'newgoogle@example.com',
+        role: UserRole.ADOPTER,
+      }),
+    );
   });
 
   it('should link googleId to existing user with same email', async () => {
@@ -118,5 +131,6 @@ describe('GoogleLoginUseCase', () => {
     expect(existingUser.googleId).toBe('google-123');
     expect(existingUser.avatarUrl).toBe('https://avatar.jpg');
     expect(mockAdopterProfileRepository.create).not.toHaveBeenCalled();
+    expect(mockEventEmitter.emit).not.toHaveBeenCalled();
   });
 });

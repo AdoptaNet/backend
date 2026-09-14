@@ -114,6 +114,10 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   EMAIL_FROM?: string = 'onboarding@resend.dev';
+
+  @IsString()
+  @IsOptional()
+  RESEND_WEBHOOK_SECRET?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
