@@ -60,21 +60,21 @@ describe('UploadImageUseCase', () => {
     } as Express.Multer.File;
 
     mockMediaService.uploadImage.mockResolvedValue({
-      url: 'https://res.cloudinary.com/demo/image/upload/v1/pic.png',
-      publicId: 'adoptanet/general/pic',
-      format: 'png',
+      url: 'https://res.cloudinary.com/demo/image/upload/v1/pic.webp',
+      publicId: 'firu-api/general/pic',
+      format: 'webp',
       bytes: 500 * 1024,
     });
 
-    const result = await useCase.execute(file, { folder: 'adoptanet/test' });
+    const result = await useCase.execute(file, { folder: 'test' });
 
     expect(result.url).toBe(
-      'https://res.cloudinary.com/demo/image/upload/v1/pic.png',
+      'https://res.cloudinary.com/demo/image/upload/v1/pic.webp',
     );
-    expect(result.publicId).toBe('adoptanet/general/pic');
-    expect(result.format).toBe('png');
+    expect(result.publicId).toBe('firu-api/general/pic');
+    expect(result.format).toBe('webp');
     expect(mockMediaService.uploadImage).toHaveBeenCalledWith(file, {
-      folder: 'adoptanet/test',
+      folder: 'test',
     });
   });
 });

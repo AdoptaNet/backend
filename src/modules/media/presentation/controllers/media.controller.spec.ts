@@ -40,7 +40,7 @@ describe('MediaController', () => {
 
     expect(result).toBe(expectedResponse);
     expect(mockUploadImageUseCase.execute).toHaveBeenCalledWith(file, {
-      folder: 'adoptanet/general',
+      folder: 'general',
     });
   });
 });

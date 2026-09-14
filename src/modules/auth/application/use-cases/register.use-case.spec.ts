@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MediaService } from '../../../media/application/interfaces/media.service';
+import { UploadImageUseCase } from '../../../media/application/use-cases/upload-image.use-case';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { User } from '../../../users/domain/entities/user.entity';
@@ -35,9 +35,8 @@ describe('RegisterUseCase', () => {
     generateTokens: jest.fn(),
     verifyRefreshToken: jest.fn(),
   };
-  const mockMediaService = {
-    uploadImage: jest.fn(),
-    deleteImage: jest.fn(),
+  const mockUploadImageUseCase = {
+    execute: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -57,7 +56,7 @@ describe('RegisterUseCase', () => {
         },
         { provide: HashingService, useValue: mockHashingService },
         { provide: TokenService, useValue: mockTokenService },
-        { provide: MediaService, useValue: mockMediaService },
+        { provide: UploadImageUseCase, useValue: mockUploadImageUseCase },
       ],
     }).compile();
 
@@ -173,16 +172,19 @@ describe('RegisterUseCase', () => {
       buffer: Buffer.from('avatar-bytes'),
     } as Express.Multer.File;
 
-    mockMediaService.uploadImage.mockResolvedValue({
-      url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
-      publicId: 'adoptanet/avatars/avatar_123',
+    mockUploadImageUseCase.execute.mockResolvedValue({
+      url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+      publicId: 'firu-api/avatars/avatar_123',
+      format: 'webp',
+      bytes: 2048,
     });
 
     const createdUser = new User();
     createdUser.email = 'avatar@example.com';
     createdUser.role = UserRole.ADOPTER;
     createdUser.avatarUrl =
-      'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg';
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp';
+    createdUser.avatarKey = 'firu-api/avatars/avatar_123';
 
     const savedUser = new User();
     Object.assign(savedUser, createdUser, {
@@ -210,16 +212,18 @@ describe('RegisterUseCase', () => {
       avatarFile,
     );
 
-    expect(mockMediaService.uploadImage).toHaveBeenCalledWith(avatarFile, {
-      folder: 'adoptanet/avatars',
+    expect(mockUploadImageUseCase.execute).toHaveBeenCalledWith(avatarFile, {
+      folder: 'avatars',
     });
     expect(mockUserRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        avatarUrl: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
+        avatarUrl:
+          'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+        avatarKey: 'firu-api/avatars/avatar_123',
       }),
     );
     expect(result.user.avatarUrl).toBe(
-      'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
+      'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
     );
   });
 });

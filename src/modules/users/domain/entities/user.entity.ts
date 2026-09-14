@@ -21,6 +21,9 @@ export class User extends AuditableEntity {
   @Column({ type: 'varchar', nullable: true })
   avatarUrl: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  avatarKey: string | null;
+
   @Column({ type: 'enum', enum: UserRole, default: UserRole.ADOPTER })
   role: UserRole;
 

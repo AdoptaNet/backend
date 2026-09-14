@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { MediaModule } from '../media/media.module';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
+import { DeleteAvatarUseCase } from './application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-case';
 import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
 import { UpdateAvatarUseCase } from './application/use-cases/update-avatar.use-case';
@@ -42,6 +43,7 @@ import { UsersController } from './presentation/controllers/users.controller';
     GetMyProfileUseCase,
     UpdateUserUseCase,
     UpdateAvatarUseCase,
+    DeleteAvatarUseCase,
     ChangePasswordUseCase,
     UpdateAdopterProfileUseCase,
     UpdateShelterProfileUseCase,

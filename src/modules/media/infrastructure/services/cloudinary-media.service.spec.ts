@@ -21,6 +21,7 @@ describe('CloudinaryMediaService', () => {
       if (key === 'CLOUDINARY_CLOUD_NAME') return 'demo';
       if (key === 'CLOUDINARY_API_KEY') return '123456';
       if (key === 'CLOUDINARY_API_SECRET') return 'secret';
+      if (key === 'APP_NAME') return 'Firu API';
       return null;
     }),
   };
@@ -44,17 +45,19 @@ describe('CloudinaryMediaService', () => {
     } as Express.Multer.File;
 
     const mockUploadResult = {
-      secure_url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.jpg',
-      public_id: 'adoptanet/avatars/avatar_123',
-      format: 'jpg',
+      secure_url: 'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
+      public_id: 'firu-api/avatars/avatar_123',
+      format: 'webp',
       bytes: 2048,
     };
 
+    let capturedOptions: Record<string, unknown> = {};
     (cloudinary.uploader.upload_stream as jest.Mock).mockImplementation(
       (
         options: unknown,
         callback: (error: unknown, result: unknown) => void,
       ) => {
+        capturedOptions = options as Record<string, unknown>;
         return {
           end: () => {
             callback(null, mockUploadResult);
@@ -64,12 +67,17 @@ describe('CloudinaryMediaService', () => {
     );
 
     const result = await service.uploadImage(file, {
-      folder: 'adoptanet/avatars',
+      folder: 'avatars',
     });
 
+    expect(capturedOptions).toMatchObject({
+      folder: 'firu-api/avatars',
+      format: 'webp',
+      quality: 'auto:good',
+    });
     expect(result.url).toBe(mockUploadResult.secure_url);
     expect(result.publicId).toBe(mockUploadResult.public_id);
-    expect(result.format).toBe('jpg');
+    expect(result.format).toBe('webp');
     expect(result.bytes).toBe(2048);
   });
 
@@ -96,14 +104,20 @@ describe('CloudinaryMediaService', () => {
     );
   });
 
+  it('should build url from publicId', () => {
+    expect(service.buildUrl('firu-api/avatars/pic')).toBe(
+      'https://res.cloudinary.com/demo/image/upload/firu-api/avatars/pic',
+    );
+  });
+
   it('should return true when deleteImage succeeds', async () => {
     (cloudinary.uploader.destroy as jest.Mock).mockResolvedValue({
       result: 'ok',
     });
 
-    const result = await service.deleteImage('adoptanet/pic');
+    const result = await service.deleteImage('firu-api/pic');
     expect(result).toBe(true);
-    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith('adoptanet/pic');
+    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith('firu-api/pic');
   });
 
   it('should return false when deleteImage fails', async () => {
@@ -111,7 +125,7 @@ describe('CloudinaryMediaService', () => {
       new Error('Delete error'),
     );
 
-    const result = await service.deleteImage('adoptanet/pic');
+    const result = await service.deleteImage('firu-api/pic');
     expect(result).toBe(false);
   });
 });
