@@ -17,6 +17,7 @@ export class AuthNotificationListener {
 
     try {
       await this.emailService.sendWelcomeEmail(event.email, {
+        userId: event.userId,
         fullName: event.fullName,
         role: event.role,
       });

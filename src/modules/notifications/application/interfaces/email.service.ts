@@ -1,11 +1,15 @@
 import * as React from 'react';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
+import { NotificationType } from '../../domain/value-objects/notification-type.enum';
 
 export interface SendEmailOptions {
   to: string | string[];
   subject: string;
   template: React.ReactElement;
   text?: string;
+  userId?: string;
+  type?: NotificationType;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SendEmailResult {
@@ -14,6 +18,7 @@ export interface SendEmailResult {
 }
 
 export interface SendWelcomeEmailData {
+  userId?: string;
   fullName?: string | null;
   role: UserRole;
 }

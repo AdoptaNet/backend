@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as ReactDOMServer from 'react-dom/server';
 import { EmailService } from '../../application/interfaces/email.service';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
+import { NotificationRepository } from '../../domain/repositories/notification.repository';
 import { SampleEmailTemplate } from '../../presentation/templates/sample-email.template';
 import { ResendEmailService } from './resend-email.service';
 
@@ -20,8 +21,24 @@ jest.mock('@react-email/components', () => {
 describe('ResendEmailService', () => {
   let service: ResendEmailService;
   let configService: ConfigService;
+  const mockNotificationRepository = {
+    create: jest.fn((data) => ({
+      ...data,
+      id: 'notif-1',
+      isRead: false,
+      createdAt: new Date(),
+    })),
+    save: jest.fn(async (data) => data),
+    findById: jest.fn(),
+    findByExternalId: jest.fn(),
+    findByUserId: jest.fn(),
+    findUnreadByUserId: jest.fn(),
+    markAsRead: jest.fn(),
+  };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ResendEmailService,
@@ -34,6 +51,10 @@ describe('ResendEmailService', () => {
               return null;
             }),
           },
+        },
+        {
+          provide: NotificationRepository,
+          useValue: mockNotificationRepository,
         },
       ],
     }).compile();

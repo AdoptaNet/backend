@@ -45,6 +45,7 @@ describe('AuthNotificationListener', () => {
     expect(mockEmailService.sendWelcomeEmail).toHaveBeenCalledWith(
       'carlos@example.com',
       {
+        userId: 'uuid-123',
         fullName: 'Carlos Mendoza',
         role: UserRole.ADOPTER,
       },

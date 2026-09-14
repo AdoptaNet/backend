@@ -22,7 +22,8 @@ export function WelcomeEmailTemplate({
   frontendUrl = 'http://localhost:3001',
 }: WelcomeEmailProps) {
   const isAdopter = role === UserRole.ADOPTER;
-  const displayName = fullName?.trim() || (isAdopter ? 'adoptante' : 'rescatista');
+  const displayName =
+    fullName?.trim() || (isAdopter ? 'adoptante' : 'rescatista');
 
   return (
     <BaseEmailLayout previewText="🐾 ¡Te damos la bienvenida a Adoptanet! Gracias por sumarte a la adopción responsable.">
@@ -79,7 +80,9 @@ export function WelcomeEmailTemplate({
             lineHeight: '20px',
           }}
         >
-          {isAdopter ? '¿Qué puedes hacer ahora?' : 'Próximos pasos para tu albergue:'}
+          {isAdopter
+            ? '¿Qué puedes hacer ahora?'
+            : 'Próximos pasos para tu albergue:'}
         </Text>
 
         {isAdopter ? (
@@ -92,7 +95,9 @@ export function WelcomeEmailTemplate({
                 margin: '0 0 8px 0',
               }}
             >
-              1. <strong>Completa tu perfil:</strong> Cuéntanos sobre tu tipo de vivienda, horarios y patio para que nuestro sistema encuentre a tu compañero ideal.
+              1. <strong>Completa tu perfil:</strong> Cuéntanos sobre tu tipo de
+              vivienda, horarios y patio para que nuestro sistema encuentre a tu
+              compañero ideal.
             </Text>
             <Text
               style={{
@@ -102,7 +107,8 @@ export function WelcomeEmailTemplate({
                 margin: '0 0 8px 0',
               }}
             >
-              2. <strong>Descubre tus coincidencias:</strong> Consulta las razones concretas de afinidad con cada perrito o gatito rescatado.
+              2. <strong>Descubre tus coincidencias:</strong> Consulta las
+              razones concretas de afinidad con cada perrito o gatito rescatado.
             </Text>
             <Text
               style={{
@@ -112,7 +118,8 @@ export function WelcomeEmailTemplate({
                 margin: '0',
               }}
             >
-              3. <strong>Postula con confianza:</strong> Envía solicitudes directas y mantén comunicación clara con los albergues.
+              3. <strong>Postula con confianza:</strong> Envía solicitudes
+              directas y mantén comunicación clara con los albergues.
             </Text>
           </>
         ) : (
@@ -125,7 +132,8 @@ export function WelcomeEmailTemplate({
                 margin: '0 0 8px 0',
               }}
             >
-              1. <strong>Configura el perfil de tu albergue:</strong> Agrega tu información de contacto, redes y ubicación para generar confianza.
+              1. <strong>Configura el perfil de tu albergue:</strong> Agrega tu
+              información de contacto, redes y ubicación para generar confianza.
             </Text>
             <Text
               style={{
@@ -135,7 +143,8 @@ export function WelcomeEmailTemplate({
                 margin: '0 0 8px 0',
               }}
             >
-              2. <strong>Publica tus animales:</strong> Sube fotos nítidas y describe su temperamento, nivel de energía y necesidades.
+              2. <strong>Publica tus animales:</strong> Sube fotos nítidas y
+              describe su temperamento, nivel de energía y necesidades.
             </Text>
             <Text
               style={{
@@ -145,7 +154,8 @@ export function WelcomeEmailTemplate({
                 margin: '0',
               }}
             >
-              3. <strong>Evalúa solicitudes objetivas:</strong> Recibe postulaciones ordenadas con el perfil real de cada postulante.
+              3. <strong>Evalúa solicitudes objetivas:</strong> Recibe
+              postulaciones ordenadas con el perfil real de cada postulante.
             </Text>
           </>
         )}
@@ -154,10 +164,12 @@ export function WelcomeEmailTemplate({
       {/* Botón de acción principal */}
       <Section style={{ textAlign: 'center', margin: '28px 0 20px 0' }}>
         <EmailButton
-          href={isAdopter ? `${frontendUrl}/explorar` : `${frontendUrl}/albergue`}
+          href={`${frontendUrl}/home`}
           variant={isAdopter ? 'primary' : 'secondary'}
         >
-          {isAdopter ? 'Explorar mascotas en adopción' : 'Ir a mi panel de albergue'}
+          {isAdopter
+            ? 'Explorar mascotas en adopción'
+            : 'Ir a mi panel de albergue'}
         </EmailButton>
       </Section>
 
@@ -176,7 +188,8 @@ export function WelcomeEmailTemplate({
           margin: '0',
         }}
       >
-        ¡Gracias por sumarte a la adopción responsable en el Perú! Si tienes alguna duda, responde directamente a este correo.
+        ¡Gracias por sumarte a la adopción responsable en el Perú! Si tienes
+        alguna duda, responde directamente a este correo.
       </Text>
     </BaseEmailLayout>
   );

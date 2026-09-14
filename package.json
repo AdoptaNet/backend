@@ -54,6 +54,7 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.28.0",
     "rxjs": "^7.8.1",
+    "svix": "^2.5.0",
     "typeorm": "^1.1.1"
   },
   "devDependencies": {
