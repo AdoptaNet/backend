@@ -54,6 +54,7 @@ export class GoogleLoginUseCase {
           fullName: profile.fullName ?? null,
           avatarUrl: profile.avatarUrl ?? null,
           role: UserRole.ADOPTER,
+          roleSelected: false,
         });
       }
     }
@@ -97,10 +98,12 @@ export class GoogleLoginUseCase {
         fullName: savedUser.fullName,
         avatarUrl: savedUser.avatarUrl,
         role: savedUser.role,
+        roleSelected: savedUser.roleSelected,
         createdAt: savedUser.createdAt,
       },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
+      isNewUser,
     };
   }
 }

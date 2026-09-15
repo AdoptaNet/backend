@@ -19,6 +19,7 @@ export class GetMyProfileUseCase {
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
       role: user.role,
+      roleSelected: user.roleSelected,
       createdAt: user.createdAt,
       adopterProfile: user.adopterProfile
         ? {

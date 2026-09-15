@@ -27,6 +27,9 @@ export class User extends AuditableEntity {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.ADOPTER })
   role: UserRole;
 
+  @Column({ type: 'boolean', default: true })
+  roleSelected: boolean;
+
   @Column({ type: 'varchar', nullable: true })
   refreshTokenHash: string | null;
 

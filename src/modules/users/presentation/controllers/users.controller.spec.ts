@@ -4,6 +4,7 @@ import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
 import { DeleteAvatarUseCase } from '../../application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
+import { SelectUserRoleUseCase } from '../../application/use-cases/select-user-role.use-case';
 import { UpdateAdopterProfileUseCase } from '../../application/use-cases/update-adopter-profile.use-case';
 import { UpdateAvatarUseCase } from '../../application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from '../../application/use-cases/update-shelter-profile.use-case';
@@ -19,6 +20,7 @@ describe('UsersController', () => {
   const mockChangePasswordUseCase = { execute: jest.fn() };
   const mockUpdateAdopterProfileUseCase = { execute: jest.fn() };
   const mockUpdateShelterProfileUseCase = { execute: jest.fn() };
+  const mockSelectUserRoleUseCase = { execute: jest.fn() };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -38,6 +40,10 @@ describe('UsersController', () => {
         {
           provide: UpdateShelterProfileUseCase,
           useValue: mockUpdateShelterProfileUseCase,
+        },
+        {
+          provide: SelectUserRoleUseCase,
+          useValue: mockSelectUserRoleUseCase,
         },
       ],
     }).compile();
@@ -154,5 +160,29 @@ describe('UsersController', () => {
       'uuid-2',
       dto,
     );
+  });
+
+  it('should call SelectUserRoleUseCase on selectRole', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const dto = { role: UserRole.SHELTER as const };
+    const authResponse = {
+      user: {
+        id: 'uuid-1',
+        email: 'test@example.com',
+        fullName: null,
+        avatarUrl: null,
+        role: UserRole.SHELTER,
+        createdAt: new Date(),
+      },
+      accessToken: 'acc-token',
+      refreshToken: 'ref-token',
+    };
+    mockSelectUserRoleUseCase.execute.mockResolvedValue(authResponse);
+
+    const result = await controller.selectRole(user, dto);
+
+    expect(result).toBe(authResponse);
+    expect(mockSelectUserRoleUseCase.execute).toHaveBeenCalledWith('uuid-1', dto);
   });
 });
