@@ -21,6 +21,16 @@ export class UserTypeOrmRepository extends UserRepository {
     return this.ormRepo.findOne({ where: { id } });
   }
 
+  async findByIdWithProfile(id: string): Promise<User | null> {
+    return this.ormRepo.findOne({
+      where: { id },
+      relations: {
+        adopterProfile: true,
+        shelterProfile: true,
+      },
+    });
+  }
+
   async findByGoogleId(googleId: string): Promise<User | null> {
     return this.ormRepo.findOne({ where: { googleId } });
   }

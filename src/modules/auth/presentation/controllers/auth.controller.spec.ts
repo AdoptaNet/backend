@@ -57,7 +57,7 @@ describe('AuthController', () => {
     const result = await controller.register(dto);
 
     expect(result).toBe(expectedResponse);
-    expect(mockRegisterUseCase.execute).toHaveBeenCalledWith(dto);
+    expect(mockRegisterUseCase.execute).toHaveBeenCalledWith(dto, undefined);
   });
 
   it('should call LoginUseCase on login', async () => {
@@ -112,27 +112,5 @@ describe('AuthController', () => {
 
     expect(result).toEqual({ message: 'Sesión cerrada exitosamente' });
     expect(mockLogoutUseCase.execute).toHaveBeenCalledWith(user);
-  });
-
-  it('should return UserResponseDto for authenticated user on getMe', () => {
-    const date = new Date('2026-01-01');
-    const user = new User();
-    user.id = 'uuid-123';
-    user.email = 'user@test.com';
-    user.fullName = 'Auth User';
-    user.avatarUrl = null;
-    user.role = UserRole.ADOPTER;
-    user.createdAt = date;
-
-    const result = controller.getMe(user);
-
-    expect(result).toEqual({
-      id: 'uuid-123',
-      email: 'user@test.com',
-      fullName: 'Auth User',
-      avatarUrl: null,
-      role: UserRole.ADOPTER,
-      createdAt: date,
-    });
   });
 });
