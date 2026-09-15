@@ -84,6 +84,7 @@ describe('GoogleLoginUseCase', () => {
 
     expect(result.accessToken).toBe('access');
     expect(result.refreshToken).toBe('refresh');
+    expect(result.isNewUser).toBe(true);
     expect(mockUserRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         googleId: 'google-123',
@@ -128,6 +129,7 @@ describe('GoogleLoginUseCase', () => {
     });
 
     expect(result.user.id).toBe('uuid-2');
+    expect(result.isNewUser).toBe(false);
     expect(existingUser.googleId).toBe('google-123');
     expect(existingUser.avatarUrl).toBe('https://avatar.jpg');
     expect(mockAdopterProfileRepository.create).not.toHaveBeenCalled();

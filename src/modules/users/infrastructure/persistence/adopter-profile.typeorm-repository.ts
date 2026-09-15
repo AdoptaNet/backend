@@ -24,4 +24,8 @@ export class AdopterProfileTypeOrmRepository extends AdopterProfileRepository {
   create(data: Partial<AdopterProfile>): AdopterProfile {
     return this.ormRepo.create(data);
   }
+
+  async deleteByUserId(userId: string): Promise<void> {
+    await this.ormRepo.delete({ userId });
+  }
 }

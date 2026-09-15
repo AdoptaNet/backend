@@ -53,6 +53,7 @@ export class RegisterUseCase {
       avatarUrl,
       avatarKey,
       role,
+      roleSelected: true,
     });
 
     const savedUser = await this.userRepository.save(user);
@@ -97,6 +98,7 @@ export class RegisterUseCase {
         fullName: savedUser.fullName,
         avatarUrl: savedUser.avatarUrl,
         role: savedUser.role,
+        roleSelected: savedUser.roleSelected,
         createdAt: savedUser.createdAt,
       },
       accessToken: tokens.accessToken,
