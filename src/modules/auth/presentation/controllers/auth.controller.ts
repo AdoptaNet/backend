@@ -8,6 +8,7 @@ import {
   Req,
   Res,
   UploadedFile,
+  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -35,6 +36,7 @@ import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.u
 import { RegisterUseCase } from '../../application/use-cases/register.use-case';
 import { GoogleAuthGuard } from '../../infrastructure/guards/google-auth.guard';
 import { JwtAuthGuard } from '../../infrastructure/guards/jwt-auth.guard';
+import { OAuthExceptionFilter } from '../../infrastructure/filters/oauth-exception.filter';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -150,6 +152,7 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
+  @UseFilters(OAuthExceptionFilter)
   @ApiOperation({ summary: 'Callback de autenticación de Google' })
   googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     const authResult = req.user as AuthResponseDto;
@@ -159,6 +162,10 @@ export class AuthController {
     const redirectUrl = new URL('/auth/callback', frontendUrl);
     redirectUrl.searchParams.set('accessToken', authResult.accessToken);
     redirectUrl.searchParams.set('refreshToken', authResult.refreshToken);
+
+    if (authResult.isNewUser) {
+      redirectUrl.searchParams.set('isNewUser', 'true');
+    }
 
     return res.redirect(redirectUrl.toString());
   }

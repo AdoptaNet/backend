@@ -113,4 +113,48 @@ describe('AuthController', () => {
     expect(result).toEqual({ message: 'Sesión cerrada exitosamente' });
     expect(mockLogoutUseCase.execute).toHaveBeenCalledWith(user);
   });
+
+  it('should redirect to frontend callback with tokens and isNewUser=true when new user', () => {
+    mockConfigService.get.mockReturnValue('http://localhost:3001');
+
+    const req = {
+      user: {
+        accessToken: 'mock-access',
+        refreshToken: 'mock-refresh',
+        isNewUser: true,
+      },
+    } as any;
+
+    const res = {
+      redirect: jest.fn(),
+    } as any;
+
+    controller.googleAuthCallback(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      'http://localhost:3001/auth/callback?accessToken=mock-access&refreshToken=mock-refresh&isNewUser=true',
+    );
+  });
+
+  it('should redirect without isNewUser when user is not new', () => {
+    mockConfigService.get.mockReturnValue('http://localhost:3001');
+
+    const req = {
+      user: {
+        accessToken: 'mock-access',
+        refreshToken: 'mock-refresh',
+        isNewUser: false,
+      },
+    } as any;
+
+    const res = {
+      redirect: jest.fn(),
+    } as any;
+
+    controller.googleAuthCallback(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      'http://localhost:3001/auth/callback?accessToken=mock-access&refreshToken=mock-refresh',
+    );
+  });
 });

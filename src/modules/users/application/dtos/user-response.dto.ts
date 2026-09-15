@@ -19,6 +19,12 @@ export class UserResponseDto {
   @ApiProperty({ enum: UserRole, description: 'User role' })
   role: UserRole;
 
+  @ApiProperty({
+    description: 'Indica si el usuario ya seleccionó/confirmó su rol',
+    default: true,
+  })
+  roleSelected?: boolean;
+
   @ApiProperty({ description: 'Account creation date' })
   createdAt: Date;
 

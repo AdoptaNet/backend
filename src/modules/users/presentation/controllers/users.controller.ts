@@ -28,9 +28,12 @@ import { UpdateAdopterProfileDto } from '../../application/dtos/update-adopter-p
 import { UpdateShelterProfileDto } from '../../application/dtos/update-shelter-profile.dto';
 import { UpdateUserDto } from '../../application/dtos/update-user.dto';
 import { UserResponseDto } from '../../application/dtos/user-response.dto';
+import { SelectUserRoleDto } from '../../application/dtos/select-user-role.dto';
+import { AuthResponseDto } from '../../../auth/application/dtos/auth-response.dto';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
 import { DeleteAvatarUseCase } from '../../application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
+import { SelectUserRoleUseCase } from '../../application/use-cases/select-user-role.use-case';
 import { UpdateAdopterProfileUseCase } from '../../application/use-cases/update-adopter-profile.use-case';
 import { UpdateAvatarUseCase } from '../../application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from '../../application/use-cases/update-shelter-profile.use-case';
@@ -50,6 +53,7 @@ export class UsersController {
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly updateAdopterProfileUseCase: UpdateAdopterProfileUseCase,
     private readonly updateShelterProfileUseCase: UpdateShelterProfileUseCase,
+    private readonly selectUserRoleUseCase: SelectUserRoleUseCase,
   ) {}
 
   @Get('me')
@@ -199,5 +203,30 @@ export class UsersController {
     @Body() dto: UpdateShelterProfileDto,
   ): Promise<ShelterProfileResponseDto> {
     return this.updateShelterProfileUseCase.execute(user.id, dto);
+  }
+
+  @Patch('me/role')
+  @ApiOperation({
+    summary:
+      'Seleccionar o asignar rol inicial del usuario durante onboarding (adopter o shelter)',
+    description:
+      'Permite al usuario elegir su rol inicial tras el registro con Google. No se permite si el perfil ya fue configurado o si la cuenta fue creada con contraseña.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: AuthResponseDto,
+    description: 'Rol actualizado exitosamente y nuevos tokens JWT emitidos',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'No es posible cambiar el rol una vez configurado el perfil o datos inválidos',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async selectRole(
+    @CurrentUser() user: User,
+    @Body() dto: SelectUserRoleDto,
+  ): Promise<AuthResponseDto> {
+    return this.selectUserRoleUseCase.execute(user.id, dto);
   }
 }

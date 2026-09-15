@@ -5,6 +5,7 @@ import { MediaModule } from '../media/media.module';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
 import { DeleteAvatarUseCase } from './application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-case';
+import { SelectUserRoleUseCase } from './application/use-cases/select-user-role.use-case';
 import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
 import { UpdateAvatarUseCase } from './application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from './application/use-cases/update-shelter-profile.use-case';
@@ -47,12 +48,14 @@ import { UsersController } from './presentation/controllers/users.controller';
     ChangePasswordUseCase,
     UpdateAdopterProfileUseCase,
     UpdateShelterProfileUseCase,
+    SelectUserRoleUseCase,
   ],
   exports: [
     UserRepository,
     AdopterProfileRepository,
     ShelterProfileRepository,
     GetMyProfileUseCase,
+    SelectUserRoleUseCase,
   ],
 })
 export class UsersModule {}
