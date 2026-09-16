@@ -183,6 +183,9 @@ describe('UsersController', () => {
     const result = await controller.selectRole(user, dto);
 
     expect(result).toBe(authResponse);
-    expect(mockSelectUserRoleUseCase.execute).toHaveBeenCalledWith('uuid-1', dto);
+    expect(mockSelectUserRoleUseCase.execute).toHaveBeenCalledWith(
+      'uuid-1',
+      dto,
+    );
   });
 });
