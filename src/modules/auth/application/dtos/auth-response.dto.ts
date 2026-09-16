@@ -15,7 +15,8 @@ export class AuthResponseDto {
   refreshToken: string;
 
   @ApiProperty({
-    description: 'Indica si el usuario fue registrado en este flujo de autenticación',
+    description:
+      'Indica si el usuario fue registrado en este flujo de autenticación',
     required: false,
   })
   isNewUser?: boolean;

@@ -34,7 +34,12 @@ export class UpdateShelterProfileUseCase {
         ...dto,
       });
     } else {
-      Object.assign(profile, dto);
+      const keys = Object.keys(dto) as (keyof UpdateShelterProfileDto)[];
+      for (const key of keys) {
+        if (dto[key] !== undefined) {
+          (profile as any)[key] = dto[key];
+        }
+      }
     }
 
     const saved = await this.shelterProfileRepository.save(profile);

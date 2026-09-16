@@ -10,7 +10,9 @@ describe('OAuthExceptionFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    filter = new OAuthExceptionFilter(mockConfigService as unknown as ConfigService);
+    filter = new OAuthExceptionFilter(
+      mockConfigService as unknown as ConfigService,
+    );
   });
 
   it('should redirect to login with error=oauth_cancelled', () => {

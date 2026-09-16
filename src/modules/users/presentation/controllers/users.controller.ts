@@ -185,8 +185,10 @@ export class UsersController {
   }
 
   @Put('me/shelter-profile')
+  @Patch('me/shelter-profile')
   @ApiOperation({
-    summary: 'Crear o actualizar perfil de albergue o rescatista',
+    summary:
+      'Crear o actualizar perfil de albergue o rescatista (soporta PUT y PATCH)',
   })
   @ApiResponse({
     status: 200,

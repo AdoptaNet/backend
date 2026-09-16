@@ -35,7 +35,9 @@ describe('HandleResendWebhookUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<HandleResendWebhookUseCase>(HandleResendWebhookUseCase);
+    useCase = module.get<HandleResendWebhookUseCase>(
+      HandleResendWebhookUseCase,
+    );
   });
 
   it('should update notification status to DELIVERED on email.delivered event', async () => {
@@ -167,7 +169,8 @@ describe('HandleResendWebhookUseCase', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
-              if (key === 'RESEND_WEBHOOK_SECRET') return 'whsec_testsecret1234567890';
+              if (key === 'RESEND_WEBHOOK_SECRET')
+                return 'whsec_testsecret1234567890';
               return null;
             }),
           },
