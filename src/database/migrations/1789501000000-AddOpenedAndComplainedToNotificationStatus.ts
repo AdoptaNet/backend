@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddOpenedAndComplainedToNotificationStatus1789501000000
-  implements MigrationInterface
-{
+export class AddOpenedAndComplainedToNotificationStatus1789501000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `ALTER TYPE "notifications_status_enum" ADD VALUE IF NOT EXISTS 'opened'`,

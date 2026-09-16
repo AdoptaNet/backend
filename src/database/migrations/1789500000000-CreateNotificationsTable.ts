@@ -6,9 +6,7 @@ import {
   TableIndex,
 } from 'typeorm';
 
-export class CreateNotificationsTable1789500000000
-  implements MigrationInterface
-{
+export class CreateNotificationsTable1789500000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 1. Crear tipos enum
     await queryRunner.query(
@@ -155,7 +153,10 @@ export class CreateNotificationsTable1789500000000
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex('notifications', 'IDX_notifications_external_id');
+    await queryRunner.dropIndex(
+      'notifications',
+      'IDX_notifications_external_id',
+    );
     await queryRunner.dropIndex('notifications', 'IDX_notifications_user_id');
     await queryRunner.dropTable('notifications', true);
     await queryRunner.query(`DROP TYPE IF EXISTS "notifications_status_enum"`);

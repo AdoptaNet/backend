@@ -12,8 +12,10 @@ describe('AuthNotificationListener', () => {
     mockEmailService = {
       sendEmail: jest.fn(),
       renderTemplate: jest.fn(),
-      sendWelcomeEmail: jest.fn().mockResolvedValue({ id: 'msg-1', success: true }),
-    } as unknown as jest.Mocked<EmailService>;
+      sendWelcomeEmail: jest
+        .fn()
+        .mockResolvedValue({ id: 'msg-1', success: true }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -53,7 +55,9 @@ describe('AuthNotificationListener', () => {
   });
 
   it('should not throw if emailService.sendWelcomeEmail fails', async () => {
-    mockEmailService.sendWelcomeEmail.mockRejectedValue(new Error('Resend error'));
+    mockEmailService.sendWelcomeEmail.mockRejectedValue(
+      new Error('Resend error'),
+    );
 
     const event = new UserRegisteredEvent(
       'uuid-123',
