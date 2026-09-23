@@ -21,9 +21,6 @@ export class UpdateUserUseCase {
     if (dto.fullName !== undefined) {
       user.fullName = dto.fullName;
     }
-    if (dto.avatarUrl !== undefined) {
-      user.avatarUrl = dto.avatarUrl;
-    }
 
     await this.userRepository.save(user);
 

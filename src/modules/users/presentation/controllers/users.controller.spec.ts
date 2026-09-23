@@ -2,8 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../domain/entities/user.entity';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
+import { DeleteAccountUseCase } from '../../application/use-cases/delete-account.use-case';
+import { DeleteAvatarUseCase } from '../../application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
+import { SelectUserRoleUseCase } from '../../application/use-cases/select-user-role.use-case';
 import { UpdateAdopterProfileUseCase } from '../../application/use-cases/update-adopter-profile.use-case';
+import { UpdateAvatarUseCase } from '../../application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from '../../application/use-cases/update-shelter-profile.use-case';
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { UsersController } from './users.controller';
@@ -12,9 +16,13 @@ describe('UsersController', () => {
   let controller: UsersController;
   const mockGetMyProfileUseCase = { execute: jest.fn() };
   const mockUpdateUserUseCase = { execute: jest.fn() };
+  const mockUpdateAvatarUseCase = { execute: jest.fn() };
+  const mockDeleteAvatarUseCase = { execute: jest.fn() };
   const mockChangePasswordUseCase = { execute: jest.fn() };
   const mockUpdateAdopterProfileUseCase = { execute: jest.fn() };
   const mockUpdateShelterProfileUseCase = { execute: jest.fn() };
+  const mockSelectUserRoleUseCase = { execute: jest.fn() };
+  const mockDeleteAccountUseCase = { execute: jest.fn() };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -24,6 +32,8 @@ describe('UsersController', () => {
       providers: [
         { provide: GetMyProfileUseCase, useValue: mockGetMyProfileUseCase },
         { provide: UpdateUserUseCase, useValue: mockUpdateUserUseCase },
+        { provide: UpdateAvatarUseCase, useValue: mockUpdateAvatarUseCase },
+        { provide: DeleteAvatarUseCase, useValue: mockDeleteAvatarUseCase },
         { provide: ChangePasswordUseCase, useValue: mockChangePasswordUseCase },
         {
           provide: UpdateAdopterProfileUseCase,
@@ -32,6 +42,14 @@ describe('UsersController', () => {
         {
           provide: UpdateShelterProfileUseCase,
           useValue: mockUpdateShelterProfileUseCase,
+        },
+        {
+          provide: SelectUserRoleUseCase,
+          useValue: mockSelectUserRoleUseCase,
+        },
+        {
+          provide: DeleteAccountUseCase,
+          useValue: mockDeleteAccountUseCase,
         },
       ],
     }).compile();
@@ -66,6 +84,37 @@ describe('UsersController', () => {
 
     expect(result).toBe(updated);
     expect(mockUpdateUserUseCase.execute).toHaveBeenCalledWith('uuid-1', dto);
+  });
+
+  it('should call UpdateAvatarUseCase on updateAvatar', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const file = { mimetype: 'image/jpeg' } as Express.Multer.File;
+    const updated = {
+      id: 'uuid-1',
+      avatarUrl: 'https://res.cloudinary.com/avatar.jpg',
+    };
+    mockUpdateAvatarUseCase.execute.mockResolvedValue(updated);
+
+    const result = await controller.updateAvatar(user, file);
+
+    expect(result).toBe(updated);
+    expect(mockUpdateAvatarUseCase.execute).toHaveBeenCalledWith(
+      'uuid-1',
+      file,
+    );
+  });
+
+  it('should call DeleteAvatarUseCase on deleteAvatar', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const updated = { id: 'uuid-1', avatarUrl: null };
+    mockDeleteAvatarUseCase.execute.mockResolvedValue(updated);
+
+    const result = await controller.deleteAvatar(user);
+
+    expect(result).toBe(updated);
+    expect(mockDeleteAvatarUseCase.execute).toHaveBeenCalledWith('uuid-1');
   });
 
   it('should call ChangePasswordUseCase on changePassword', async () => {
@@ -115,6 +164,51 @@ describe('UsersController', () => {
     expect(result).toBe(profile);
     expect(mockUpdateShelterProfileUseCase.execute).toHaveBeenCalledWith(
       'uuid-2',
+      dto,
+    );
+  });
+
+  it('should call SelectUserRoleUseCase on selectRole', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const dto = { role: UserRole.SHELTER as const };
+    const authResponse = {
+      user: {
+        id: 'uuid-1',
+        email: 'test@example.com',
+        fullName: null,
+        avatarUrl: null,
+        role: UserRole.SHELTER,
+        roleSelected: true,
+        createdAt: new Date(),
+      },
+      accessToken: 'acc-token',
+      refreshToken: 'ref-token',
+    };
+    mockSelectUserRoleUseCase.execute.mockResolvedValue(authResponse);
+
+    const result = await controller.selectRole(user, dto);
+
+    expect(result).toBe(authResponse);
+    expect(mockSelectUserRoleUseCase.execute).toHaveBeenCalledWith(
+      'uuid-1',
+      dto,
+    );
+  });
+
+  it('should call DeleteAccountUseCase on deleteAccount (US-05)', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const dto = { password: 'Password123!' };
+    mockDeleteAccountUseCase.execute.mockResolvedValue({
+      message: 'Cuenta dada de baja exitosamente',
+    });
+
+    const result = await controller.deleteAccount(user, dto);
+
+    expect(result).toEqual({ message: 'Cuenta dada de baja exitosamente' });
+    expect(mockDeleteAccountUseCase.execute).toHaveBeenCalledWith(
+      'uuid-1',
       dto,
     );
   });

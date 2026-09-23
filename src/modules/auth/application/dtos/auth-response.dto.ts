@@ -13,4 +13,11 @@ export class AuthResponseDto {
 
   @ApiProperty({ description: 'JWT Refresh Token de larga duración' })
   refreshToken: string;
+
+  @ApiProperty({
+    description:
+      'Indica si el usuario fue registrado en este flujo de autenticación',
+    required: false,
+  })
+  isNewUser?: boolean;
 }

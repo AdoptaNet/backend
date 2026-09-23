@@ -1,16 +1,23 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { MediaModule } from '../media/media.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { UsersModule } from '../users/users.module';
 import { HashingService } from './application/interfaces/hashing.service';
 import { TokenService } from './application/interfaces/token.service';
+import { ForgotPasswordUseCase } from './application/use-cases/forgot-password.use-case';
 import { GoogleLoginUseCase } from './application/use-cases/google-login.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 import { RegisterUseCase } from './application/use-cases/register.use-case';
+import { ResendVerificationUseCase } from './application/use-cases/resend-verification.use-case';
+import { ResetPasswordUseCase } from './application/use-cases/reset-password.use-case';
+import { VerifyEmailUseCase } from './application/use-cases/verify-email.use-case';
 import { GoogleAuthGuard } from './infrastructure/guards/google-auth.guard';
 import { JwtAuthGuard } from './infrastructure/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from './infrastructure/guards/optional-jwt-auth.guard';
 import { RolesGuard } from './infrastructure/guards/roles.guard';
 import { BcryptHashingService } from './infrastructure/services/bcrypt-hashing.service';
 import { JwtTokenService } from './infrastructure/services/jwt-token.service';
@@ -23,6 +30,8 @@ import { AuthController } from './presentation/controllers/auth.controller';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
     forwardRef(() => UsersModule),
+    MediaModule,
+    NotificationsModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -31,9 +40,14 @@ import { AuthController } from './presentation/controllers/auth.controller';
     RefreshTokenUseCase,
     LogoutUseCase,
     GoogleLoginUseCase,
+    VerifyEmailUseCase,
+    ResendVerificationUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
     JwtStrategy,
     GoogleStrategy,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RolesGuard,
     GoogleAuthGuard,
     {
@@ -47,6 +61,7 @@ import { AuthController } from './presentation/controllers/auth.controller';
   ],
   exports: [
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RolesGuard,
     GoogleAuthGuard,
     PassportModule,

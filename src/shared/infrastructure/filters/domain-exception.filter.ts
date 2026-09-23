@@ -52,8 +52,15 @@ export class DomainExceptionFilter implements ExceptionFilter {
     ) {
       return HttpStatus.UNAUTHORIZED;
     }
-    if (name.includes('Forbidden') || name.includes('RoleMismatch')) {
+    if (
+      name.includes('Forbidden') ||
+      name.includes('RoleMismatch') ||
+      name.includes('EmailNotVerified')
+    ) {
       return HttpStatus.FORBIDDEN;
+    }
+    if (name.includes('RateLimit') || name.includes('TooManyRequests')) {
+      return HttpStatus.TOO_MANY_REQUESTS;
     }
 
     return HttpStatus.BAD_REQUEST;

@@ -24,4 +24,8 @@ export class ShelterProfileTypeOrmRepository extends ShelterProfileRepository {
   create(data: Partial<ShelterProfile>): ShelterProfile {
     return this.ormRepo.create(data);
   }
+
+  async deleteByUserId(userId: string): Promise<void> {
+    await this.ormRepo.delete({ userId });
+  }
 }

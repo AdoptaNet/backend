@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsInt,
@@ -7,77 +8,103 @@ import {
   IsString,
   IsUrl,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
+const emptyToNull = ({ value }: { value: unknown }) =>
+  typeof value === 'string' && value.trim() === '' ? null : value;
+
+const emptyOrNaNToNull = ({ value }: { value: unknown }) => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string' && value.trim() === '') return null;
+  const num = Number(value);
+  return isNaN(num) ? null : num;
+};
+
 export class UpdateShelterProfileDto {
-  @ApiProperty({ example: 'Albergue Patitas Felices', required: false })
+  @ApiPropertyOptional({ example: 'Albergue Patitas Felices' })
+  @Transform(emptyToNull)
   @IsString()
   @IsOptional()
-  organizationName?: string;
+  organizationName?: string | null;
 
-  @ApiProperty({ example: 'Av. Las Palmeras 123', required: false })
+  @ApiPropertyOptional({ example: 'Av. Las Palmeras 123' })
+  @Transform(emptyToNull)
   @IsString()
   @IsOptional()
-  address?: string;
+  address?: string | null;
 
-  @ApiProperty({ example: 'Miraflores', required: false })
+  @ApiPropertyOptional({ example: 'Miraflores' })
+  @Transform(emptyToNull)
   @IsString()
   @IsOptional()
-  city?: string;
+  city?: string | null;
 
-  @ApiProperty({ example: 'Lima', required: false })
+  @ApiPropertyOptional({ example: 'Lima' })
+  @Transform(emptyToNull)
   @IsString()
   @IsOptional()
-  department?: string;
+  department?: string | null;
 
-  @ApiProperty({ example: '+51999888777', required: false })
+  @ApiPropertyOptional({ example: '+51999888777' })
+  @Transform(emptyToNull)
   @IsString()
   @IsOptional()
-  phoneNumber?: string;
+  phoneNumber?: string | null;
 
-  @ApiProperty({ example: 'contacto@patitasfelices.pe', required: false })
+  @ApiPropertyOptional({ example: 'contacto@patitasfelices.pe' })
+  @Transform(emptyToNull)
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsEmail({}, { message: 'El correo de contacto no es válido' })
   @IsOptional()
-  contactEmail?: string;
+  contactEmail?: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example:
       'Albergue sin fines de lucro dedicado al rescate de perritos callejeros',
-    required: false,
   })
+  @Transform(emptyToNull)
   @IsString()
   @IsOptional()
-  description?: string;
+  description?: string | null;
 
-  @ApiProperty({ example: 30, required: false })
+  @ApiPropertyOptional({ example: 30 })
+  @Transform(emptyOrNaNToNull)
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsInt()
   @Min(0)
   @IsOptional()
-  rescueCapacity?: number;
+  rescueCapacity?: number | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://facebook.com/patitasfelices',
-    required: false,
   })
+  @Transform(emptyToNull)
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsUrl({}, { message: 'La URL de Facebook no es válida' })
   @IsOptional()
-  facebookUrl?: string;
+  facebookUrl?: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://instagram.com/patitasfelices',
-    required: false,
   })
+  @Transform(emptyToNull)
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsUrl({}, { message: 'La URL de Instagram no es válida' })
   @IsOptional()
-  instagramUrl?: string;
+  instagramUrl?: string | null;
 
-  @ApiProperty({ example: -12.046374, required: false })
+  @ApiPropertyOptional({ example: -12.046374 })
+  @Transform(emptyOrNaNToNull)
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsNumber()
   @IsOptional()
-  latitude?: number;
+  latitude?: number | null;
 
-  @ApiProperty({ example: -77.042793, required: false })
+  @ApiPropertyOptional({ example: -77.042793 })
+  @Transform(emptyOrNaNToNull)
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsNumber()
   @IsOptional()
-  longitude?: number;
+  longitude?: number | null;
 }
