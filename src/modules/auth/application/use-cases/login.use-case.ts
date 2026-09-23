@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
+import { EmailNotVerifiedException } from '../../domain/exceptions/email-not-verified.exception';
 import { InvalidCredentialsException } from '../../domain/exceptions/invalid-credentials.exception';
 import { AuthResponseDto } from '../dtos/auth-response.dto';
 import { LoginDto } from '../dtos/login.dto';
@@ -18,7 +19,9 @@ export class LoginUseCase {
     const user = await this.userRepository.findByEmail(
       dto.email.toLowerCase().trim(),
     );
-    if (!user || !user.passwordHash) {
+
+    // US-03 Escenario 2: Denegación de acceso si cuenta no existe, inactiva o dada de baja
+    if (!user || !user.passwordHash || !user.isActive || user.deletedAt) {
       throw new InvalidCredentialsException();
     }
 
@@ -28,6 +31,13 @@ export class LoginUseCase {
     );
     if (!isPasswordValid) {
       throw new InvalidCredentialsException();
+    }
+
+    // US-01 Escenario 4: Bloqueo de inicio de sesión si el correo no está verificado (403)
+    if (!user.isEmailVerified) {
+      throw new EmailNotVerifiedException(
+        'Debe verificar su correo electrónico antes de ingresar',
+      );
     }
 
     const tokens = await this.tokenService.generateTokens({
@@ -46,6 +56,7 @@ export class LoginUseCase {
         fullName: user.fullName,
         avatarUrl: user.avatarUrl,
         role: user.role,
+        roleSelected: user.roleSelected,
         createdAt: user.createdAt,
       },
       accessToken: tokens.accessToken,

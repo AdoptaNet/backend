@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
+import { EmailNotVerifiedException } from '../../domain/exceptions/email-not-verified.exception';
 import { InvalidCredentialsException } from '../../domain/exceptions/invalid-credentials.exception';
 import { HashingService } from '../interfaces/hashing.service';
 import { TokenService } from '../interfaces/token.service';
@@ -48,6 +49,7 @@ describe('LoginUseCase', () => {
     const googleUser = new User();
     googleUser.email = 'google@example.com';
     googleUser.passwordHash = null;
+    googleUser.isActive = true;
     mockUserRepository.findByEmail.mockResolvedValue(googleUser);
 
     await expect(
@@ -55,10 +57,36 @@ describe('LoginUseCase', () => {
     ).rejects.toThrow(InvalidCredentialsException);
   });
 
+  it('should throw InvalidCredentialsException if account is inactive (is_active = false)', async () => {
+    const inactiveUser = new User();
+    inactiveUser.email = 'inactive@example.com';
+    inactiveUser.passwordHash = 'hash';
+    inactiveUser.isActive = false;
+    mockUserRepository.findByEmail.mockResolvedValue(inactiveUser);
+
+    await expect(
+      useCase.execute({ email: 'inactive@example.com', password: 'Pass' }),
+    ).rejects.toThrow(InvalidCredentialsException);
+  });
+
+  it('should throw InvalidCredentialsException if account was soft deleted', async () => {
+    const deletedUser = new User();
+    deletedUser.email = 'deleted@example.com';
+    deletedUser.passwordHash = 'hash';
+    deletedUser.isActive = true;
+    deletedUser.deletedAt = new Date();
+    mockUserRepository.findByEmail.mockResolvedValue(deletedUser);
+
+    await expect(
+      useCase.execute({ email: 'deleted@example.com', password: 'Pass' }),
+    ).rejects.toThrow(InvalidCredentialsException);
+  });
+
   it('should throw InvalidCredentialsException if password does not match', async () => {
     const user = new User();
     user.email = 'user@example.com';
     user.passwordHash = 'hash';
+    user.isActive = true;
     mockUserRepository.findByEmail.mockResolvedValue(user);
     mockHashingService.compare.mockResolvedValue(false);
 
@@ -67,12 +95,33 @@ describe('LoginUseCase', () => {
     ).rejects.toThrow(InvalidCredentialsException);
   });
 
-  it('should return tokens and user profile on successful login', async () => {
+  it('should throw EmailNotVerifiedException (403) if email is not verified', async () => {
+    const unverifiedUser = new User();
+    unverifiedUser.email = 'unverified@example.com';
+    unverifiedUser.passwordHash = 'hash';
+    unverifiedUser.isActive = true;
+    unverifiedUser.isEmailVerified = false;
+
+    mockUserRepository.findByEmail.mockResolvedValue(unverifiedUser);
+    mockHashingService.compare.mockResolvedValue(true);
+
+    await expect(
+      useCase.execute({
+        email: 'unverified@example.com',
+        password: 'Password123!',
+      }),
+    ).rejects.toThrow(EmailNotVerifiedException);
+  });
+
+  it('should return tokens and user profile on successful login when verified and active', async () => {
     const user = new User();
     user.id = 'uuid-1';
     user.email = 'user@example.com';
     user.passwordHash = 'hash';
     user.role = UserRole.ADOPTER;
+    user.roleSelected = true;
+    user.isActive = true;
+    user.isEmailVerified = true;
     user.createdAt = new Date();
 
     mockUserRepository.findByEmail.mockResolvedValue(user);

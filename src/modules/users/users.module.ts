@@ -2,7 +2,9 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { MediaModule } from '../media/media.module';
+import { PetsModule } from '../pets/pets.module';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
+import { DeleteAccountUseCase } from './application/use-cases/delete-account.use-case';
 import { DeleteAvatarUseCase } from './application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-case';
 import { SelectUserRoleUseCase } from './application/use-cases/select-user-role.use-case';
@@ -25,6 +27,7 @@ import { UsersController } from './presentation/controllers/users.controller';
   imports: [
     TypeOrmModule.forFeature([User, AdopterProfile, ShelterProfile]),
     forwardRef(() => AuthModule),
+    forwardRef(() => PetsModule),
     MediaModule,
   ],
   controllers: [UsersController],
@@ -49,6 +52,7 @@ import { UsersController } from './presentation/controllers/users.controller';
     UpdateAdopterProfileUseCase,
     UpdateShelterProfileUseCase,
     SelectUserRoleUseCase,
+    DeleteAccountUseCase,
   ],
   exports: [
     UserRepository,
@@ -56,6 +60,7 @@ import { UsersController } from './presentation/controllers/users.controller';
     ShelterProfileRepository,
     GetMyProfileUseCase,
     SelectUserRoleUseCase,
+    DeleteAccountUseCase,
   ],
 })
 export class UsersModule {}

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../domain/entities/user.entity';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
+import { DeleteAccountUseCase } from '../../application/use-cases/delete-account.use-case';
 import { DeleteAvatarUseCase } from '../../application/use-cases/delete-avatar.use-case';
 import { GetMyProfileUseCase } from '../../application/use-cases/get-my-profile.use-case';
 import { SelectUserRoleUseCase } from '../../application/use-cases/select-user-role.use-case';
@@ -21,6 +22,7 @@ describe('UsersController', () => {
   const mockUpdateAdopterProfileUseCase = { execute: jest.fn() };
   const mockUpdateShelterProfileUseCase = { execute: jest.fn() };
   const mockSelectUserRoleUseCase = { execute: jest.fn() };
+  const mockDeleteAccountUseCase = { execute: jest.fn() };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -44,6 +46,10 @@ describe('UsersController', () => {
         {
           provide: SelectUserRoleUseCase,
           useValue: mockSelectUserRoleUseCase,
+        },
+        {
+          provide: DeleteAccountUseCase,
+          useValue: mockDeleteAccountUseCase,
         },
       ],
     }).compile();
@@ -173,6 +179,7 @@ describe('UsersController', () => {
         fullName: null,
         avatarUrl: null,
         role: UserRole.SHELTER,
+        roleSelected: true,
         createdAt: new Date(),
       },
       accessToken: 'acc-token',
@@ -184,6 +191,23 @@ describe('UsersController', () => {
 
     expect(result).toBe(authResponse);
     expect(mockSelectUserRoleUseCase.execute).toHaveBeenCalledWith(
+      'uuid-1',
+      dto,
+    );
+  });
+
+  it('should call DeleteAccountUseCase on deleteAccount (US-05)', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    const dto = { password: 'Password123!' };
+    mockDeleteAccountUseCase.execute.mockResolvedValue({
+      message: 'Cuenta dada de baja exitosamente',
+    });
+
+    const result = await controller.deleteAccount(user, dto);
+
+    expect(result).toEqual({ message: 'Cuenta dada de baja exitosamente' });
+    expect(mockDeleteAccountUseCase.execute).toHaveBeenCalledWith(
       'uuid-1',
       dto,
     );

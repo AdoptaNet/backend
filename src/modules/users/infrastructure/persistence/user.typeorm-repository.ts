@@ -35,6 +35,18 @@ export class UserTypeOrmRepository extends UserRepository {
     return this.ormRepo.findOne({ where: { googleId } });
   }
 
+  async findByVerificationTokenHash(hash: string): Promise<User | null> {
+    return this.ormRepo.findOne({
+      where: { emailVerificationTokenHash: hash },
+    });
+  }
+
+  async findByPasswordResetTokenHash(hash: string): Promise<User | null> {
+    return this.ormRepo.findOne({
+      where: { passwordResetTokenHash: hash },
+    });
+  }
+
   async save(user: User): Promise<User> {
     return this.ormRepo.save(user);
   }

@@ -25,6 +25,12 @@ export class UserResponseDto {
   })
   roleSelected?: boolean;
 
+  @ApiProperty({
+    description: 'Indica si el usuario tiene una contraseña local establecida',
+    default: true,
+  })
+  hasPassword?: boolean;
+
   @ApiProperty({ description: 'Account creation date' })
   createdAt: Date;
 
