@@ -35,6 +35,13 @@ export interface SendPasswordResetData {
   resetUrl: string;
 }
 
+export interface SendShelterVerificationData {
+  userId?: string;
+  organizationName?: string | null;
+  isVerified: boolean;
+  shelterUrl: string;
+}
+
 /**
  * Contrato abstracto del servicio de correo electrónico (Clean Architecture).
  * Desacopla la lógica de negocio de la implementación de despacho (Resend, etc.).
@@ -53,5 +60,9 @@ export abstract class EmailService {
   abstract sendPasswordResetEmail(
     to: string,
     data: SendPasswordResetData,
+  ): Promise<SendEmailResult>;
+  abstract sendShelterVerificationEmail(
+    to: string,
+    data: SendShelterVerificationData,
   ): Promise<SendEmailResult>;
 }

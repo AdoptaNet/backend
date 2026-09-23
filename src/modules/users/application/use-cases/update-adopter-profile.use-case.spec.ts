@@ -13,6 +13,8 @@ import {
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 import { UpdateAdopterProfileUseCase } from './update-adopter-profile.use-case';
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 describe('UpdateAdopterProfileUseCase', () => {
   let useCase: UpdateAdopterProfileUseCase;
   const mockUserRepository = {
@@ -22,6 +24,9 @@ describe('UpdateAdopterProfileUseCase', () => {
     findByUserId: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+  };
+  const mockEventEmitter = {
+    emit: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -34,6 +39,10 @@ describe('UpdateAdopterProfileUseCase', () => {
         {
           provide: AdopterProfileRepository,
           useValue: mockAdopterProfileRepository,
+        },
+        {
+          provide: EventEmitter2,
+          useValue: mockEventEmitter,
         },
       ],
     }).compile();
