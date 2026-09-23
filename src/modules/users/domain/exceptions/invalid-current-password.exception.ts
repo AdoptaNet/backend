@@ -1,7 +1,7 @@
 import { DomainException } from '../../../../shared/domain/exceptions/domain.exception';
 
 export class InvalidCurrentPasswordException extends DomainException {
-  constructor() {
-    super('La contraseña actual ingresada es incorrecta');
+  constructor(message = 'La contraseña actual ingresada es incorrecta') {
+    super(message);
   }
 }

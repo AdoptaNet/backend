@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HashingService } from '../../../auth/application/interfaces/hashing.service';
 import { User } from '../../domain/entities/user.entity';
 import { InvalidCurrentPasswordException } from '../../domain/exceptions/invalid-current-password.exception';
-import { PasswordNotSetException } from '../../domain/exceptions/password-not-set.exception';
 import { UserNotFoundException } from '../../domain/exceptions/user-not-found.exception';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { ChangePasswordUseCase } from './change-password.use-case';
@@ -43,19 +42,36 @@ describe('ChangePasswordUseCase', () => {
     ).rejects.toThrow(UserNotFoundException);
   });
 
-  it('should throw PasswordNotSetException if user registered with Google and has no password', async () => {
+  it('should allow setting password directly for Google users without prior password (US-04 Escenario 4)', async () => {
     const googleUser = new User();
     googleUser.id = 'uuid-google';
     googleUser.passwordHash = null;
 
     mockUserRepository.findById.mockResolvedValue(googleUser);
+    mockHashingService.hash.mockResolvedValue('new-hashed-password');
+
+    const result = await useCase.execute('uuid-google', {
+      newPassword: 'newPassword123!',
+    });
+
+    expect(googleUser.passwordHash).toBe('new-hashed-password');
+    expect(googleUser.refreshTokenHash).toBeNull();
+    expect(mockUserRepository.save).toHaveBeenCalledWith(googleUser);
+    expect(result).toEqual({ message: 'Contraseña actualizada exitosamente' });
+  });
+
+  it('should throw InvalidCurrentPasswordException if current password is missing on password account', async () => {
+    const user = new User();
+    user.id = 'uuid-1';
+    user.passwordHash = 'stored-hash';
+
+    mockUserRepository.findById.mockResolvedValue(user);
 
     await expect(
-      useCase.execute('uuid-google', {
-        currentPassword: 'any',
+      useCase.execute('uuid-1', {
         newPassword: 'newPassword123!',
       }),
-    ).rejects.toThrow(PasswordNotSetException);
+    ).rejects.toThrow(InvalidCurrentPasswordException);
   });
 
   it('should throw InvalidCurrentPasswordException if current password does not match', async () => {
@@ -74,10 +90,11 @@ describe('ChangePasswordUseCase', () => {
     ).rejects.toThrow(InvalidCurrentPasswordException);
   });
 
-  it('should hash new password and update user when current password is valid', async () => {
+  it('should hash new password, revoke active sessions and update user when current password is valid', async () => {
     const user = new User();
     user.id = 'uuid-1';
     user.passwordHash = 'stored-hash';
+    user.refreshTokenHash = 'old-session';
 
     mockUserRepository.findById.mockResolvedValue(user);
     mockHashingService.compare.mockResolvedValue(true);
@@ -89,6 +106,7 @@ describe('ChangePasswordUseCase', () => {
     });
 
     expect(user.passwordHash).toBe('new-hash-123');
+    expect(user.refreshTokenHash).toBeNull();
     expect(mockUserRepository.save).toHaveBeenCalledWith(user);
     expect(result).toEqual({ message: 'Contraseña actualizada exitosamente' });
   });

@@ -23,6 +23,18 @@ export interface SendWelcomeEmailData {
   role: UserRole;
 }
 
+export interface SendEmailVerificationData {
+  userId?: string;
+  fullName?: string | null;
+  verificationUrl: string;
+}
+
+export interface SendPasswordResetData {
+  userId?: string;
+  fullName?: string | null;
+  resetUrl: string;
+}
+
 /**
  * Contrato abstracto del servicio de correo electrónico (Clean Architecture).
  * Desacopla la lógica de negocio de la implementación de despacho (Resend, etc.).
@@ -33,5 +45,13 @@ export abstract class EmailService {
   abstract sendWelcomeEmail(
     to: string,
     data: SendWelcomeEmailData,
+  ): Promise<SendEmailResult>;
+  abstract sendEmailVerification(
+    to: string,
+    data: SendEmailVerificationData,
+  ): Promise<SendEmailResult>;
+  abstract sendPasswordResetEmail(
+    to: string,
+    data: SendPasswordResetData,
   ): Promise<SendEmailResult>;
 }

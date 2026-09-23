@@ -20,6 +20,7 @@ export class GetMyProfileUseCase {
       avatarUrl: user.avatarUrl,
       role: user.role,
       roleSelected: user.roleSelected,
+      hasPassword: Boolean(user.passwordHash),
       createdAt: user.createdAt,
       adopterProfile: user.adopterProfile
         ? {

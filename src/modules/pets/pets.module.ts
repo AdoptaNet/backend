@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
@@ -16,7 +16,11 @@ import { PetTypeOrmRepository } from './infrastructure/persistence/pet.typeorm-r
 import { PetsController } from './presentation/controllers/pets.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Pet, PetPhoto]), UsersModule, AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([Pet, PetPhoto]),
+    forwardRef(() => UsersModule),
+    AuthModule,
+  ],
   controllers: [PetsController],
   providers: [
     {
