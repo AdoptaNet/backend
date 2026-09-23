@@ -27,6 +27,7 @@ export class GetMyProfileUseCase {
             id: user.adopterProfile.id,
             userId: user.adopterProfile.userId,
             department: user.adopterProfile.department,
+            city: user.adopterProfile.city,
             zoneType: user.adopterProfile.zoneType,
             housingType: user.adopterProfile.housingType,
             outdoorSpace: user.adopterProfile.outdoorSpace,
@@ -59,6 +60,8 @@ export class GetMyProfileUseCase {
             followUpAcceptance: user.adopterProfile.followUpAcceptance,
             adopterAgeRange: user.adopterProfile.adopterAgeRange,
             phoneNumber: user.adopterProfile.phoneNumber,
+            isSurveyCompleted: user.adopterProfile.isSurveyCompleted ?? false,
+            compatibilityData: user.adopterProfile.compatibilityData,
             createdAt: user.adopterProfile.createdAt,
             updatedAt: user.adopterProfile.updatedAt,
           }

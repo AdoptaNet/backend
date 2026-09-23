@@ -15,6 +15,15 @@ describe('AuthNotificationListener', () => {
       sendWelcomeEmail: jest
         .fn()
         .mockResolvedValue({ id: 'msg-1', success: true }),
+      sendEmailVerification: jest
+        .fn()
+        .mockResolvedValue({ id: 'msg-2', success: true }),
+      sendPasswordResetEmail: jest
+        .fn()
+        .mockResolvedValue({ id: 'msg-3', success: true }),
+      sendShelterVerificationEmail: jest
+        .fn()
+        .mockResolvedValue({ id: 'msg-4', success: true }),
     };
 
     const module: TestingModule = await Test.createTestingModule({

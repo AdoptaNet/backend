@@ -23,7 +23,7 @@ export class UserTypeOrmRepository extends UserRepository {
 
   async findByIdWithProfile(id: string): Promise<User | null> {
     return this.ormRepo.findOne({
-      where: { id },
+      where: [{ id }, { shelterProfile: { id } }],
       relations: {
         adopterProfile: true,
         shelterProfile: true,

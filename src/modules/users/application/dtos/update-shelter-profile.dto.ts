@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Matches,
   Min,
   ValidateIf,
 } from 'class-validator';
@@ -48,7 +49,12 @@ export class UpdateShelterProfileDto {
 
   @ApiPropertyOptional({ example: '+51999888777' })
   @Transform(emptyToNull)
+  @ValidateIf((_, val) => val !== null && val !== undefined)
   @IsString()
+  @Matches(/^(\+?51)?9\d{8}$/, {
+    message:
+      'El número telefónico debe ser un celular válido de Perú (9 dígitos, ej: 999888777 o +51999888777)',
+  })
   @IsOptional()
   phoneNumber?: string | null;
 

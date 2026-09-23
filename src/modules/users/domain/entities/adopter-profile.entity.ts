@@ -137,7 +137,17 @@ export class AdopterProfile extends AuditableEntity {
   @Column({ type: 'enum', enum: AdopterAgeRange, nullable: true })
   adopterAgeRange: AdopterAgeRange | null;
 
-  // Contact
+  // Contact & Location
   @Column({ type: 'varchar', nullable: true })
   phoneNumber: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  city: string | null;
+
+  // Survey status & ML structured payload
+  @Column({ type: 'boolean', default: false })
+  isSurveyCompleted: boolean;
+
+  @Column({ type: 'jsonb', nullable: true })
+  compatibilityData: Record<string, any> | null;
 }
