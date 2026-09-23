@@ -12,6 +12,7 @@ import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-c
 import { RegisterUseCase } from './application/use-cases/register.use-case';
 import { GoogleAuthGuard } from './infrastructure/guards/google-auth.guard';
 import { JwtAuthGuard } from './infrastructure/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from './infrastructure/guards/optional-jwt-auth.guard';
 import { RolesGuard } from './infrastructure/guards/roles.guard';
 import { BcryptHashingService } from './infrastructure/services/bcrypt-hashing.service';
 import { JwtTokenService } from './infrastructure/services/jwt-token.service';
@@ -36,6 +37,7 @@ import { AuthController } from './presentation/controllers/auth.controller';
     JwtStrategy,
     GoogleStrategy,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RolesGuard,
     GoogleAuthGuard,
     {
@@ -49,6 +51,7 @@ import { AuthController } from './presentation/controllers/auth.controller';
   ],
   exports: [
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RolesGuard,
     GoogleAuthGuard,
     PassportModule,

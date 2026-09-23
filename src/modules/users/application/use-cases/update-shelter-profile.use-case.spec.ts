@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { ShelterProfile } from '../../domain/entities/shelter-profile.entity';
 import { User } from '../../domain/entities/user.entity';
 import { RoleMismatchException } from '../../domain/exceptions/role-mismatch.exception';
@@ -6,6 +8,7 @@ import { UserNotFoundException } from '../../domain/exceptions/user-not-found.ex
 import { ShelterProfileRepository } from '../../domain/repositories/shelter-profile.repository';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
+import { UpdateShelterProfileDto } from '../dtos/update-shelter-profile.dto';
 import { UpdateShelterProfileUseCase } from './update-shelter-profile.use-case';
 
 describe('UpdateShelterProfileUseCase', () => {
@@ -125,5 +128,22 @@ describe('UpdateShelterProfileUseCase', () => {
     expect(mockShelterProfileRepository.save).toHaveBeenCalledWith(
       existingProfile,
     );
+  });
+
+  it('should transform empty strings to null and pass validation in UpdateShelterProfileDto', async () => {
+    const rawData = {
+      organizationName: 'Albergue Patitas',
+      contactEmail: '',
+      facebookUrl: '',
+      instagramUrl: '',
+      rescueCapacity: '',
+    };
+    const dto = plainToInstance(UpdateShelterProfileDto, rawData);
+    const errors = await validate(dto);
+    expect(errors.length).toBe(0);
+    expect(dto.contactEmail).toBeNull();
+    expect(dto.facebookUrl).toBeNull();
+    expect(dto.instagramUrl).toBeNull();
+    expect(dto.rescueCapacity).toBeNull();
   });
 });
