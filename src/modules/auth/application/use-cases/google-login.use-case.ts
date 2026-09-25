@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
-import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { AuthResponseDto } from '../dtos/auth-response.dto';
 import { HashingService } from '../interfaces/hashing.service';
 import { TokenService } from '../interfaces/token.service';
@@ -21,7 +19,6 @@ export class GoogleLoginUseCase {
     private readonly userRepository: UserRepository,
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(profile: GoogleUserProfile): Promise<AuthResponseDto> {
@@ -78,18 +75,6 @@ export class GoogleLoginUseCase {
       tokens.refreshToken,
     );
     await this.userRepository.save(savedUser);
-
-    if (isNewUser) {
-      this.eventEmitter.emit(
-        UserRegisteredEvent.EVENT_NAME,
-        new UserRegisteredEvent(
-          savedUser.id,
-          savedUser.email,
-          savedUser.fullName,
-          savedUser.role,
-        ),
-      );
-    }
 
     return {
       user: {

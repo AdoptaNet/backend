@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
+import { MediaModule } from '../media/media.module';
 import { UsersModule } from '../users/users.module';
 import { CreatePetUseCase } from './application/use-cases/create-pet.use-case';
 import { DeletePetUseCase } from './application/use-cases/delete-pet.use-case';
@@ -19,7 +20,8 @@ import { PetsController } from './presentation/controllers/pets.controller';
   imports: [
     TypeOrmModule.forFeature([Pet, PetPhoto]),
     forwardRef(() => UsersModule),
-    AuthModule,
+    forwardRef(() => AuthModule),
+    MediaModule,
   ],
   controllers: [PetsController],
   providers: [

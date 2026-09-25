@@ -35,7 +35,6 @@ describe('GoogleLoginUseCase', () => {
         { provide: UserRepository, useValue: mockUserRepository },
         { provide: HashingService, useValue: mockHashingService },
         { provide: TokenService, useValue: mockTokenService },
-        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -79,13 +78,6 @@ describe('GoogleLoginUseCase', () => {
         email: 'newgoogle@example.com',
         roleSelected: false,
         isEmailVerified: true,
-      }),
-    );
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-      UserRegisteredEvent.EVENT_NAME,
-      expect.objectContaining({
-        email: 'newgoogle@example.com',
-        role: UserRole.ADOPTER,
       }),
     );
   });

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthResponseDto } from '../../../auth/application/dtos/auth-response.dto';
 import { HashingService } from '../../../auth/application/interfaces/hashing.service';
 import { TokenService } from '../../../auth/application/interfaces/token.service';
+import { UserRegisteredEvent } from '../../../auth/domain/events/user-registered.event';
 import { AdopterProfile } from '../../domain/entities/adopter-profile.entity';
 import { ShelterProfile } from '../../domain/entities/shelter-profile.entity';
 import { RoleChangeNotAllowedException } from '../../domain/exceptions/role-change-not-allowed.exception';
@@ -20,6 +22,7 @@ export class SelectUserRoleUseCase {
     private readonly shelterProfileRepository: ShelterProfileRepository,
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(
@@ -97,6 +100,16 @@ export class SelectUserRoleUseCase {
 
     user.refreshTokenHash = await this.hashingService.hash(tokens.refreshToken);
     const savedUser = await this.userRepository.save(user);
+
+    this.eventEmitter.emit(
+      UserRegisteredEvent.EVENT_NAME,
+      new UserRegisteredEvent(
+        savedUser.id,
+        savedUser.email,
+        savedUser.fullName ?? null,
+        savedUser.role,
+      ),
+    );
 
     return {
       user: {
