@@ -8,12 +8,18 @@ import {
   SendEmailOptions,
   SendEmailResult,
   SendWelcomeEmailData,
+  SendEmailVerificationData,
+  SendPasswordResetData,
+  SendShelterVerificationData,
 } from '../../application/interfaces/email.service';
 import { NotificationRepository } from '../../domain/repositories/notification.repository';
 import { NotificationChannel } from '../../domain/value-objects/notification-channel.enum';
 import { NotificationStatus } from '../../domain/value-objects/notification-status.enum';
 import { NotificationType } from '../../domain/value-objects/notification-type.enum';
 import { WelcomeEmailTemplate } from '../../presentation/templates/welcome-email.template';
+import { EmailVerificationTemplate } from '../../presentation/templates/email-verification.template';
+import { PasswordResetTemplate } from '../../presentation/templates/password-reset.template';
+import { ShelterVerificationTemplate } from '../../presentation/templates/shelter-verification.template';
 
 @Injectable()
 export class ResendEmailService implements EmailService {
@@ -166,4 +172,74 @@ export class ResendEmailService implements EmailService {
       metadata: { role: data.role },
     });
   }
+
+  /**
+   * Envía el correo de verificación para activar la cuenta de un usuario recién registrado (US-01).
+   */
+  async sendEmailVerification(
+    to: string,
+    data: SendEmailVerificationData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(EmailVerificationTemplate, {
+      fullName: data.fullName,
+      verificationUrl: data.verificationUrl,
+    });
+
+    return await this.sendEmail({
+      to,
+      subject: '✉️ Confirma tu correo para activar tu cuenta en Adoptanet',
+      template,
+      userId: data.userId,
+      type: NotificationType.EMAIL_VERIFICATION,
+    });
+  }
+
+  /**
+   * Envía el correo con enlace seguro para restablecer la contraseña (US-04).
+   */
+  async sendPasswordResetEmail(
+    to: string,
+    data: SendPasswordResetData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(PasswordResetTemplate, {
+      fullName: data.fullName,
+      resetUrl: data.resetUrl,
+    });
+
+    return await this.sendEmail({
+      to,
+      subject: '🔑 Restablece tu contraseña en Adoptanet',
+      template,
+      userId: data.userId,
+      type: NotificationType.PASSWORD_RESET,
+    });
+  }
+
+  /**
+   * Envía la notificación de verificación o acreditación oficial a un albergue (US-08).
+   */
+  async sendShelterVerificationEmail(
+    to: string,
+    data: SendShelterVerificationData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(ShelterVerificationTemplate, {
+      organizationName: data.organizationName,
+      isVerified: data.isVerified,
+      shelterUrl: data.shelterUrl,
+    });
+
+    const subject = data.isVerified
+      ? '🎉 ¡Tu albergue ha sido verificado en AdoptaNet!'
+      : 'ℹ️ Actualización del estado de verificación de tu albergue';
+
+    return await this.sendEmail({
+      to,
+      subject,
+      template,
+      userId: data.userId,
+      type: NotificationType.SHELTER_VERIFIED,
+      metadata: { isVerified: data.isVerified },
+    });
+  }
 }
+

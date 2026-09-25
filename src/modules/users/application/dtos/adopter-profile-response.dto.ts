@@ -40,6 +40,9 @@ export class AdopterProfileResponseDto {
   @ApiProperty({ description: 'Departamento del Perú', nullable: true })
   department: string | null;
 
+  @ApiProperty({ description: 'Ciudad o distrito del adoptante', nullable: true })
+  city: string | null;
+
   @ApiProperty({ enum: ZoneType, description: 'Tipo de zona', nullable: true })
   zoneType: ZoneType | null;
 
@@ -242,6 +245,18 @@ export class AdopterProfileResponseDto {
 
   @ApiProperty({ description: 'Teléfono de contacto', nullable: true })
   phoneNumber: string | null;
+
+  @ApiProperty({
+    description: 'Indica si completó el cuestionario de compatibilidad ML',
+    example: true,
+  })
+  isSurveyCompleted: boolean;
+
+  @ApiProperty({
+    description: 'Documento JSONB con las variables estructuradas para el motor ML',
+    nullable: true,
+  })
+  compatibilityData?: Record<string, any> | null;
 
   @ApiProperty({ description: 'Fecha de creación' })
   createdAt: Date;

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 import {
   ActivityLevel,
   AdopterAgeRange,
@@ -40,6 +40,15 @@ export class UpdateAdopterProfileDto {
   @IsString()
   @IsOptional()
   department?: string;
+
+  @ApiProperty({
+    example: 'Miraflores',
+    description: 'Ciudad o distrito del adoptante',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  city?: string;
 
   @ApiProperty({ enum: ZoneType, required: false })
   @IsEnum(ZoneType)
@@ -197,5 +206,9 @@ export class UpdateAdopterProfileDto {
   @ApiProperty({ example: '+51987654321', required: false })
   @IsString()
   @IsOptional()
+  @Matches(/^(\+?51)?9\d{8}$/, {
+    message:
+      'El número telefónico debe ser un celular válido de Perú (9 dígitos, ej: 987654321 o +51987654321)',
+  })
   phoneNumber?: string;
 }
