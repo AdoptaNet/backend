@@ -23,7 +23,7 @@ export class UserTypeOrmRepository extends UserRepository {
 
   async findByIdWithProfile(id: string): Promise<User | null> {
     return this.ormRepo.findOne({
-      where: { id },
+      where: [{ id }, { shelterProfile: { id } }],
       relations: {
         adopterProfile: true,
         shelterProfile: true,
@@ -33,6 +33,18 @@ export class UserTypeOrmRepository extends UserRepository {
 
   async findByGoogleId(googleId: string): Promise<User | null> {
     return this.ormRepo.findOne({ where: { googleId } });
+  }
+
+  async findByVerificationTokenHash(hash: string): Promise<User | null> {
+    return this.ormRepo.findOne({
+      where: { emailVerificationTokenHash: hash },
+    });
+  }
+
+  async findByPasswordResetTokenHash(hash: string): Promise<User | null> {
+    return this.ormRepo.findOne({
+      where: { passwordResetTokenHash: hash },
+    });
   }
 
   async save(user: User): Promise<User> {

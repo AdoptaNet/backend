@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { User } from '../../../users/domain/entities/user.entity';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 import { PetPhoto } from '../../domain/entities/pet-photo.entity';
 import { Pet } from '../../domain/entities/pet.entity';
+import { PetCreatedEvent } from '../../domain/events/pet-created.event';
 import { InvalidPhotoCountException } from '../../domain/exceptions/invalid-photo-count.exception';
 import { PetAccessForbiddenException } from '../../domain/exceptions/pet-access-forbidden.exception';
 import { ShelterProfileIncompleteException } from '../../domain/exceptions/shelter-profile-incomplete.exception';
@@ -21,6 +23,7 @@ export class CreatePetUseCase {
   constructor(
     private readonly petRepository: PetRepository,
     private readonly shelterProfileRepository: ShelterProfileRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(user: User, dto: CreatePetDto): Promise<PetResponseDto> {
@@ -43,9 +46,9 @@ export class CreatePetUseCase {
       throw new ShelterProfileIncompleteException();
     }
 
-    if (!dto.photos || dto.photos.length < 1 || dto.photos.length > 6) {
+    if (!dto.photos || dto.photos.length < 3 || dto.photos.length > 6) {
       throw new InvalidPhotoCountException(
-        'Debe incluir entre 1 y 6 fotografías',
+        'Debe incluir entre 3 y 6 fotografías',
       );
     }
 
@@ -93,6 +96,17 @@ export class CreatePetUseCase {
     });
 
     const savedPet = await this.petRepository.save(pet);
+
+    this.eventEmitter.emit(
+      'pet.created',
+      new PetCreatedEvent(
+        savedPet.id,
+        savedPet.shelterId,
+        savedPet.species,
+        savedPet.status,
+      ),
+    );
+
     return PetResponseDto.fromEntity(savedPet, shelterProfile);
   }
 }

@@ -1,6 +1,8 @@
+import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UploadImageUseCase } from '../../../media/application/use-cases/upload-image.use-case';
+import { EmailService } from '../../../notifications/application/interfaces/email.service';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { User } from '../../../users/domain/entities/user.entity';
@@ -9,7 +11,6 @@ import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { EmailAlreadyInUseException } from '../../domain/exceptions/email-already-in-use.exception';
 import { HashingService } from '../interfaces/hashing.service';
-import { TokenService } from '../interfaces/token.service';
 import { RegisterUseCase } from './register.use-case';
 
 describe('RegisterUseCase', () => {
@@ -36,9 +37,11 @@ describe('RegisterUseCase', () => {
     hash: jest.fn(),
     compare: jest.fn(),
   };
-  const mockTokenService = {
-    generateTokens: jest.fn(),
-    verifyRefreshToken: jest.fn(),
+  const mockEmailService = {
+    sendEmailVerification: jest.fn(),
+  };
+  const mockConfigService = {
+    get: jest.fn().mockReturnValue('http://localhost:3001'),
   };
   const mockUploadImageUseCase = {
     execute: jest.fn(),
@@ -60,9 +63,9 @@ describe('RegisterUseCase', () => {
           useValue: mockShelterProfileRepository,
         },
         { provide: HashingService, useValue: mockHashingService },
-        { provide: TokenService, useValue: mockTokenService },
+        { provide: EmailService, useValue: mockEmailService },
+        { provide: ConfigService, useValue: mockConfigService },
         { provide: UploadImageUseCase, useValue: mockUploadImageUseCase },
-        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -80,16 +83,15 @@ describe('RegisterUseCase', () => {
     ).rejects.toThrow(EmailAlreadyInUseException);
   });
 
-  it('should register a new adopter user and create initial adopter profile', async () => {
+  it('should register a new adopter user with isEmailVerified=false and send verification email', async () => {
     mockUserRepository.findByEmail.mockResolvedValue(null);
-    mockHashingService.hash
-      .mockResolvedValueOnce('hashed-password')
-      .mockResolvedValueOnce('hashed-refresh-token');
+    mockHashingService.hash.mockResolvedValueOnce('hashed-password');
 
     const createdUser = new User();
     createdUser.email = 'test@example.com';
     createdUser.passwordHash = 'hashed-password';
     createdUser.role = UserRole.ADOPTER;
+    createdUser.isEmailVerified = false;
 
     const savedUser = new User();
     Object.assign(savedUser, createdUser, {
@@ -104,10 +106,7 @@ describe('RegisterUseCase', () => {
       id: 'prof-1',
       userId: 'uuid-1',
     });
-    mockTokenService.generateTokens.mockResolvedValue({
-      accessToken: 'access-123',
-      refreshToken: 'refresh-123',
-    });
+    mockEmailService.sendEmailVerification.mockResolvedValue({ success: true });
 
     const result = await useCase.execute({
       email: 'test@example.com',
@@ -115,27 +114,31 @@ describe('RegisterUseCase', () => {
       fullName: 'Test User',
     });
 
-    expect(result.accessToken).toBe('access-123');
-    expect(result.refreshToken).toBe('refresh-123');
-    expect(result.user.email).toBe('test@example.com');
+    expect(result.message).toContain('verifica tu correo');
+    expect(result.email).toBe('test@example.com');
+    expect(mockUserRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isEmailVerified: false,
+        roleSelected: true,
+        emailVerificationTokenHash: expect.any(String),
+        emailVerificationExpiresAt: expect.any(Date),
+      }),
+    );
+    expect(mockEmailService.sendEmailVerification).toHaveBeenCalledWith(
+      'test@example.com',
+      expect.objectContaining({
+        userId: 'uuid-1',
+        verificationUrl: expect.stringContaining('/verify-email?token='),
+      }),
+    );
     expect(mockAdopterProfileRepository.create).toHaveBeenCalledWith({
       userId: 'uuid-1',
     });
-    expect(mockAdopterProfileRepository.save).toHaveBeenCalled();
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-      UserRegisteredEvent.EVENT_NAME,
-      expect.objectContaining({
-        email: 'test@example.com',
-        role: UserRole.ADOPTER,
-      }),
-    );
   });
 
   it('should register a new shelter user and create initial shelter profile when role is shelter', async () => {
     mockUserRepository.findByEmail.mockResolvedValue(null);
-    mockHashingService.hash
-      .mockResolvedValueOnce('hashed-password')
-      .mockResolvedValueOnce('hashed-refresh-token');
+    mockHashingService.hash.mockResolvedValueOnce('hashed-password');
 
     const createdUser = new User();
     createdUser.email = 'shelter@example.com';
@@ -155,10 +158,7 @@ describe('RegisterUseCase', () => {
       id: 'shelter-prof-1',
       userId: 'uuid-2',
     });
-    mockTokenService.generateTokens.mockResolvedValue({
-      accessToken: 'access-456',
-      refreshToken: 'refresh-456',
-    });
+    mockEmailService.sendEmailVerification.mockResolvedValue({ success: true });
 
     const result = await useCase.execute({
       email: 'shelter@example.com',
@@ -167,7 +167,7 @@ describe('RegisterUseCase', () => {
       role: UserRole.SHELTER,
     });
 
-    expect(result.user.role).toBe(UserRole.SHELTER);
+    expect(result.role).toBe(UserRole.SHELTER);
     expect(mockShelterProfileRepository.create).toHaveBeenCalledWith({
       userId: 'uuid-2',
     });
@@ -176,9 +176,7 @@ describe('RegisterUseCase', () => {
 
   it('should upload avatar to Cloudinary when avatarFile is provided in registration', async () => {
     mockUserRepository.findByEmail.mockResolvedValue(null);
-    mockHashingService.hash
-      .mockResolvedValueOnce('hashed-password')
-      .mockResolvedValueOnce('hashed-refresh-token');
+    mockHashingService.hash.mockResolvedValueOnce('hashed-password');
 
     const avatarFile = {
       mimetype: 'image/jpeg',
@@ -212,12 +210,9 @@ describe('RegisterUseCase', () => {
       id: 'prof-3',
       userId: 'uuid-3',
     });
-    mockTokenService.generateTokens.mockResolvedValue({
-      accessToken: 'access-789',
-      refreshToken: 'refresh-789',
-    });
+    mockEmailService.sendEmailVerification.mockResolvedValue({ success: true });
 
-    const result = await useCase.execute(
+    await useCase.execute(
       {
         email: 'avatar@example.com',
         password: 'Password123!',
@@ -234,9 +229,6 @@ describe('RegisterUseCase', () => {
           'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
         avatarKey: 'firu-api/avatars/avatar_123',
       }),
-    );
-    expect(result.user.avatarUrl).toBe(
-      'https://res.cloudinary.com/demo/image/upload/v1/avatar.webp',
     );
   });
 });

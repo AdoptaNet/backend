@@ -246,11 +246,11 @@ export class CreatePetDto {
 
   @ApiProperty({
     description:
-      'Lista de fotos subidas previamente (mínimo 1, máximo 6, exactamente una principal)',
+      'Lista de fotos subidas previamente (mínimo 3, máximo 6, exactamente una principal)',
     type: [PetPhotoItemDto],
   })
   @IsArray()
-  @ArrayMinSize(1)
+  @ArrayMinSize(3)
   @ArrayMaxSize(6)
   @ValidateNested({ each: true })
   @Type(() => PetPhotoItemDto)

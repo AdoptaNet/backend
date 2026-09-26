@@ -116,6 +116,12 @@ export class PetTypeOrmRepository implements PetRepository {
       });
     }
 
+    if (options.search) {
+      qb.andWhere('LOWER(pet.name) LIKE LOWER(:search)', {
+        search: `%${options.search.trim()}%`,
+      });
+    }
+
     qb.orderBy('pet.createdAt', 'DESC')
       .addOrderBy('photos.order', 'ASC')
       .skip(skip)

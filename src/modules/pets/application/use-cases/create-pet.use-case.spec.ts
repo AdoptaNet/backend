@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ShelterProfile } from '../../../users/domain/entities/shelter-profile.entity';
 import { User } from '../../../users/domain/entities/user.entity';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
@@ -24,6 +25,9 @@ describe('CreatePetUseCase', () => {
   const mockShelterProfileRepository = {
     findByUserId: jest.fn(),
   };
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -36,6 +40,7 @@ describe('CreatePetUseCase', () => {
           provide: ShelterProfileRepository,
           useValue: mockShelterProfileRepository,
         },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -55,6 +60,7 @@ describe('CreatePetUseCase', () => {
     phoneNumber: '+51999999999',
     city: 'Lima',
     department: 'Lima',
+    isVerified: true,
   } as ShelterProfile;
 
   const validDto: CreatePetDto = {
@@ -68,9 +74,22 @@ describe('CreatePetUseCase', () => {
     description: 'Gatita muy cariñosa y tranquila.',
     photos: [
       {
-        url: 'https://cloudinary.com/firu/cat1.jpg',
+        url: 'https://cloudinary.com/firu/cat1.webp',
         publicId: 'firu/cat1',
         isPrimary: true,
+        order: 0,
+      },
+      {
+        url: 'https://cloudinary.com/firu/cat2.webp',
+        publicId: 'firu/cat2',
+        isPrimary: false,
+        order: 1,
+      },
+      {
+        url: 'https://cloudinary.com/firu/cat3.webp',
+        publicId: 'firu/cat3',
+        isPrimary: false,
+        order: 2,
       },
     ],
   };
@@ -100,10 +119,13 @@ describe('CreatePetUseCase', () => {
     );
   });
 
-  it('should throw InvalidPhotoCountException if photos array is empty', async () => {
+  it('should throw InvalidPhotoCountException if photos array has fewer than 3 items', async () => {
     mockShelterProfileRepository.findByUserId.mockResolvedValue(validProfile);
-    const dtoWithoutPhotos = { ...validDto, photos: [] };
-    await expect(useCase.execute(baseUser, dtoWithoutPhotos)).rejects.toThrow(
+    const dtoWithTwoPhotos = {
+      ...validDto,
+      photos: validDto.photos.slice(0, 2),
+    };
+    await expect(useCase.execute(baseUser, dtoWithTwoPhotos)).rejects.toThrow(
       InvalidPhotoCountException,
     );
   });
@@ -112,20 +134,14 @@ describe('CreatePetUseCase', () => {
     mockShelterProfileRepository.findByUserId.mockResolvedValue(validProfile);
     const dtoNoPrimary = {
       ...validDto,
-      photos: [
-        {
-          url: 'https://cloudinary.com/firu/cat1.jpg',
-          publicId: 'firu/cat1',
-          isPrimary: false,
-        },
-      ],
+      photos: validDto.photos.map((p) => ({ ...p, isPrimary: false })),
     };
     await expect(useCase.execute(baseUser, dtoNoPrimary)).rejects.toThrow(
       InvalidPhotoCountException,
     );
   });
 
-  it('should create pet successfully, calculating ageCategory automatically if omitted', async () => {
+  it('should create pet successfully, calculating ageCategory automatically if omitted and emitting event', async () => {
     mockShelterProfileRepository.findByUserId.mockResolvedValue(validProfile);
     mockPetRepository.save.mockImplementation((pet: Pet) => {
       pet.id = 'pet-uuid-1';
@@ -140,8 +156,13 @@ describe('CreatePetUseCase', () => {
     expect(result.name).toBe('Pelusa');
     expect(result.ageCategory).toBe(PetAgeCategory.PUPPY); // 8 months -> puppy
     expect(result.status).toBe(PetStatus.AVAILABLE);
-    expect(result.photos).toHaveLength(1);
+    expect(result.photos).toHaveLength(3);
     expect(result.shelter?.organizationName).toBe('Huellitas');
+    expect(result.shelter?.isVerified).toBe(true);
     expect(mockPetRepository.save).toHaveBeenCalled();
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+      'pet.created',
+      expect.objectContaining({ petId: 'pet-uuid-1' }),
+    );
   });
 });

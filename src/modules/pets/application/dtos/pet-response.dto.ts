@@ -59,6 +59,9 @@ export class PetShelterResponseDto {
 
   @ApiPropertyOptional({ example: '+51987654321' })
   phoneNumber: string | null;
+
+  @ApiPropertyOptional({ example: true })
+  isVerified?: boolean;
 }
 
 export class PetResponseDto {
@@ -192,6 +195,7 @@ export class PetResponseDto {
         department: profile.department,
         contactEmail: profile.contactEmail || pet.shelter?.email || null,
         phoneNumber: profile.phoneNumber,
+        isVerified: profile.isVerified ?? false,
       };
     }
 

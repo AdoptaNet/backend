@@ -1,6 +1,8 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HashingService } from '../../../auth/application/interfaces/hashing.service';
 import { TokenService } from '../../../auth/application/interfaces/token.service';
+import { UserRegisteredEvent } from '../../../auth/domain/events/user-registered.event';
 import { AdopterProfile } from '../../domain/entities/adopter-profile.entity';
 import { ShelterProfile } from '../../domain/entities/shelter-profile.entity';
 import { User } from '../../domain/entities/user.entity';
@@ -36,6 +38,9 @@ describe('SelectUserRoleUseCase', () => {
   const mockTokenService = {
     generateTokens: jest.fn(),
   };
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -54,6 +59,7 @@ describe('SelectUserRoleUseCase', () => {
         },
         { provide: HashingService, useValue: mockHashingService },
         { provide: TokenService, useValue: mockTokenService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -180,6 +186,12 @@ describe('SelectUserRoleUseCase', () => {
     expect(result.user.role).toBe(UserRole.SHELTER);
     expect(result.user.roleSelected).toBe(true);
     expect(result.accessToken).toBe('new-access-token');
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+      UserRegisteredEvent.EVENT_NAME,
+      expect.objectContaining({
+        role: UserRole.SHELTER,
+      }),
+    );
   });
 
   it('should switch role to ADOPTER, delete empty shelter profile and create adopter profile', async () => {
@@ -228,5 +240,11 @@ describe('SelectUserRoleUseCase', () => {
     );
     expect(result.user.role).toBe(UserRole.ADOPTER);
     expect(result.user.roleSelected).toBe(true);
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+      UserRegisteredEvent.EVENT_NAME,
+      expect.objectContaining({
+        role: UserRole.ADOPTER,
+      }),
+    );
   });
 });

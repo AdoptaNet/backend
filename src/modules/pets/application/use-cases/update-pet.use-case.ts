@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { MediaService } from '../../../media/application/interfaces/media.service';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 import { PetPhoto } from '../../domain/entities/pet-photo.entity';
+import { PetUpdatedEvent } from '../../domain/events/pet-updated.event';
 import { InvalidPhotoCountException } from '../../domain/exceptions/invalid-photo-count.exception';
 import { PetAccessForbiddenException } from '../../domain/exceptions/pet-access-forbidden.exception';
 import { PetNotFoundException } from '../../domain/exceptions/pet-not-found.exception';
@@ -12,7 +15,11 @@ import { UpdatePetDto } from '../dtos/update-pet.dto';
 
 @Injectable()
 export class UpdatePetUseCase {
-  constructor(private readonly petRepository: PetRepository) {}
+  constructor(
+    private readonly petRepository: PetRepository,
+    private readonly mediaService: MediaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async execute(
     id: string,
@@ -31,9 +38,9 @@ export class UpdatePetUseCase {
     }
 
     if (dto.photos !== undefined) {
-      if (dto.photos.length < 1 || dto.photos.length > 6) {
+      if (dto.photos.length < 3 || dto.photos.length > 6) {
         throw new InvalidPhotoCountException(
-          'Debe incluir entre 1 y 6 fotografías',
+          'Debe incluir entre 3 y 6 fotografías',
         );
       }
       const primaryCount = dto.photos.filter((p) => p.isPrimary).length;
@@ -42,6 +49,20 @@ export class UpdatePetUseCase {
           'Debe haber exactamente una fotografía principal marcada',
         );
       }
+
+      // CA-09.4: Clean up orphaned photos in Cloudinary
+      const newPublicIds = new Set(dto.photos.map((p) => p.publicId));
+      const orphanedPhotos = (pet.photos || []).filter(
+        (oldPhoto) => oldPhoto.publicId && !newPublicIds.has(oldPhoto.publicId),
+      );
+      for (const orphan of orphanedPhotos) {
+        try {
+          await this.mediaService.deleteImage(orphan.publicId);
+        } catch {
+          // Non-blocking cleanup
+        }
+      }
+
       pet.photos = dto.photos.map((p, index) => {
         const photo = new PetPhoto();
         if (p.id) photo.id = p.id;
@@ -95,6 +116,12 @@ export class UpdatePetUseCase {
     if (dto.status !== undefined) pet.status = dto.status;
 
     const savedPet = await this.petRepository.save(pet);
+
+    this.eventEmitter.emit(
+      'pet.updated',
+      new PetUpdatedEvent(savedPet.id, savedPet.shelterId, savedPet.status),
+    );
+
     return PetResponseDto.fromEntity(savedPet, pet.shelter?.shelterProfile);
   }
 }

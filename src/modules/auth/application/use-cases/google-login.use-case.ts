@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
-import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { AuthResponseDto } from '../dtos/auth-response.dto';
 import { HashingService } from '../interfaces/hashing.service';
 import { TokenService } from '../interfaces/token.service';
@@ -20,10 +17,8 @@ export interface GoogleUserProfile {
 export class GoogleLoginUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly adopterProfileRepository: AdopterProfileRepository,
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(profile: GoogleUserProfile): Promise<AuthResponseDto> {
@@ -39,7 +34,12 @@ export class GoogleLoginUseCase {
       );
 
       if (user) {
+        // US-02 Escenario 4: Vinculación automática por email preexistente
         user.googleId = profile.googleId;
+        user.isEmailVerified = true;
+        if (!user.emailVerifiedAt) {
+          user.emailVerifiedAt = new Date();
+        }
         if (!user.avatarUrl && profile.avatarUrl) {
           user.avatarUrl = profile.avatarUrl;
         }
@@ -47,6 +47,7 @@ export class GoogleLoginUseCase {
           user.fullName = profile.fullName;
         }
       } else {
+        // US-02 Escenario 1: Registro por primera vez con Google
         isNewUser = true;
         user = this.userRepository.create({
           googleId: profile.googleId,
@@ -55,18 +56,14 @@ export class GoogleLoginUseCase {
           avatarUrl: profile.avatarUrl ?? null,
           role: UserRole.ADOPTER,
           roleSelected: false,
+          isEmailVerified: true,
+          emailVerifiedAt: new Date(),
+          isActive: true,
         });
       }
     }
 
     const savedUser = await this.userRepository.save(user);
-
-    if (isNewUser) {
-      const adopterProfile = this.adopterProfileRepository.create({
-        userId: savedUser.id,
-      });
-      await this.adopterProfileRepository.save(adopterProfile);
-    }
 
     const tokens = await this.tokenService.generateTokens({
       sub: savedUser.id,
@@ -78,18 +75,6 @@ export class GoogleLoginUseCase {
       tokens.refreshToken,
     );
     await this.userRepository.save(savedUser);
-
-    if (isNewUser) {
-      this.eventEmitter.emit(
-        UserRegisteredEvent.EVENT_NAME,
-        new UserRegisteredEvent(
-          savedUser.id,
-          savedUser.email,
-          savedUser.fullName,
-          savedUser.role,
-        ),
-      );
-    }
 
     return {
       user: {

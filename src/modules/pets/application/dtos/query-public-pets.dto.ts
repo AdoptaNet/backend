@@ -56,6 +56,14 @@ export class QueryPublicPetsDto {
   department?: string;
 
   @ApiPropertyOptional({
+    description: 'Búsqueda por nombre de la mascota',
+    example: 'Firulais',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({
     description: 'Número de página',
     default: 1,
     minimum: 1,
