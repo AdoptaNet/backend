@@ -26,10 +26,20 @@ export function WelcomeEmailTemplate({
     fullName?.trim() || (isAdopter ? 'adoptante' : 'rescatista');
 
   return (
-    <BaseEmailLayout previewText="🐾 ¡Te damos la bienvenida a Adoptanet! Gracias por sumarte a la adopción responsable.">
+    <BaseEmailLayout
+      previewText={
+        isAdopter
+          ? '🐾 ¡Te damos la bienvenida a Adoptanet! Encuentra a tu compañero ideal.'
+          : '🏡 ¡Te damos la bienvenida a Adoptanet! Gracias por registrar tu labor de rescate.'
+      }
+    >
       {/* Insignia superior */}
       <Section style={{ marginBottom: '16px' }}>
-        <EmailBadge variant="accent">🐾 Comunidad Adoptanet</EmailBadge>
+        <EmailBadge variant="accent">
+          {isAdopter
+            ? '🐾 Comunidad de Adoptantes'
+            : '🏡 Red de Albergues y Rescatistas'}
+        </EmailBadge>
       </Section>
 
       {/* Título de bienvenida */}
@@ -164,12 +174,12 @@ export function WelcomeEmailTemplate({
       {/* Botón de acción principal */}
       <Section style={{ textAlign: 'center', margin: '28px 0 20px 0' }}>
         <EmailButton
-          href={`${frontendUrl}/home`}
+          href={`${frontendUrl}/pets`}
           variant={isAdopter ? 'primary' : 'secondary'}
         >
           {isAdopter
-            ? 'Explorar mascotas en adopción'
-            : 'Ir a mi panel de albergue'}
+            ? 'Explorar catálogo de adopción'
+            : 'Ir a mi panel de mascotas'}
         </EmailButton>
       </Section>
 

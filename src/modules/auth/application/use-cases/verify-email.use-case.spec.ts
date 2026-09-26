@@ -1,7 +1,9 @@
 import * as crypto from 'crypto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
+import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { InvalidOrExpiredTokenException } from '../../domain/exceptions/invalid-or-expired-token.exception';
 import { VerifyEmailUseCase } from './verify-email.use-case';
 
@@ -11,6 +13,9 @@ describe('VerifyEmailUseCase', () => {
     findByVerificationTokenHash: jest.fn(),
     save: jest.fn(),
   };
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -19,6 +24,7 @@ describe('VerifyEmailUseCase', () => {
       providers: [
         VerifyEmailUseCase,
         { provide: UserRepository, useValue: mockUserRepository },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -66,5 +72,9 @@ describe('VerifyEmailUseCase', () => {
     expect(user.emailVerificationTokenHash).toBeNull();
     expect(user.emailVerificationExpiresAt).toBeNull();
     expect(mockUserRepository.save).toHaveBeenCalledWith(user);
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+      UserRegisteredEvent.EVENT_NAME,
+      expect.any(UserRegisteredEvent),
+    );
   });
 });

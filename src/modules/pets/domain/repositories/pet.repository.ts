@@ -19,6 +19,7 @@ export interface FindPublicPetsOptions {
   gender?: PetGender;
   city?: string;
   department?: string;
+  search?: string;
   page?: number;
   limit?: number;
 }

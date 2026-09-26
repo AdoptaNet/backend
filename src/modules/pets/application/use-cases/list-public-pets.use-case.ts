@@ -19,6 +19,7 @@ export class ListPublicPetsUseCase {
       gender: query.gender,
       city: query.city,
       department: query.department,
+      search: query.search,
       page,
       limit,
     });

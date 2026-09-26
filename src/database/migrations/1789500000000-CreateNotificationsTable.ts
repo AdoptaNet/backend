@@ -10,7 +10,7 @@ export class CreateNotificationsTable1789500000000 implements MigrationInterface
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 1. Crear tipos enum
     await queryRunner.query(
-      `CREATE TYPE "notifications_type_enum" AS ENUM('welcome', 'adoption_status_changed', 'new_adoption_request', 'follow_up_reminder', 'custom')`,
+      `CREATE TYPE "notifications_type_enum" AS ENUM('welcome', 'email_verification', 'password_reset', 'shelter_verified', 'adoption_status_changed', 'new_adoption_request', 'follow_up_reminder', 'custom')`,
     );
     await queryRunner.query(
       `CREATE TYPE "notifications_channel_enum" AS ENUM('email', 'in_app', 'both')`,

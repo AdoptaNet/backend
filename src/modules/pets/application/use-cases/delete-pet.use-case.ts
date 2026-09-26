@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 import { PetAccessForbiddenException } from '../../domain/exceptions/pet-access-forbidden.exception';
+import { PetDeletionBlockedException } from '../../domain/exceptions/pet-deletion-blocked.exception';
 import { PetNotFoundException } from '../../domain/exceptions/pet-not-found.exception';
 import { PetRepository } from '../../domain/repositories/pet.repository';
+import { PetStatus } from '../../domain/value-objects/pet-status.enum';
 
 @Injectable()
 export class DeletePetUseCase {
@@ -19,6 +21,13 @@ export class DeletePetUseCase {
       throw new PetAccessForbiddenException(
         'No tienes permisos para eliminar esta mascota',
       );
+    }
+
+    if (
+      pet.status === PetStatus.IN_PROCESS ||
+      pet.status === PetStatus.ADOPTED
+    ) {
+      throw new PetDeletionBlockedException();
     }
 
     await this.petRepository.softDelete(id);

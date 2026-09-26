@@ -66,7 +66,6 @@ describe('RegisterUseCase', () => {
         { provide: EmailService, useValue: mockEmailService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: UploadImageUseCase, useValue: mockUploadImageUseCase },
-        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -135,13 +134,6 @@ describe('RegisterUseCase', () => {
     expect(mockAdopterProfileRepository.create).toHaveBeenCalledWith({
       userId: 'uuid-1',
     });
-    expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-      UserRegisteredEvent.EVENT_NAME,
-      expect.objectContaining({
-        email: 'test@example.com',
-        role: UserRole.ADOPTER,
-      }),
-    );
   });
 
   it('should register a new shelter user and create initial shelter profile when role is shelter', async () => {

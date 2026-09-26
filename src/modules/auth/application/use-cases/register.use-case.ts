@@ -1,14 +1,12 @@
 import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UploadImageUseCase } from '../../../media/application/use-cases/upload-image.use-case';
 import { EmailService } from '../../../notifications/application/interfaces/email.service';
 import { AdopterProfileRepository } from '../../../users/domain/repositories/adopter-profile.repository';
 import { ShelterProfileRepository } from '../../../users/domain/repositories/shelter-profile.repository';
 import { UserRepository } from '../../../users/domain/repositories/user.repository';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
-import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
 import { EmailAlreadyInUseException } from '../../domain/exceptions/email-already-in-use.exception';
 import { RegisterResponseDto } from '../dtos/register-response.dto';
 import { RegisterDto } from '../dtos/register.dto';
@@ -22,7 +20,6 @@ export class RegisterUseCase {
     private readonly shelterProfileRepository: ShelterProfileRepository,
     private readonly hashingService: HashingService,
     private readonly uploadImageUseCase: UploadImageUseCase,
-    private readonly eventEmitter: EventEmitter2,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {}
@@ -96,16 +93,6 @@ export class RegisterUseCase {
       fullName: savedUser.fullName,
       verificationUrl,
     });
-
-    this.eventEmitter.emit(
-      UserRegisteredEvent.EVENT_NAME,
-      new UserRegisteredEvent(
-        savedUser.id,
-        savedUser.email,
-        savedUser.fullName,
-        savedUser.role,
-      ),
-    );
 
     return {
       message:

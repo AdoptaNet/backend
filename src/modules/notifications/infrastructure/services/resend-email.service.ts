@@ -16,6 +16,7 @@ import { NotificationRepository } from '../../domain/repositories/notification.r
 import { NotificationChannel } from '../../domain/value-objects/notification-channel.enum';
 import { NotificationStatus } from '../../domain/value-objects/notification-status.enum';
 import { NotificationType } from '../../domain/value-objects/notification-type.enum';
+import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 import { WelcomeEmailTemplate } from '../../presentation/templates/welcome-email.template';
 import { EmailVerificationTemplate } from '../../presentation/templates/email-verification.template';
 import { PasswordResetTemplate } from '../../presentation/templates/password-reset.template';
@@ -163,9 +164,14 @@ export class ResendEmailService implements EmailService {
       frontendUrl,
     });
 
+    const isAdopter = data.role === UserRole.ADOPTER;
+    const subject = isAdopter
+      ? '🐾 ¡Te damos la bienvenida a Adoptanet! Encuentra a tu compañero ideal'
+      : '🏡 ¡Te damos la bienvenida a Adoptanet! Gestiona tu albergue y rescates';
+
     return await this.sendEmail({
       to,
-      subject: '🐾 ¡Te damos la bienvenida a Adoptanet!',
+      subject,
       template,
       userId: data.userId,
       type: NotificationType.WELCOME,

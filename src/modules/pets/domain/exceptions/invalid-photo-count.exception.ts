@@ -2,7 +2,7 @@ import { DomainException } from '../../../../shared/domain/exceptions/domain.exc
 
 export class InvalidPhotoCountException extends DomainException {
   constructor(
-    message = 'Debe incluir entre 1 y 6 fotografías con exactamente una marcada como principal',
+    message = 'Debe incluir entre 3 y 6 fotografías con exactamente una marcada como principal',
   ) {
     super(message);
   }
