@@ -6,6 +6,7 @@ import { MediaModule } from './modules/media/media.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PetsModule } from './modules/pets/pets.module';
 import { UsersModule } from './modules/users/users.module';
+import { AdoptionsModule } from './modules/adoptions/adoptions.module';
 import { validate } from './shared/infrastructure/config/env.validation';
 import { DatabaseModule } from './shared/infrastructure/database/database.module';
 
@@ -22,6 +23,7 @@ import { DatabaseModule } from './shared/infrastructure/database/database.module
     MediaModule,
     NotificationsModule,
     PetsModule,
+    AdoptionsModule,
   ],
   controllers: [],
   providers: [],

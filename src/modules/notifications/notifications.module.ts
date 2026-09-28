@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailService } from './application/interfaces/email.service';
 import { AuthNotificationListener } from './application/listeners/auth-notification.listener';
+import { AdoptionNotificationListener } from './application/listeners/adoption-notification.listener';
 import { HandleResendWebhookUseCase } from './application/use-cases/handle-resend-webhook.use-case';
 import { Notification } from './domain/entities/notification.entity';
 import { NotificationRepository } from './domain/repositories/notification.repository';
@@ -23,6 +24,7 @@ import { ResendWebhookController } from './presentation/controllers/resend-webho
       useClass: NotificationTypeOrmRepository,
     },
     AuthNotificationListener,
+    AdoptionNotificationListener,
     HandleResendWebhookUseCase,
   ],
   exports: [EmailService, NotificationRepository, HandleResendWebhookUseCase],
