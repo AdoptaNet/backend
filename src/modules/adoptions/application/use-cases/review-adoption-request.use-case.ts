@@ -53,6 +53,9 @@ export class ReviewAdoptionRequestUseCase {
 
     if (dto.status === AdoptionStatus.UNDER_REVIEW) {
       adoption.status = AdoptionStatus.UNDER_REVIEW;
+      if (dto.reviewNotes !== undefined) {
+        adoption.reviewNotes = dto.reviewNotes?.trim() || null;
+      }
       const saved = await this.adoptionRepo.save(adoption);
 
       this.eventEmitter.emit(
@@ -114,6 +117,9 @@ export class ReviewAdoptionRequestUseCase {
         // 1. Marcar solicitud como aprobada
         adoption.status = AdoptionStatus.APPROVED;
         adoption.approvedAt = new Date();
+        if (dto.reviewNotes !== undefined) {
+          adoption.reviewNotes = dto.reviewNotes?.trim() || null;
+        }
         savedApproved = await manager.save(AdoptionRequest, adoption);
 
         // 2. Actualizar estado de la mascota a adopted

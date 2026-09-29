@@ -48,4 +48,14 @@ export class ReviewAdoptionRequestDto {
   @IsOptional()
   @IsString({ message: 'Las notas de rechazo deben ser texto.' })
   rejectionNotes?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Instrucciones o notas para el adoptante al aprobar o pasar a revisión la solicitud',
+    example:
+      '¡Felicidades! Te esperamos este sábado a las 10am con tu DNI para formalizar la entrega.',
+  })
+  @IsOptional()
+  @IsString({ message: 'Las notas de revisión deben ser texto.' })
+  reviewNotes?: string;
 }

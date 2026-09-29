@@ -81,6 +81,9 @@ export class AdoptionRequestResponseDto {
   rejectionNotes?: string | null;
 
   @ApiPropertyOptional()
+  reviewNotes?: string | null;
+
+  @ApiPropertyOptional()
   approvedAt?: Date | null;
 
   @ApiPropertyOptional()
