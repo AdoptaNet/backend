@@ -66,7 +66,6 @@ export class PetTypeOrmRepository implements PetRepository {
     }
 
     qb.orderBy('pet.createdAt', 'DESC')
-      .addOrderBy('photos.order', 'ASC')
       .skip(skip)
       .take(limit);
 
@@ -123,7 +122,6 @@ export class PetTypeOrmRepository implements PetRepository {
     }
 
     qb.orderBy('pet.createdAt', 'DESC')
-      .addOrderBy('photos.order', 'ASC')
       .skip(skip)
       .take(limit);
 

@@ -18,6 +18,7 @@ export class AdoptionRequestMapper {
       adopterSnapshot: entity.adopterSnapshot,
       rejectionReason: entity.rejectionReason,
       rejectionNotes: entity.rejectionNotes,
+      reviewNotes: entity.reviewNotes ?? null,
       approvedAt: entity.approvedAt,
       rejectedAt: entity.rejectedAt,
       cancelledAt: entity.cancelledAt,

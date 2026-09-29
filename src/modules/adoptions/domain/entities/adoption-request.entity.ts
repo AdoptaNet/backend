@@ -58,6 +58,9 @@ export class AdoptionRequest extends AuditableEntity {
   @Column({ type: 'text', nullable: true, name: 'rejection_notes' })
   rejectionNotes: string | null;
 
+  @Column({ type: 'text', nullable: true, name: 'review_notes' })
+  reviewNotes: string | null;
+
   @Column({ type: 'timestamp', nullable: true, name: 'approved_at' })
   approvedAt: Date | null;
 
