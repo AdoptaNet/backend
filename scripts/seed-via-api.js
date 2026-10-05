@@ -6,14 +6,41 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { Client } = require('pg');
 
-const API_BASE = 'http://localhost:3001';
-const DOCKER_CONTAINER = 'supabase_db_adopta-net';
+// Cargar variables de entorno del archivo .env
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  const envConfig = fs.readFileSync(envPath, 'utf8');
+  envConfig.split('\n').forEach((line) => {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (match && !line.trim().startsWith('#')) {
+      process.env[match[1]] = match[2].replace(/^["']|["']$/g, '').trim();
+    }
+  });
+}
 
-function runSql(sql) {
-  const cmd = `docker exec -i ${DOCKER_CONTAINER} psql -U postgres -d postgres -c "${sql.replace(/"/g, '\\"')}"`;
-  execSync(cmd, { stdio: 'pipe' });
+const API_BASE = process.env.API_URL || `http://localhost:${process.env.PORT || 3001}`;
+
+async function runSql(sql) {
+  // Configurar cliente Postgres usando las variables de entorno
+  const client = new Client({
+    host: process.env.DATABASE_HOST,
+    port: process.env.DATABASE_PORT,
+    user: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASSWORD,
+    database: process.env.DATABASE_NAME,
+    ssl: process.env.DATABASE_HOST?.includes('supabase') || process.env.DATABASE_SSL === 'true'
+      ? { rejectUnauthorized: false }
+      : undefined,
+  });
+
+  await client.connect();
+  try {
+    await client.query(sql);
+  } finally {
+    await client.end();
+  }
 }
 
 async function request(endpoint, options = {}) {
@@ -40,7 +67,7 @@ async function register(email, password, fullName, role) {
     body: JSON.stringify({ email, password, fullName, role: regRole }),
   });
   // Activate email & confirm role selection directly in DB (and elevate role if admin)
-  runSql(`UPDATE users SET is_email_verified = true, role_selected = true, role = '${role}' WHERE email = '${email.toLowerCase()}';`);
+  await runSql(`UPDATE users SET is_email_verified = true, role_selected = true, role = '${role}' WHERE email = '${email.toLowerCase()}';`);
 }
 
 async function login(email, password) {
@@ -79,7 +106,7 @@ async function main() {
 
   // 1. Limpiar base de datos
   console.log('\n[1/7] Limpiando tablas operativas de la base de datos...');
-  runSql('TRUNCATE TABLE adoption_requests, pet_photos, pets, notifications, adopter_profiles, shelter_profiles, users CASCADE;');
+  await runSql('TRUNCATE TABLE adoption_requests, pet_photos, pets, notifications, adopter_profiles, shelter_profiles, users CASCADE;');
   console.log('✔ Base de datos reseteada limpiamente (migraciones preservadas).');
 
   // 2. Crear Administrador
