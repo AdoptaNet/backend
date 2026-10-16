@@ -10,10 +10,15 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -25,20 +30,25 @@ import { OptionalJwtAuthGuard } from '../../../auth/infrastructure/guards/option
 import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
 import { User } from '../../../users/domain/entities/user.entity';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
+import { AnalyzePetPhotosResponseDto } from '../../application/dtos/analyze-pet-photos-response.dto';
 import { CreatePetDto } from '../../application/dtos/create-pet.dto';
 import { PaginatedPetsResponseDto } from '../../application/dtos/paginated-pets-response.dto';
 import { PetResponseDto } from '../../application/dtos/pet-response.dto';
 import { QueryPublicPetsDto } from '../../application/dtos/query-public-pets.dto';
 import { QueryShelterPetsDto } from '../../application/dtos/query-shelter-pets.dto';
+import { SimilarPetResponseDto } from '../../application/dtos/similar-pet-response.dto';
 import { UpdatePetStatusDto } from '../../application/dtos/update-pet-status.dto';
 import { UpdatePetDto } from '../../application/dtos/update-pet.dto';
+import { AnalyzePetPhotosUseCase } from '../../application/use-cases/analyze-pet-photos.use-case';
 import { CreatePetUseCase } from '../../application/use-cases/create-pet.use-case';
 import { DeletePetUseCase } from '../../application/use-cases/delete-pet.use-case';
 import { GetMyPetsUseCase } from '../../application/use-cases/get-my-pets.use-case';
 import { GetPetByIdUseCase } from '../../application/use-cases/get-pet-by-id.use-case';
 import { ListPublicPetsUseCase } from '../../application/use-cases/list-public-pets.use-case';
+import { SearchSimilarPetsUseCase } from '../../application/use-cases/search-similar-pets.use-case';
 import { UpdatePetStatusUseCase } from '../../application/use-cases/update-pet-status.use-case';
 import { UpdatePetUseCase } from '../../application/use-cases/update-pet.use-case';
+import { PetSpecies } from '../../domain/value-objects/pet-species.enum';
 
 @ApiTags('pets')
 @Controller('pets')
@@ -51,7 +61,61 @@ export class PetsController {
     private readonly updatePetUseCase: UpdatePetUseCase,
     private readonly updatePetStatusUseCase: UpdatePetStatusUseCase,
     private readonly deletePetUseCase: DeletePetUseCase,
+    private readonly analyzePetPhotosUseCase: AnalyzePetPhotosUseCase,
+    private readonly searchSimilarPetsUseCase: SearchSimilarPetsUseCase,
   ) {}
+
+  @Post('analyze-photos')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SHELTER)
+  @UseInterceptors(
+    FilesInterceptor('photos', 6, {
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Analizar fotos con DINOv2 para autocompletar ficha de mascota',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: AnalyzePetPhotosResponseDto,
+    description: 'Atributos sugeridos y embedding calculados por IA',
+  })
+  async analyzePhotos(
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<AnalyzePetPhotosResponseDto> {
+    return this.analyzePetPhotosUseCase.execute(files);
+  }
+
+  @Post('search-similar')
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Buscar mascotas en adopción por similitud visual de foto',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: [SimilarPetResponseDto],
+    description: 'Listado de mascotas ordenadas por similitud visual',
+  })
+  async searchSimilar(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('limit') limit?: number,
+    @Query('species') species?: PetSpecies,
+    @Query('threshold') threshold?: number,
+  ): Promise<SimilarPetResponseDto[]> {
+    return this.searchSimilarPetsUseCase.execute(file, {
+      limit: limit ? Number(limit) : undefined,
+      species,
+      threshold: threshold ? Number(threshold) : undefined,
+    });
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

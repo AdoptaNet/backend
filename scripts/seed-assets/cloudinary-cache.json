@@ -1,54 +1,244 @@
 {
-  "dogPhotos": [
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237288/firu-api/general/hcgs8tma4ixgcrpbkjht.webp",
-      "publicId": "firu-api/general/hcgs8tma4ixgcrpbkjht"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237291/firu-api/general/xjowqzjta02brkskwi5k.webp",
-      "publicId": "firu-api/general/xjowqzjta02brkskwi5k"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237292/firu-api/general/drcoervztni6wugqeroy.webp",
-      "publicId": "firu-api/general/drcoervztni6wugqeroy"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237295/firu-api/general/rss0wphhyrfzntstkxzl.webp",
-      "publicId": "firu-api/general/rss0wphhyrfzntstkxzl"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237297/firu-api/general/wy0jtqmx3u2i6p2c5pwa.webp",
-      "publicId": "firu-api/general/wy0jtqmx3u2i6p2c5pwa"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237299/firu-api/general/z3rldpxwnuo4j9vgmdnq.webp",
-      "publicId": "firu-api/general/z3rldpxwnuo4j9vgmdnq"
-    }
-  ],
-  "catPhotos": [
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237290/firu-api/general/g2kxmqlgn3r5gtweq6bz.webp",
-      "publicId": "firu-api/general/g2kxmqlgn3r5gtweq6bz"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237292/firu-api/general/sekjbda1av5e7tru2map.webp",
-      "publicId": "firu-api/general/sekjbda1av5e7tru2map"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237294/firu-api/general/gm0b9tx5fphlzapvsxbb.webp",
-      "publicId": "firu-api/general/gm0b9tx5fphlzapvsxbb"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237296/firu-api/general/oorpblyvaxthkicopcnb.webp",
-      "publicId": "firu-api/general/oorpblyvaxthkicopcnb"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237298/firu-api/general/e9aoj1k2wrzcxcqa8jbn.webp",
-      "publicId": "firu-api/general/e9aoj1k2wrzcxcqa8jbn"
-    },
-    {
-      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237300/firu-api/general/ewmbukn5vfehhznmkuw5.webp",
-      "publicId": "firu-api/general/ewmbukn5vfehhznmkuw5"
-    }
-  ]
+  "pets": {
+    "max": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184222/firu-api/general/lx6yxbwataygsghrahcs.webp",
+        "publicId": "firu-api/general/lx6yxbwataygsghrahcs",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184223/firu-api/general/oyb84yvjfi8lya9te0ao.webp",
+        "publicId": "firu-api/general/oyb84yvjfi8lya9te0ao",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184224/firu-api/general/j6tejc9ceeuijcp5avrx.webp",
+        "publicId": "firu-api/general/j6tejc9ceeuijcp5avrx",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "luna": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184226/firu-api/general/uhjrtsqgt7tyu0hx5tex.webp",
+        "publicId": "firu-api/general/uhjrtsqgt7tyu0hx5tex",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184228/firu-api/general/qsvgabwxkwy5lcz4srwt.webp",
+        "publicId": "firu-api/general/qsvgabwxkwy5lcz4srwt",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184229/firu-api/general/scyrftsqldypp4ken8iz.webp",
+        "publicId": "firu-api/general/scyrftsqldypp4ken8iz",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "mishi": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184230/firu-api/general/hmxhn1gk4uzgvpo4o9eb.webp",
+        "publicId": "firu-api/general/hmxhn1gk4uzgvpo4o9eb",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184231/firu-api/general/ugk8dczkha32any8qyck.webp",
+        "publicId": "firu-api/general/ugk8dczkha32any8qyck",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184233/firu-api/general/tgvixpoclzylmnuxtcow.webp",
+        "publicId": "firu-api/general/tgvixpoclzylmnuxtcow",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "rocky": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184234/firu-api/general/hk8brd8azuisom6isaqi.webp",
+        "publicId": "firu-api/general/hk8brd8azuisom6isaqi",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184235/firu-api/general/i7rbav6kgr0njajuikbq.webp",
+        "publicId": "firu-api/general/i7rbav6kgr0njajuikbq",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184236/firu-api/general/rpipyvgoslxiwkjzwhl9.webp",
+        "publicId": "firu-api/general/rpipyvgoslxiwkjzwhl9",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "simba": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184238/firu-api/general/s2cjewwgze2suyl6szlq.webp",
+        "publicId": "firu-api/general/s2cjewwgze2suyl6szlq",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184239/firu-api/general/smd9uyu98rhmtqxtc9j1.webp",
+        "publicId": "firu-api/general/smd9uyu98rhmtqxtc9j1",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184240/firu-api/general/ad78bab0rigsw5lzsyr3.webp",
+        "publicId": "firu-api/general/ad78bab0rigsw5lzsyr3",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "toby": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184241/firu-api/general/l1jxeyhcez0qlahphd29.webp",
+        "publicId": "firu-api/general/l1jxeyhcez0qlahphd29",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184242/firu-api/general/vhsdgpxzt1nnlsyx06xu.webp",
+        "publicId": "firu-api/general/vhsdgpxzt1nnlsyx06xu",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184243/firu-api/general/lxi6akvgbzptlj6bmpbd.webp",
+        "publicId": "firu-api/general/lxi6akvgbzptlj6bmpbd",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "nala": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184244/firu-api/general/gykbmoze0jtdya41uywi.webp",
+        "publicId": "firu-api/general/gykbmoze0jtdya41uywi",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184245/firu-api/general/y8qema6gqvlzd2piuoug.webp",
+        "publicId": "firu-api/general/y8qema6gqvlzd2piuoug",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184246/firu-api/general/sbiaxvakimepoohuldum.webp",
+        "publicId": "firu-api/general/sbiaxvakimepoohuldum",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "balto": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184247/firu-api/general/vw2cbwubvkdcam6aegqu.webp",
+        "publicId": "firu-api/general/vw2cbwubvkdcam6aegqu",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184248/firu-api/general/kwiiypyvsonu8mnodkys.webp",
+        "publicId": "firu-api/general/kwiiypyvsonu8mnodkys",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184248/firu-api/general/vzxfq2jrenczhrofp0sq.webp",
+        "publicId": "firu-api/general/vzxfq2jrenczhrofp0sq",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "copito": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184250/firu-api/general/hjknuxrixx9ruenda9yb.webp",
+        "publicId": "firu-api/general/hjknuxrixx9ruenda9yb",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184250/firu-api/general/oohpqubzuqogj3hbqxdu.webp",
+        "publicId": "firu-api/general/oohpqubzuqogj3hbqxdu",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184251/firu-api/general/y6z40xpozqpnzq8ggw9c.webp",
+        "publicId": "firu-api/general/y6z40xpozqpnzq8ggw9c",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "bella": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184252/firu-api/general/agnhresy7prsalaqwjhv.webp",
+        "publicId": "firu-api/general/agnhresy7prsalaqwjhv",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184253/firu-api/general/frnsazmyfd8qnsxpvtsg.webp",
+        "publicId": "firu-api/general/frnsazmyfd8qnsxpvtsg",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184253/firu-api/general/hq4txiub5s1fxujm99fi.webp",
+        "publicId": "firu-api/general/hq4txiub5s1fxujm99fi",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "pelusa": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184254/firu-api/general/ulrtuq1hazsmh8ttq0bh.webp",
+        "publicId": "firu-api/general/ulrtuq1hazsmh8ttq0bh",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184255/firu-api/general/bxiqo600wrqxaneuskri.webp",
+        "publicId": "firu-api/general/bxiqo600wrqxaneuskri",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184255/firu-api/general/ezeidjilpskpec1bn7ca.webp",
+        "publicId": "firu-api/general/ezeidjilpskpec1bn7ca",
+        "isPrimary": false,
+        "order": 2
+      }
+    ],
+    "thor": [
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184257/firu-api/general/qmdpa7zekdk1ue10q92d.webp",
+        "publicId": "firu-api/general/qmdpa7zekdk1ue10q92d",
+        "isPrimary": true,
+        "order": 0
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184258/firu-api/general/cwdxthw97t4ulczm2fez.webp",
+        "publicId": "firu-api/general/cwdxthw97t4ulczm2fez",
+        "isPrimary": false,
+        "order": 1
+      },
+      {
+        "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1792184259/firu-api/general/q2sgvpftjxjkxkk3wn19.webp",
+        "publicId": "firu-api/general/q2sgvpftjxjkxkk3wn19",
+        "isPrimary": false,
+        "order": 2
+      }
+    ]
+  }
 }

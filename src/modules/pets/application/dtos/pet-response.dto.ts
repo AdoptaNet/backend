@@ -146,6 +146,18 @@ export class PetResponseDto {
   @ApiPropertyOptional({ type: PetShelterResponseDto })
   shelter?: PetShelterResponseDto;
 
+  @ApiPropertyOptional({
+    example: ['negro', 'blanco'],
+    type: [String],
+    description: 'Colores identificados de la mascota',
+  })
+  colors?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Documento JSONB con características médicas y conductuales',
+  })
+  characteristics?: Record<string, any>;
+
   @ApiProperty({ example: '2026-09-16T10:00:00.000Z' })
   createdAt: Date;
 
@@ -165,20 +177,23 @@ export class PetResponseDto {
     dto.gender = pet.gender;
     dto.ageMonths = pet.ageMonths;
     dto.ageCategory = pet.ageCategory;
-    dto.size = pet.size;
-    dto.furLength = pet.furLength;
-    dto.isSterilized = pet.isSterilized;
-    dto.isVaccinated = pet.isVaccinated;
-    dto.healthStatus = pet.healthStatus;
-    dto.healthNotes = pet.healthNotes ?? null;
-    dto.energyLevel = pet.energyLevel;
-    dto.goodWithChildren = pet.goodWithChildren ?? null;
-    dto.goodWithDogs = pet.goodWithDogs ?? null;
-    dto.goodWithCats = pet.goodWithCats ?? null;
-    dto.vocalizationLevel = pet.vocalizationLevel;
-    dto.trainingLevel = pet.trainingLevel;
-    dto.timeAloneToleranceHours = pet.timeAloneToleranceHours ?? null;
-    dto.shelterStayMonths = pet.shelterStayMonths;
+    const chars = pet.characteristics || {};
+    const medical = chars.medical || {};
+    const behavioral = chars.behavioral || {};
+
+    dto.furLength = medical.fur_length ?? PetFurLength.SHORT;
+    dto.isSterilized = medical.is_sterilized ?? false;
+    dto.isVaccinated = medical.is_vaccinated ?? false;
+    dto.healthStatus = medical.health_status ?? PetHealthStatus.HEALTHY;
+    dto.healthNotes = medical.health_notes ?? null;
+    dto.energyLevel = behavioral.energy_level ?? 3;
+    dto.goodWithChildren = behavioral.good_with_children ?? null;
+    dto.goodWithDogs = behavioral.good_with_dogs ?? null;
+    dto.goodWithCats = behavioral.good_with_cats ?? null;
+    dto.vocalizationLevel = behavioral.vocalization_level ?? 1;
+    dto.trainingLevel = behavioral.training_level ?? PetTrainingLevel.NONE;
+    dto.timeAloneToleranceHours = behavioral.time_alone_tolerance_hours ?? null;
+    dto.shelterStayMonths = behavioral.shelter_stay_months ?? 0;
     dto.description = pet.description;
     dto.status = pet.status;
 
@@ -201,6 +216,11 @@ export class PetResponseDto {
         isVerified: profile.isVerified ?? false,
       };
     }
+
+    dto.characteristics = pet.characteristics ?? {};
+    dto.colors = Array.isArray(pet.characteristics?.colors)
+      ? pet.characteristics.colors
+      : [];
 
     dto.createdAt = pet.createdAt;
     dto.updatedAt = pet.updatedAt;

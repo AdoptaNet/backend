@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { PetPhoto } from '../../domain/entities/pet-photo.entity';
 import { Pet } from '../../domain/entities/pet.entity';
 import {
   FindPublicPetsOptions,
   FindShelterPetsOptions,
+  FindSimilarPetsOptions,
   PetRepository,
+  SimilarPetResult,
 } from '../../domain/repositories/pet.repository';
 import { PetStatus } from '../../domain/value-objects/pet-status.enum';
 
@@ -158,6 +160,70 @@ export class PetTypeOrmRepository implements PetRepository {
 
       return manager.save(Pet, pet);
     });
+  }
+
+  async findSimilarByVector(
+    vector: number[],
+    options?: FindSimilarPetsOptions,
+  ): Promise<SimilarPetResult[]> {
+    const limit =
+      options?.limit && options.limit > 0 ? Math.min(options.limit, 50) : 12;
+    const threshold = options?.threshold ?? 0.25;
+    const vectorString = `[${vector.join(',')}]`;
+
+    const qb = this.petRepo
+      .createQueryBuilder('pet')
+      .select('pet.id', 'id')
+      .addSelect(
+        `(1 - (pet.visual_embedding <=> '${vectorString}'))`,
+        'similarity_score',
+      )
+      .where('pet.status = :status', { status: PetStatus.AVAILABLE })
+      .andWhere('pet.visual_embedding IS NOT NULL')
+      .andWhere(
+        `(1 - (pet.visual_embedding <=> '${vectorString}')) >= :threshold`,
+        { threshold },
+      );
+
+    if (options?.species) {
+      qb.andWhere('pet.species = :species', { species: options.species });
+    }
+
+    qb.orderBy(`pet.visual_embedding <=> '${vectorString}'`, 'ASC').limit(limit);
+
+    const rawResults = await qb.getRawMany<{ id: string; similarity_score: string }>();
+
+    if (!rawResults || rawResults.length === 0) {
+      return [];
+    }
+
+    const ids = rawResults.map((r) => r.id);
+    const pets = await this.petRepo.find({
+      where: { id: In(ids) },
+      relations: {
+        photos: true,
+        shelter: {
+          shelterProfile: true,
+        },
+      },
+    });
+
+    const petMap = new Map(pets.map((p) => [p.id, p]));
+
+    const results: SimilarPetResult[] = [];
+    for (const raw of rawResults) {
+      const pet = petMap.get(raw.id);
+      if (pet) {
+        const rawScore = parseFloat(raw.similarity_score ?? '0');
+        const similarity = Math.max(
+          0,
+          Math.min(1, Math.round(rawScore * 1000) / 1000),
+        );
+        results.push({ pet, similarity });
+      }
+    }
+
+    return results;
   }
 
   async softDelete(id: string): Promise<void> {
