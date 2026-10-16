@@ -155,6 +155,7 @@ describe('CreatePetUseCase', () => {
     expect(result.id).toBe('pet-uuid-1');
     expect(result.name).toBe('Pelusa');
     expect(result.ageCategory).toBe(PetAgeCategory.PUPPY); // 8 months -> puppy
+    expect(result.size).toBe(PetSize.SMALL);
     expect(result.status).toBe(PetStatus.AVAILABLE);
     expect(result.photos).toHaveLength(3);
     expect(result.shelter?.organizationName).toBe('Huellitas');
