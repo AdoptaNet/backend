@@ -25,7 +25,8 @@
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
-    "supabase:status": "supabase status"
+    "supabase:status": "supabase status",
+    "seed:api": "node scripts/seed-via-api.js"
   },
   "dependencies": {
     "@nestjs/axios": "^12.0.0",

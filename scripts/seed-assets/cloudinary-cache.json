@@ -1,0 +1,54 @@
+{
+  "dogPhotos": [
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237288/firu-api/general/hcgs8tma4ixgcrpbkjht.webp",
+      "publicId": "firu-api/general/hcgs8tma4ixgcrpbkjht"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237291/firu-api/general/xjowqzjta02brkskwi5k.webp",
+      "publicId": "firu-api/general/xjowqzjta02brkskwi5k"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237292/firu-api/general/drcoervztni6wugqeroy.webp",
+      "publicId": "firu-api/general/drcoervztni6wugqeroy"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237295/firu-api/general/rss0wphhyrfzntstkxzl.webp",
+      "publicId": "firu-api/general/rss0wphhyrfzntstkxzl"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237297/firu-api/general/wy0jtqmx3u2i6p2c5pwa.webp",
+      "publicId": "firu-api/general/wy0jtqmx3u2i6p2c5pwa"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237299/firu-api/general/z3rldpxwnuo4j9vgmdnq.webp",
+      "publicId": "firu-api/general/z3rldpxwnuo4j9vgmdnq"
+    }
+  ],
+  "catPhotos": [
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237290/firu-api/general/g2kxmqlgn3r5gtweq6bz.webp",
+      "publicId": "firu-api/general/g2kxmqlgn3r5gtweq6bz"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237292/firu-api/general/sekjbda1av5e7tru2map.webp",
+      "publicId": "firu-api/general/sekjbda1av5e7tru2map"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237294/firu-api/general/gm0b9tx5fphlzapvsxbb.webp",
+      "publicId": "firu-api/general/gm0b9tx5fphlzapvsxbb"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237296/firu-api/general/oorpblyvaxthkicopcnb.webp",
+      "publicId": "firu-api/general/oorpblyvaxthkicopcnb"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237298/firu-api/general/e9aoj1k2wrzcxcqa8jbn.webp",
+      "publicId": "firu-api/general/e9aoj1k2wrzcxcqa8jbn"
+    },
+    {
+      "url": "https://res.cloudinary.com/dadx6zirr/image/upload/v1791237300/firu-api/general/ewmbukn5vfehhznmkuw5.webp",
+      "publicId": "firu-api/general/ewmbukn5vfehhznmkuw5"
+    }
+  ]
+}

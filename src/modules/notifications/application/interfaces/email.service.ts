@@ -42,6 +42,23 @@ export interface SendShelterVerificationData {
   shelterUrl: string;
 }
 
+export interface SendNewAdoptionRequestData {
+  userId?: string;
+  petName: string;
+  adopterName: string;
+  applicationUrl: string;
+}
+
+export interface SendAdoptionStatusChangedData {
+  userId?: string;
+  adopterName: string;
+  petName: string;
+  isApproved: boolean;
+  rejectionReasonText?: string | null;
+  rejectionNotes?: string | null;
+  actionUrl: string;
+}
+
 /**
  * Contrato abstracto del servicio de correo electrónico (Clean Architecture).
  * Desacopla la lógica de negocio de la implementación de despacho (Resend, etc.).
@@ -64,5 +81,13 @@ export abstract class EmailService {
   abstract sendShelterVerificationEmail(
     to: string,
     data: SendShelterVerificationData,
+  ): Promise<SendEmailResult>;
+  abstract sendNewAdoptionRequestEmail(
+    to: string,
+    data: SendNewAdoptionRequestData,
+  ): Promise<SendEmailResult>;
+  abstract sendAdoptionStatusChangedEmail(
+    to: string,
+    data: SendAdoptionStatusChangedData,
   ): Promise<SendEmailResult>;
 }

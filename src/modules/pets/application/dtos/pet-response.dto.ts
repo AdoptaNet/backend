@@ -183,7 +183,10 @@ export class PetResponseDto {
     dto.status = pet.status;
 
     dto.photos = pet.photos
-      ? pet.photos.map((p) => PetPhotoResponseDto.fromEntity(p))
+      ? pet.photos
+          .slice()
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          .map((p) => PetPhotoResponseDto.fromEntity(p))
       : [];
 
     const profile = shelterProfile ?? pet.shelter?.shelterProfile;

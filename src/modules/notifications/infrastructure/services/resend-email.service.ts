@@ -11,6 +11,8 @@ import {
   SendEmailVerificationData,
   SendPasswordResetData,
   SendShelterVerificationData,
+  SendNewAdoptionRequestData,
+  SendAdoptionStatusChangedData,
 } from '../../application/interfaces/email.service';
 import { NotificationRepository } from '../../domain/repositories/notification.repository';
 import { NotificationChannel } from '../../domain/value-objects/notification-channel.enum';
@@ -21,6 +23,8 @@ import { WelcomeEmailTemplate } from '../../presentation/templates/welcome-email
 import { EmailVerificationTemplate } from '../../presentation/templates/email-verification.template';
 import { PasswordResetTemplate } from '../../presentation/templates/password-reset.template';
 import { ShelterVerificationTemplate } from '../../presentation/templates/shelter-verification.template';
+import { NewAdoptionRequestTemplate } from '../../presentation/templates/new-adoption-request.template';
+import { AdoptionStatusChangedTemplate } from '../../presentation/templates/adoption-status-changed.template';
 
 @Injectable()
 export class ResendEmailService implements EmailService {
@@ -245,6 +249,63 @@ export class ResendEmailService implements EmailService {
       userId: data.userId,
       type: NotificationType.SHELTER_VERIFIED,
       metadata: { isVerified: data.isVerified },
+    });
+  }
+
+  /**
+   * Envía la notificación al albergue cuando un adoptante postula formalmente a una mascota (US-15).
+   */
+  async sendNewAdoptionRequestEmail(
+    to: string,
+    data: SendNewAdoptionRequestData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(NewAdoptionRequestTemplate, {
+      petName: data.petName,
+      adopterName: data.adopterName,
+      applicationUrl: data.applicationUrl,
+    });
+
+    return await this.sendEmail({
+      to,
+      subject: `🐾 ¡Nueva solicitud de adopción recibida para ${data.petName}!`,
+      template,
+      userId: data.userId,
+      type: NotificationType.NEW_ADOPTION_REQUEST,
+      metadata: { petName: data.petName, adopterName: data.adopterName },
+    });
+  }
+
+  /**
+   * Envía la resolución o actualización de la solicitud de adopción al adoptante (US-16).
+   */
+  async sendAdoptionStatusChangedEmail(
+    to: string,
+    data: SendAdoptionStatusChangedData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(AdoptionStatusChangedTemplate, {
+      adopterName: data.adopterName,
+      petName: data.petName,
+      isApproved: data.isApproved,
+      rejectionReasonText: data.rejectionReasonText,
+      rejectionNotes: data.rejectionNotes,
+      actionUrl: data.actionUrl,
+    });
+
+    const subject = data.isApproved
+      ? `🎉 ¡Felicidades! Tu solicitud de adopción para ${data.petName} fue aprobada`
+      : `ℹ️ Actualización sobre tu solicitud de adopción para ${data.petName}`;
+
+    return await this.sendEmail({
+      to,
+      subject,
+      template,
+      userId: data.userId,
+      type: NotificationType.ADOPTION_STATUS_CHANGED,
+      metadata: {
+        petName: data.petName,
+        isApproved: data.isApproved,
+        rejectionReasonText: data.rejectionReasonText,
+      },
     });
   }
 }
