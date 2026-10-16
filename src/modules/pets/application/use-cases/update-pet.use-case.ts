@@ -10,6 +10,7 @@ import { PetAccessForbiddenException } from '../../domain/exceptions/pet-access-
 import { PetNotFoundException } from '../../domain/exceptions/pet-not-found.exception';
 import { PetRepository } from '../../domain/repositories/pet.repository';
 import { calculateAgeCategory } from '../../domain/utils/calculate-age-category.util';
+import { buildPetCharacteristics } from '../../domain/utils/pet-characteristics.util';
 import { PetResponseDto } from '../dtos/pet-response.dto';
 import { UpdatePetDto } from '../dtos/update-pet.dto';
 
@@ -87,33 +88,71 @@ export class UpdatePetUseCase {
     }
 
     if (dto.size !== undefined) pet.size = dto.size;
-    if (dto.furLength !== undefined) pet.furLength = dto.furLength;
-    if (dto.isSterilized !== undefined) pet.isSterilized = dto.isSterilized;
-    if (dto.isVaccinated !== undefined) pet.isVaccinated = dto.isVaccinated;
-    if (dto.healthStatus !== undefined) pet.healthStatus = dto.healthStatus;
-    if (dto.healthNotes !== undefined) {
-      pet.healthNotes = dto.healthNotes?.trim() || null;
-    }
-    if (dto.energyLevel !== undefined) pet.energyLevel = dto.energyLevel;
-    if (dto.goodWithChildren !== undefined) {
-      pet.goodWithChildren = dto.goodWithChildren;
-    }
-    if (dto.goodWithDogs !== undefined) pet.goodWithDogs = dto.goodWithDogs;
-    if (dto.goodWithCats !== undefined) pet.goodWithCats = dto.goodWithCats;
-    if (dto.vocalizationLevel !== undefined) {
-      pet.vocalizationLevel = dto.vocalizationLevel;
-    }
-    if (dto.trainingLevel !== undefined) {
-      pet.trainingLevel = dto.trainingLevel;
-    }
-    if (dto.timeAloneToleranceHours !== undefined) {
-      pet.timeAloneToleranceHours = dto.timeAloneToleranceHours;
-    }
-    if (dto.shelterStayMonths !== undefined) {
-      pet.shelterStayMonths = dto.shelterStayMonths;
-    }
     if (dto.description !== undefined) pet.description = dto.description.trim();
     if (dto.status !== undefined) pet.status = dto.status;
+
+    if (
+      dto.characteristics !== undefined ||
+      dto.colors !== undefined ||
+      dto.furLength !== undefined ||
+      dto.isSterilized !== undefined ||
+      dto.isVaccinated !== undefined ||
+      dto.healthStatus !== undefined ||
+      dto.healthNotes !== undefined ||
+      dto.energyLevel !== undefined ||
+      dto.goodWithChildren !== undefined ||
+      dto.goodWithDogs !== undefined ||
+      dto.goodWithCats !== undefined ||
+      dto.vocalizationLevel !== undefined ||
+      dto.trainingLevel !== undefined ||
+      dto.timeAloneToleranceHours !== undefined ||
+      dto.shelterStayMonths !== undefined
+    ) {
+      const prevChars = pet.characteristics || {};
+      const prevMed = prevChars.medical || {};
+      const prevBeh = prevChars.behavioral || {};
+
+      pet.characteristics = dto.characteristics || {
+        ...prevChars,
+        colors: dto.colors ?? prevChars.colors ?? [],
+        medical: {
+          ...prevMed,
+          fur_length: dto.furLength ?? prevMed.fur_length ?? 'short',
+          is_sterilized: dto.isSterilized ?? prevMed.is_sterilized ?? false,
+          is_vaccinated: dto.isVaccinated ?? prevMed.is_vaccinated ?? false,
+          health_status: dto.healthStatus ?? prevMed.health_status ?? 'healthy',
+          health_notes:
+            dto.healthNotes !== undefined
+              ? dto.healthNotes?.trim() || null
+              : (prevMed.health_notes ?? null),
+        },
+        behavioral: {
+          ...prevBeh,
+          energy_level: dto.energyLevel ?? prevBeh.energy_level ?? 3,
+          vocalization_level:
+            dto.vocalizationLevel ?? prevBeh.vocalization_level ?? 1,
+          training_level: dto.trainingLevel ?? prevBeh.training_level ?? 'none',
+          good_with_children:
+            dto.goodWithChildren !== undefined
+              ? dto.goodWithChildren
+              : (prevBeh.good_with_children ?? null),
+          good_with_dogs:
+            dto.goodWithDogs !== undefined
+              ? dto.goodWithDogs
+              : (prevBeh.good_with_dogs ?? null),
+          good_with_cats:
+            dto.goodWithCats !== undefined
+              ? dto.goodWithCats
+              : (prevBeh.good_with_cats ?? null),
+          time_alone_tolerance_hours:
+            dto.timeAloneToleranceHours !== undefined
+              ? dto.timeAloneToleranceHours
+              : (prevBeh.time_alone_tolerance_hours ?? null),
+          shelter_stay_months:
+            dto.shelterStayMonths ?? prevBeh.shelter_stay_months ?? 0,
+        },
+      };
+    }
 
     const savedPet = await this.petRepository.save(pet);
 

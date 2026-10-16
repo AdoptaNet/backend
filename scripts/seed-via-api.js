@@ -99,6 +99,266 @@ async function uploadPhoto(token, filePath) {
   return { url: data.url, publicId: data.publicId };
 }
 
+const petsConfig = [
+  // Albergue 1 (Huellitas)
+  {
+    shelterIndex: 0,
+    name: 'Max',
+    species: 'dog',
+    breed: 'Golden Retriever Mix',
+    gender: 'male',
+    ageMonths: 18,
+    size: 'medium',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 4,
+    vocalizationLevel: 2,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: false,
+    colors: ['crema', 'marron'],
+    description: 'Max es un perrito noble, muy juguetón y lleno de energía positiva. Ama correr en parques y convivir con familias activas.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 0,
+    name: 'Luna',
+    species: 'dog',
+    breed: 'Mestiza',
+    gender: 'female',
+    ageMonths: 24,
+    size: 'medium',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 3,
+    vocalizationLevel: 1,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: true,
+    colors: ['negro', 'blanco'],
+    description: 'Luna es tranquila, dulce y muy obediente. Ideal para departamento o casa con rutina relajada.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 0,
+    name: 'Mishi',
+    species: 'cat',
+    breed: 'Atigrado Europeo',
+    gender: 'female',
+    ageMonths: 14,
+    size: 'small',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 2,
+    vocalizationLevel: 2,
+    goodWithChildren: true,
+    goodWithDogs: false,
+    goodWithCats: true,
+    colors: ['gris', 'blanco'],
+    description: 'Mishi adora descansar cerca de ventanas soleadas y recibir caricias. Muy limpia y sociable con otros gatos.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 0,
+    name: 'Rocky',
+    species: 'dog',
+    breed: 'Labrador Mestizo',
+    gender: 'male',
+    ageMonths: 36,
+    size: 'large',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 3,
+    vocalizationLevel: 2,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: false,
+    colors: ['marron', 'negro'],
+    description: 'Rocky es un perro guardián y compañero leal rescatado en una obra. Tiene entrenamiento básico y es muy obediente.',
+    status: 'available',
+  },
+
+  // Albergue 2 (Patitas)
+  {
+    shelterIndex: 1,
+    name: 'Simba',
+    species: 'cat',
+    breed: 'Naranjoso Mestizo',
+    gender: 'male',
+    ageMonths: 10,
+    size: 'small',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 3,
+    vocalizationLevel: 3,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: true,
+    colors: ['crema', 'marron'],
+    description: 'Simba es un gatito curioso y ronroneador que busca cariño permanente. Se lleva genial con todos en casa.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 1,
+    name: 'Toby',
+    species: 'dog',
+    breed: 'Beagle Mestizo',
+    gender: 'male',
+    ageMonths: 15,
+    size: 'small',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 3,
+    vocalizationLevel: 3,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: null,
+    colors: ['marron', 'blanco', 'negro'],
+    description: 'Toby es alegre, cariñoso y tiene un olfato insaciable. Le encantan las caminatas diarias por el parque.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 1,
+    name: 'Nala',
+    species: 'cat',
+    breed: 'Siamés Mestiza',
+    gender: 'female',
+    ageMonths: 20,
+    size: 'small',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 2,
+    vocalizationLevel: 2,
+    goodWithChildren: false,
+    goodWithDogs: false,
+    goodWithCats: true,
+    colors: ['crema', 'marron'],
+    description: 'Nala es una señorita elegante, algo tímida al inicio pero fiel y protectora de su espacio.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 1,
+    name: 'Balto',
+    species: 'dog',
+    breed: 'Husky Mestizo',
+    gender: 'male',
+    ageMonths: 48,
+    size: 'large',
+    furLength: 'long',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 3,
+    vocalizationLevel: 2,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: false,
+    colors: ['negro', 'gris', 'blanco'],
+    description: 'Balto es un noble ejemplar rescatado en carretera. Muy cariñoso con adultos y protector del hogar.',
+    status: 'available',
+  },
+
+  // Albergue 3 (San Roque)
+  {
+    shelterIndex: 2,
+    name: 'Copito',
+    species: 'cat',
+    breed: 'Blanco Doméstico',
+    gender: 'male',
+    ageMonths: 8,
+    size: 'small',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 4,
+    vocalizationLevel: 1,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: true,
+    colors: ['blanco'],
+    description: 'Copito es puro amor y alegría. Juguetón incansable de plumeros y pelotas de tela.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 2,
+    name: 'Bella',
+    species: 'dog',
+    breed: 'Podenco Mestizo',
+    gender: 'female',
+    ageMonths: 16,
+    size: 'medium',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 3,
+    vocalizationLevel: 1,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: true,
+    colors: ['marron', 'blanco'],
+    description: 'Bella es ágil, inteligente y con mirada enternecedora. Se adapta rápido a cualquier hogar con cariño.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 2,
+    name: 'Pelusa',
+    species: 'cat',
+    breed: 'Gata de Pelo Largo',
+    gender: 'female',
+    ageMonths: 30,
+    size: 'small',
+    furLength: 'long',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 1,
+    vocalizationLevel: 1,
+    goodWithChildren: true,
+    goodWithDogs: false,
+    goodWithCats: true,
+    colors: ['blanco', 'gris'],
+    description: 'Pelusa es una bolita de algodón silenciosa y relajada. Ama dormir en cojines y que la cepillen con paciencia.',
+    status: 'available',
+  },
+  {
+    shelterIndex: 2,
+    name: 'Thor',
+    species: 'dog',
+    breed: 'Pastor Mestizo',
+    gender: 'male',
+    ageMonths: 28,
+    size: 'large',
+    furLength: 'short',
+    isSterilized: true,
+    isVaccinated: true,
+    healthStatus: 'healthy',
+    energyLevel: 4,
+    vocalizationLevel: 2,
+    goodWithChildren: true,
+    goodWithDogs: true,
+    goodWithCats: false,
+    colors: ['negro', 'marron'],
+    description: 'Thor es valiente, juguetón y atlético. Busca personas que disfruten del senderismo o correr.',
+    status: 'available',
+  },
+];
+
 async function main() {
   console.log('===============================================================');
   console.log('🐾 INICIANDO SEEDING COMPLETO A TRAVÉS DE LA API DE ADOPTANET 🐾');
@@ -117,39 +377,62 @@ async function main() {
   const { token: adminToken, user: adminUser } = await login(adminEmail, commonPass);
   console.log(`✔ Admin creado: ${adminEmail} (UUID: ${adminUser.id})`);
 
-  // 3. Subir fotos a Cloudinary usando la API (o usar caché para ejecuciones instantáneas)
+  // 3. Subir fotos personalizadas a Cloudinary usando la API (o usar caché)
   const assetsDir = path.join(__dirname, 'seed-assets');
+  const petsAssetsDir = path.join(assetsDir, 'pets');
   const cacheFile = path.join(assetsDir, 'cloudinary-cache.json');
-  let dogPhotos = [];
-  let catPhotos = [];
+  let petsPhotosCache = {};
 
   if (fs.existsSync(cacheFile)) {
-    console.log('\n[3/7] Usando URLs cacheadas de Cloudinary (ejecución ultrarrápida)...');
-    const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
-    dogPhotos = cached.dogPhotos;
-    catPhotos = cached.catPhotos;
-    console.log(`✔ Cargadas ${dogPhotos.length} fotos de perros y ${catPhotos.length} fotos de gatos desde caché.`);
-  } else {
-    console.log('\n[3/7] Subiendo lote de fotos reales a Cloudinary mediante POST /media/upload...');
-    for (let i = 1; i <= 6; i++) {
-      const dogPath = path.join(assetsDir, `dog-${i}.jpg`);
-      const catPath = path.join(assetsDir, `cat-${i}.jpg`);
-
-      if (fs.existsSync(dogPath)) {
-        process.stdout.write(`  - Subiendo dog-${i}.jpg... `);
-        const res = await uploadPhoto(adminToken, dogPath);
-        dogPhotos.push(res);
-        console.log('✔ OK');
+    try {
+      const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+      if (cached.pets) {
+        petsPhotosCache = cached.pets;
+        console.log(`\n[3/7] Usando URLs cacheadas de Cloudinary (${Object.keys(petsPhotosCache).length} mascotas)...`);
       }
-      if (fs.existsSync(catPath)) {
-        process.stdout.write(`  - Subiendo cat-${i}.jpg... `);
-        const res = await uploadPhoto(adminToken, catPath);
-        catPhotos.push(res);
+    } catch {
+      // Ignorar error de caché y regenerar
+    }
+  }
+
+  console.log('\n[3/7] Verificando fotos dedicadas por mascota en Cloudinary...');
+  let cacheUpdated = false;
+
+  for (const p of petsConfig) {
+    const petKey = p.name.toLowerCase();
+    if (petsPhotosCache[petKey] && petsPhotosCache[petKey].length === 3) {
+      console.log(`  ✔ ${p.name}: 3 fotos cargadas desde caché.`);
+      continue;
+    }
+
+    console.log(`  - Subiendo 3 fotos reales para '${p.name}' desde seed-assets/pets/${petKey}...`);
+    const petFolder = path.join(petsAssetsDir, petKey);
+    const uploadedPhotos = [];
+
+    for (let i = 1; i <= 3; i++) {
+      const photoPath = path.join(petFolder, `${i}.jpg`);
+      if (fs.existsSync(photoPath)) {
+        process.stdout.write(`    Subiendo ${petKey}/${i}.jpg... `);
+        const res = await uploadPhoto(adminToken, photoPath);
+        uploadedPhotos.push({
+          url: res.url,
+          publicId: res.publicId,
+          isPrimary: i === 1,
+          order: i - 1,
+        });
         console.log('✔ OK');
+      } else {
+        console.warn(`    ⚠ Archivo no encontrado: ${photoPath}`);
       }
     }
-    fs.writeFileSync(cacheFile, JSON.stringify({ dogPhotos, catPhotos }, null, 2));
-    console.log(`✔ Subidas y cacheadas ${dogPhotos.length} fotos de perros y ${catPhotos.length} fotos de gatos.`);
+
+    petsPhotosCache[petKey] = uploadedPhotos;
+    cacheUpdated = true;
+  }
+
+  if (cacheUpdated) {
+    fs.writeFileSync(cacheFile, JSON.stringify({ pets: petsPhotosCache }, null, 2));
+    console.log('✔ Archivo cloudinary-cache.json actualizado con éxito.');
   }
 
   // 4. Crear Albergues
@@ -399,282 +682,11 @@ async function main() {
   // 6. Crear Mascotas via POST /pets
   console.log('\n[6/7] Creando 12 Mascotas mediante POST /pets...');
 
-  function makePhotoList(species, offset) {
-    const list = species === 'dog' ? dogPhotos : catPhotos;
-    const p1 = list[offset % list.length];
-    const p2 = list[(offset + 1) % list.length];
-    const p3 = list[(offset + 2) % list.length];
-    return [
-      { url: p1.url, publicId: p1.publicId, isPrimary: true, order: 0 },
-      { url: p2.url, publicId: p2.publicId, isPrimary: false, order: 1 },
-      { url: p3.url, publicId: p3.publicId, isPrimary: false, order: 2 },
-    ];
-  }
-
-  const petsConfig = [
-    // Albergue 1 (Huellitas)
-    {
-      shelterIndex: 0,
-      name: 'Max',
-      species: 'dog',
-      breed: 'Golden Retriever Mix',
-      gender: 'male',
-      ageMonths: 18,
-      size: 'medium',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 4,
-      vocalizationLevel: 2,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: false,
-      description: 'Max es un perrito noble, muy juguetón y lleno de energía positiva. Ama correr en parques y convivir con familias activas.',
-      status: 'available',
-      offset: 0,
-    },
-    {
-      shelterIndex: 0,
-      name: 'Luna',
-      species: 'dog',
-      breed: 'Mestiza',
-      gender: 'female',
-      ageMonths: 24,
-      size: 'medium',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 3,
-      vocalizationLevel: 1,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: true,
-      description: 'Luna es tranquila, dulce y muy obediente. Ideal para departamento o casa con rutina relajada.',
-      status: 'available',
-      offset: 1,
-    },
-    {
-      shelterIndex: 0,
-      name: 'Mishi',
-      species: 'cat',
-      breed: 'Atigrado Europeo',
-      gender: 'female',
-      ageMonths: 14,
-      size: 'small',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 2,
-      vocalizationLevel: 2,
-      goodWithChildren: true,
-      goodWithDogs: false,
-      goodWithCats: true,
-      description: 'Mishi adora descansar cerca de ventanas soleadas y recibir caricias. Muy limpia y sociable con otros gatos.',
-      status: 'available',
-      offset: 0,
-    },
-    {
-      shelterIndex: 0,
-      name: 'Rocky',
-      species: 'dog',
-      breed: 'Labrador Mestizo',
-      gender: 'male',
-      ageMonths: 36,
-      size: 'large',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 3,
-      vocalizationLevel: 2,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: false,
-      description: 'Rocky es un perro guardián y compañero leal rescatado en una obra. Tiene entrenamiento básico y es muy obediente.',
-      status: 'available', // pasará a adopted por solicitud
-      offset: 2,
-    },
-
-    // Albergue 2 (Patitas)
-    {
-      shelterIndex: 1,
-      name: 'Simba',
-      species: 'cat',
-      breed: 'Naranjoso Mestizo',
-      gender: 'male',
-      ageMonths: 10,
-      size: 'small',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 3,
-      vocalizationLevel: 3,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: true,
-      description: 'Simba es un gatito curioso y ronroneador que busca cariño permanente. Se lleva genial con todos en casa.',
-      status: 'available',
-      offset: 1,
-    },
-    {
-      shelterIndex: 1,
-      name: 'Toby',
-      species: 'dog',
-      breed: 'Beagle Mestizo',
-      gender: 'male',
-      ageMonths: 15,
-      size: 'small',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 3,
-      vocalizationLevel: 3,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: null,
-      description: 'Toby es alegre, cariñoso y tiene un olfato insaciable. Le encantan las caminatas diarias por el parque.',
-      status: 'available',
-      offset: 3,
-    },
-    {
-      shelterIndex: 1,
-      name: 'Nala',
-      species: 'cat',
-      breed: 'Siamés Mestiza',
-      gender: 'female',
-      ageMonths: 20,
-      size: 'small',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 2,
-      vocalizationLevel: 2,
-      goodWithChildren: false,
-      goodWithDogs: false,
-      goodWithCats: true,
-      description: 'Nala es una señorita elegante, algo tímida al inicio pero fiel y protectora de su espacio.',
-      status: 'available',
-      offset: 2,
-    },
-    {
-      shelterIndex: 1,
-      name: 'Balto',
-      species: 'dog',
-      breed: 'Husky Mestizo',
-      gender: 'male',
-      ageMonths: 48,
-      size: 'large',
-      furLength: 'long',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 3,
-      vocalizationLevel: 2,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: false,
-      description: 'Balto es un noble ejemplar rescatado en carretera. Muy cariñoso con adultos y protector del hogar.',
-      status: 'available',
-      offset: 4,
-    },
-
-    // Albergue 3 (San Roque)
-    {
-      shelterIndex: 2,
-      name: 'Copito',
-      species: 'cat',
-      breed: 'Blanco Doméstico',
-      gender: 'male',
-      ageMonths: 8,
-      size: 'small',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 4,
-      vocalizationLevel: 1,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: true,
-      description: 'Copito es puro amor y alegría. Juguetón incansable de plumeros y pelotas de tela.',
-      status: 'available',
-      offset: 3,
-    },
-    {
-      shelterIndex: 2,
-      name: 'Bella',
-      species: 'dog',
-      breed: 'Podenco Mestizo',
-      gender: 'female',
-      ageMonths: 16,
-      size: 'medium',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 3,
-      vocalizationLevel: 1,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: true,
-      description: 'Bella es ágil, inteligente y con mirada enternecedora. Se adapta rápido a cualquier hogar con cariño.',
-      status: 'available',
-      offset: 5,
-    },
-    {
-      shelterIndex: 2,
-      name: 'Pelusa',
-      species: 'cat',
-      breed: 'Gata de Pelo Largo',
-      gender: 'female',
-      ageMonths: 30,
-      size: 'small',
-      furLength: 'long',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 1,
-      vocalizationLevel: 1,
-      goodWithChildren: true,
-      goodWithDogs: false,
-      goodWithCats: true,
-      description: 'Pelusa es una bolita de algodón silenciosa y relajada. Ama dormir en cojines y que la cepillen con paciencia.',
-      status: 'available',
-      offset: 4,
-    },
-    {
-      shelterIndex: 2,
-      name: 'Thor',
-      species: 'dog',
-      breed: 'Pastor Mestizo',
-      gender: 'male',
-      ageMonths: 28,
-      size: 'large',
-      furLength: 'short',
-      isSterilized: true,
-      isVaccinated: true,
-      healthStatus: 'healthy',
-      energyLevel: 4,
-      vocalizationLevel: 2,
-      goodWithChildren: true,
-      goodWithDogs: true,
-      goodWithCats: false,
-      description: 'Thor es valiente, juguetón y atlético. Busca personas que disfruten del senderismo o correr.',
-      status: 'available',
-      offset: 0,
-    },
-  ];
-
   const createdPets = [];
   for (const p of petsConfig) {
     const shelter = shelters[p.shelterIndex];
-    const photos = makePhotoList(p.species, p.offset);
+    const petKey = p.name.toLowerCase();
+    const photos = petsPhotosCache[petKey] || [];
 
     const petRes = await request('/pets', {
       method: 'POST',
@@ -699,6 +711,7 @@ async function main() {
         goodWithDogs: p.goodWithDogs,
         goodWithCats: p.goodWithCats,
         description: p.description,
+        colors: p.colors || [],
         photos,
       }),
     });

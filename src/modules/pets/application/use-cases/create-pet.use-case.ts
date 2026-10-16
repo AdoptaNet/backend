@@ -11,6 +11,7 @@ import { PetAccessForbiddenException } from '../../domain/exceptions/pet-access-
 import { ShelterProfileIncompleteException } from '../../domain/exceptions/shelter-profile-incomplete.exception';
 import { PetRepository } from '../../domain/repositories/pet.repository';
 import { calculateAgeCategory } from '../../domain/utils/calculate-age-category.util';
+import { buildPetCharacteristics } from '../../domain/utils/pet-characteristics.util';
 import { PetFurLength } from '../../domain/value-objects/pet-fur-length.enum';
 import { PetHealthStatus } from '../../domain/value-objects/pet-health-status.enum';
 import { PetStatus } from '../../domain/value-objects/pet-status.enum';
@@ -70,21 +71,10 @@ export class CreatePetUseCase {
     pet.ageMonths = dto.ageMonths;
     pet.ageCategory = ageCategory;
     pet.size = dto.size;
-    pet.furLength = dto.furLength ?? PetFurLength.SHORT;
-    pet.isSterilized = dto.isSterilized ?? false;
-    pet.isVaccinated = dto.isVaccinated ?? false;
-    pet.healthStatus = dto.healthStatus ?? PetHealthStatus.HEALTHY;
-    pet.healthNotes = dto.healthNotes?.trim() || null;
-    pet.energyLevel = dto.energyLevel;
-    pet.goodWithChildren = dto.goodWithChildren ?? null;
-    pet.goodWithDogs = dto.goodWithDogs ?? null;
-    pet.goodWithCats = dto.goodWithCats ?? null;
-    pet.vocalizationLevel = dto.vocalizationLevel;
-    pet.trainingLevel = dto.trainingLevel ?? PetTrainingLevel.NONE;
-    pet.timeAloneToleranceHours = dto.timeAloneToleranceHours ?? null;
-    pet.shelterStayMonths = dto.shelterStayMonths ?? 0;
     pet.description = dto.description.trim();
     pet.status = dto.status ?? PetStatus.AVAILABLE;
+    pet.characteristics =
+      dto.characteristics || buildPetCharacteristics(dto, dto.colors);
 
     pet.photos = dto.photos.map((p, index) => {
       const photo = new PetPhoto();
