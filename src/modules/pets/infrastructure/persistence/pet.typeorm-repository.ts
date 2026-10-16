@@ -6,7 +6,9 @@ import { Pet } from '../../domain/entities/pet.entity';
 import {
   FindPublicPetsOptions,
   FindShelterPetsOptions,
+  FindSimilarPetsOptions,
   PetRepository,
+  SimilarPetResult,
 } from '../../domain/repositories/pet.repository';
 import { PetStatus } from '../../domain/value-objects/pet-status.enum';
 
@@ -158,6 +160,57 @@ export class PetTypeOrmRepository implements PetRepository {
 
       return manager.save(Pet, pet);
     });
+  }
+
+  async findSimilarByVector(
+    vector: number[],
+    options?: FindSimilarPetsOptions,
+  ): Promise<SimilarPetResult[]> {
+    const limit =
+      options?.limit && options.limit > 0 ? Math.min(options.limit, 50) : 12;
+    const threshold = options?.threshold ?? 0.3;
+    const vectorString = `[${vector.join(',')}]`;
+
+    const qb = this.petRepo
+      .createQueryBuilder('pet')
+      .leftJoinAndSelect('pet.photos', 'photos')
+      .leftJoinAndSelect('pet.shelter', 'shelter')
+      .leftJoinAndSelect('shelter.shelterProfile', 'shelterProfile')
+      .addSelect(
+        `(1 - (pet.visual_embedding <=> '${vectorString}'))`,
+        'similarity_score',
+      )
+      .where('pet.status = :status', { status: PetStatus.AVAILABLE })
+      .andWhere('pet.visual_embedding IS NOT NULL')
+      .andWhere(
+        `(1 - (pet.visual_embedding <=> '${vectorString}')) >= :threshold`,
+        { threshold },
+      );
+
+    if (options?.species) {
+      qb.andWhere('pet.species = :species', { species: options.species });
+    }
+
+    qb.orderBy(`pet.visual_embedding <=> '${vectorString}'`, 'ASC').take(limit);
+
+    const { entities, raw } = await qb.getRawAndEntities();
+
+    const results: SimilarPetResult[] = [];
+    for (let i = 0; i < entities.length; i++) {
+      const pet = entities[i];
+      const rawItem =
+        raw.find((r) => r.pet_id === pet.id || r.id === pet.id) || raw[i];
+      const rawScore = parseFloat(
+        rawItem?.similarity_score ?? rawItem?.similarityScore ?? '0',
+      );
+      const similarity = Math.max(
+        0,
+        Math.min(1, Math.round(rawScore * 1000) / 1000),
+      );
+      results.push({ pet, similarity });
+    }
+
+    return results;
   }
 
   async softDelete(id: string): Promise<void> {

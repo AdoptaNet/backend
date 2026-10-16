@@ -24,6 +24,17 @@ export interface FindPublicPetsOptions {
   limit?: number;
 }
 
+export interface FindSimilarPetsOptions {
+  limit?: number;
+  species?: PetSpecies;
+  threshold?: number;
+}
+
+export interface SimilarPetResult {
+  pet: Pet;
+  similarity: number;
+}
+
 export abstract class PetRepository {
   abstract findById(id: string): Promise<Pet | null>;
   abstract findByIdWithPhotos(id: string): Promise<Pet | null>;
@@ -32,6 +43,10 @@ export abstract class PetRepository {
     options: FindShelterPetsOptions,
   ): Promise<[Pet[], number]>;
   abstract findPublic(options: FindPublicPetsOptions): Promise<[Pet[], number]>;
+  abstract findSimilarByVector(
+    vector: number[],
+    options?: FindSimilarPetsOptions,
+  ): Promise<SimilarPetResult[]>;
   abstract save(pet: Pet): Promise<Pet>;
   abstract softDelete(id: string): Promise<void>;
 }
