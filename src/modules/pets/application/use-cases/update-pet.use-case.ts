@@ -154,6 +154,10 @@ export class UpdatePetUseCase {
       };
     }
 
+    if (dto.visualEmbedding !== undefined) {
+      pet.visualEmbedding = dto.visualEmbedding;
+    }
+
     const savedPet = await this.petRepository.save(pet);
 
     this.eventEmitter.emit(

@@ -75,6 +75,9 @@ export class CreatePetUseCase {
     pet.status = dto.status ?? PetStatus.AVAILABLE;
     pet.characteristics =
       dto.characteristics || buildPetCharacteristics(dto, dto.colors);
+    if (dto.visualEmbedding && Array.isArray(dto.visualEmbedding)) {
+      pet.visualEmbedding = dto.visualEmbedding;
+    }
 
     pet.photos = dto.photos.map((p, index) => {
       const photo = new PetPhoto();

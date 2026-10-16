@@ -260,6 +260,14 @@ export class CreatePetDto {
   @IsOptional()
   characteristics?: Record<string, any>;
 
+  @ApiPropertyOptional({
+    description: 'Vector visual embedding generado por DINOv2 (384 dimensiones)',
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  visualEmbedding?: number[];
+
   @ApiProperty({
     description:
       'Lista de fotos subidas previamente (mínimo 3, máximo 6, exactamente una principal)',
