@@ -177,6 +177,7 @@ export class PetResponseDto {
     dto.gender = pet.gender;
     dto.ageMonths = pet.ageMonths;
     dto.ageCategory = pet.ageCategory;
+    dto.size = pet.size;
     const chars = pet.characteristics || {};
     const medical = chars.medical || {};
     const behavioral = chars.behavioral || {};
