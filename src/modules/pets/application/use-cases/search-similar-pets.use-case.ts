@@ -35,9 +35,13 @@ export class SearchSimilarPetsUseCase {
 
     // 2. Determinar filtro de especie (si no fue forzado, se usa la detectada con alta confianza si existe)
     let speciesFilter = options?.species;
-    if (!speciesFilter && embeddingData.detected_species && (embeddingData.species_confidence || 0) >= 0.75) {
-      speciesFilter =
-        embeddingData.detected_species === 'dog' ? PetSpecies.DOG : PetSpecies.CAT;
+    const detectedLower = embeddingData.detected_species?.toLowerCase();
+    if (!speciesFilter && detectedLower && (embeddingData.species_confidence || 0) >= 0.75) {
+      if (detectedLower === 'dog' || detectedLower === 'perro') {
+        speciesFilter = PetSpecies.DOG;
+      } else if (detectedLower === 'cat' || detectedLower === 'gato') {
+        speciesFilter = PetSpecies.CAT;
+      }
     }
 
     // 3. Consultar mascotas similares en PostgreSQL con pgvector
