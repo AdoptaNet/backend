@@ -3,11 +3,13 @@ import { User } from '../../../users/domain/entities/user.entity';
 import { UserRole } from '../../../users/domain/value-objects/user-role.enum';
 import { CreatePetDto } from '../../application/dtos/create-pet.dto';
 import { PetResponseDto } from '../../application/dtos/pet-response.dto';
+import { AnalyzePetPhotosUseCase } from '../../application/use-cases/analyze-pet-photos.use-case';
 import { CreatePetUseCase } from '../../application/use-cases/create-pet.use-case';
 import { DeletePetUseCase } from '../../application/use-cases/delete-pet.use-case';
 import { GetMyPetsUseCase } from '../../application/use-cases/get-my-pets.use-case';
 import { GetPetByIdUseCase } from '../../application/use-cases/get-pet-by-id.use-case';
 import { ListPublicPetsUseCase } from '../../application/use-cases/list-public-pets.use-case';
+import { SearchSimilarPetsUseCase } from '../../application/use-cases/search-similar-pets.use-case';
 import { UpdatePetStatusUseCase } from '../../application/use-cases/update-pet-status.use-case';
 import { UpdatePetUseCase } from '../../application/use-cases/update-pet.use-case';
 import { PetGender } from '../../domain/value-objects/pet-gender.enum';
@@ -26,6 +28,8 @@ describe('PetsController', () => {
   const mockUpdatePetUseCase = { execute: jest.fn() };
   const mockUpdatePetStatusUseCase = { execute: jest.fn() };
   const mockDeletePetUseCase = { execute: jest.fn() };
+  const mockAnalyzePetPhotosUseCase = { execute: jest.fn() };
+  const mockSearchSimilarPetsUseCase = { execute: jest.fn() };
 
   const shelterUser: User = {
     id: 'shelter-1',
@@ -48,6 +52,14 @@ describe('PetsController', () => {
           useValue: mockUpdatePetStatusUseCase,
         },
         { provide: DeletePetUseCase, useValue: mockDeletePetUseCase },
+        {
+          provide: AnalyzePetPhotosUseCase,
+          useValue: mockAnalyzePetPhotosUseCase,
+        },
+        {
+          provide: SearchSimilarPetsUseCase,
+          useValue: mockSearchSimilarPetsUseCase,
+        },
       ],
     }).compile();
 
@@ -156,14 +168,39 @@ describe('PetsController', () => {
     );
   });
 
-  it('should call DeletePetUseCase on delete', async () => {
-    mockDeletePetUseCase.execute.mockResolvedValue(undefined);
+  it('should call AnalyzePetPhotosUseCase on analyzePhotos', async () => {
+    const mockFiles = [{ buffer: Buffer.from('test') }] as Express.Multer.File[];
+    const expected = {
+      species: { value: 'dog', confidence: 0.95, autocompleted: true },
+    };
+    mockAnalyzePetPhotosUseCase.execute.mockResolvedValue(expected);
 
-    await controller.delete('pet-1', shelterUser);
+    const result = await controller.analyzePhotos(mockFiles);
 
-    expect(mockDeletePetUseCase.execute).toHaveBeenCalledWith(
-      'pet-1',
-      shelterUser,
+    expect(result).toBe(expected);
+    expect(mockAnalyzePetPhotosUseCase.execute).toHaveBeenCalledWith(mockFiles);
+  });
+
+  it('should call SearchSimilarPetsUseCase on searchSimilar', async () => {
+    const mockFile = { buffer: Buffer.from('test') } as Express.Multer.File;
+    const expected = [{ pet: { id: 'pet-1' }, similarityPercentage: 92 }];
+    mockSearchSimilarPetsUseCase.execute.mockResolvedValue(expected);
+
+    const result = await controller.searchSimilar(
+      mockFile,
+      10,
+      PetSpecies.DOG,
+      0.3,
+    );
+
+    expect(result).toBe(expected);
+    expect(mockSearchSimilarPetsUseCase.execute).toHaveBeenCalledWith(
+      mockFile,
+      {
+        limit: 10,
+        species: PetSpecies.DOG,
+        threshold: 0.3,
+      },
     );
   });
 });

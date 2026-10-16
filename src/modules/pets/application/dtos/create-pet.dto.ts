@@ -244,6 +244,30 @@ export class CreatePetDto {
   @IsEnum(PetStatus)
   status?: PetStatus;
 
+  @ApiPropertyOptional({
+    description: 'Lista de colores identificados de la mascota',
+    example: ['negro', 'blanco'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  colors?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Documento JSONB con variables médicas y conductuales',
+  })
+  @IsOptional()
+  characteristics?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Vector visual embedding generado por DINOv2 (384 dimensiones)',
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  visualEmbedding?: number[];
+
   @ApiProperty({
     description:
       'Lista de fotos subidas previamente (mínimo 3, máximo 6, exactamente una principal)',
