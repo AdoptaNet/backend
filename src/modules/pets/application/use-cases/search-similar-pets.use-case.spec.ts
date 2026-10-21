@@ -67,5 +67,51 @@ describe('SearchSimilarPetsUseCase', () => {
     expect(results[0].pet.name).toBe('Max');
     expect(results[0].similarityScore).toBe(0.895);
     expect(results[0].similarityPercentage).toBe(90);
+    expect(results[0].matchReasons).toBeDefined();
+    expect(results[0].matchReasons.length).toBeGreaterThan(0);
+  });
+
+  it('should generate XAI matchReasons matching color, fur and size when analyzePhotos provides attributes', async () => {
+    const mockFile = { buffer: Buffer.from('test') } as Express.Multer.File;
+    const mockVector = new Array(384).fill(0.02);
+
+    visionMlService.analyzePhotos.mockResolvedValue({
+      attributes: {
+        species: { value: 'dog', label: 'Perro', confidence: 0.95 } as any,
+        fur: { value: 'corto', label: 'Corto', confidence: 0.90 } as any,
+        size: { value: 'mediano', label: 'Mediano', confidence: 0.85 } as any,
+        colors: { value: ['blanco', 'marron'], label: ['Blanco', 'Marrón'], confidence: 0.88 } as any,
+      },
+      embedding: { vector: mockVector, dimension: 384 },
+      autocompleted_fields: ['species', 'fur', 'colors'],
+      review_fields: [],
+      manual_fields: [],
+      inference_time_ms: 38.0,
+    });
+
+    const mockPet = {
+      id: 'pet-2',
+      name: 'Luna',
+      species: PetSpecies.DOG,
+      status: PetStatus.AVAILABLE,
+      photos: [],
+      characteristics: {
+        colors: ['blanco'],
+        medical: { fur_length: 'short' },
+      },
+      size: 'medium',
+    } as unknown as Pet;
+
+    petRepository.findSimilarByVector.mockResolvedValue([
+      { pet: mockPet, similarity: 0.91 },
+    ]);
+
+    const results = await useCase.execute(mockFile, { limit: 4 });
+
+    expect(results).toHaveLength(1);
+    expect(results[0].similarityPercentage).toBe(91);
+    expect(results[0].matchReasons).toContain('🎨 Color similar (Blanco)');
+    expect(results[0].matchReasons).toContain('✂️ Pelaje Corto');
+    expect(results[0].matchReasons).toContain('📏 Tamaño afín (Mediano)');
   });
 });

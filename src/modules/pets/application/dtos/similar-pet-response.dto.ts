@@ -10,4 +10,11 @@ export class SimilarPetResponseDto {
 
   @ApiProperty({ example: 92, description: 'Porcentaje entero de similitud visual' })
   similarityPercentage: number;
+
+  @ApiProperty({
+    example: ['🎨 Color similar (Crema)', '✂️ Pelaje Corto', '👁️ Fisionomía facial muy parecida'],
+    description: 'Motivos de similitud física generados por IA (XAI)',
+    type: [String],
+  })
+  matchReasons: string[];
 }

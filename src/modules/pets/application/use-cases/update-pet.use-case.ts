@@ -94,9 +94,11 @@ export class UpdatePetUseCase {
     if (
       dto.characteristics !== undefined ||
       dto.colors !== undefined ||
+      dto.adoptionFee !== undefined ||
       dto.furLength !== undefined ||
       dto.isSterilized !== undefined ||
       dto.isVaccinated !== undefined ||
+      dto.vaccinesApplied !== undefined ||
       dto.healthStatus !== undefined ||
       dto.healthNotes !== undefined ||
       dto.energyLevel !== undefined ||
@@ -111,6 +113,7 @@ export class UpdatePetUseCase {
       const prevChars = pet.characteristics || {};
       const prevMed = prevChars.medical || {};
       const prevBeh = prevChars.behavioral || {};
+      const prevFin = prevChars.financial || {};
 
       pet.characteristics = dto.characteristics || {
         ...prevChars,
@@ -120,6 +123,14 @@ export class UpdatePetUseCase {
           fur_length: dto.furLength ?? prevMed.fur_length ?? 'short',
           is_sterilized: dto.isSterilized ?? prevMed.is_sterilized ?? false,
           is_vaccinated: dto.isVaccinated ?? prevMed.is_vaccinated ?? false,
+          vaccines_applied:
+            dto.vaccinesApplied !== undefined
+              ? (Array.isArray(dto.vaccinesApplied)
+                  ? dto.vaccinesApplied.map((v: any) => String(v).trim()).filter(Boolean)
+                  : typeof dto.vaccinesApplied === 'string'
+                    ? dto.vaccinesApplied.split(',').map((v) => v.trim()).filter(Boolean)
+                    : dto.vaccinesApplied)
+              : (prevMed.vaccines_applied ?? null),
           health_status: dto.healthStatus ?? prevMed.health_status ?? 'healthy',
           health_notes:
             dto.healthNotes !== undefined
@@ -150,6 +161,13 @@ export class UpdatePetUseCase {
               : (prevBeh.time_alone_tolerance_hours ?? null),
           shelter_stay_months:
             dto.shelterStayMonths ?? prevBeh.shelter_stay_months ?? 0,
+        },
+        financial: {
+          ...prevFin,
+          adoption_fee:
+            dto.adoptionFee !== undefined && dto.adoptionFee !== null
+              ? Number(dto.adoptionFee)
+              : (prevFin.adoption_fee ?? 0),
         },
       };
     }

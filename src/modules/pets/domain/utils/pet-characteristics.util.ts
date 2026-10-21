@@ -3,6 +3,7 @@ export function buildPetCharacteristics(
     furLength?: any;
     isSterilized?: any;
     isVaccinated?: any;
+    vaccinesApplied?: any;
     healthStatus?: any;
     healthNotes?: any;
     energyLevel?: any;
@@ -13,6 +14,7 @@ export function buildPetCharacteristics(
     goodWithCats?: any;
     timeAloneToleranceHours?: any;
     shelterStayMonths?: any;
+    adoptionFee?: any;
     characteristics?: any;
   },
   colors?: string[],
@@ -33,6 +35,14 @@ export function buildPetCharacteristics(
         pet.isVaccinated ??
         prevCharacteristics.medical?.is_vaccinated ??
         false,
+      vaccines_applied:
+        pet.vaccinesApplied !== undefined
+          ? (Array.isArray(pet.vaccinesApplied)
+              ? pet.vaccinesApplied.map((v: any) => String(v).trim()).filter(Boolean)
+              : typeof pet.vaccinesApplied === 'string'
+                ? pet.vaccinesApplied.split(',').map((v) => v.trim()).filter(Boolean)
+                : pet.vaccinesApplied)
+          : (prevCharacteristics.medical?.vaccines_applied ?? null),
       health_status:
         pet.healthStatus ??
         prevCharacteristics.medical?.health_status ??
@@ -74,6 +84,13 @@ export function buildPetCharacteristics(
         pet.shelterStayMonths ??
         prevCharacteristics.behavioral?.shelter_stay_months ??
         0,
+    },
+    financial: {
+      ...(prevCharacteristics.financial || {}),
+      adoption_fee:
+        pet.adoptionFee !== undefined && pet.adoptionFee !== null
+          ? Number(pet.adoptionFee)
+          : (prevCharacteristics.financial?.adoption_fee ?? 0),
     },
   };
 }

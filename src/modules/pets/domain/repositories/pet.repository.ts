@@ -20,6 +20,8 @@ export interface FindPublicPetsOptions {
   city?: string;
   department?: string;
   search?: string;
+  feeType?: 'all' | 'free' | 'with_fee';
+  isSterilized?: boolean;
   page?: number;
   limit?: number;
 }

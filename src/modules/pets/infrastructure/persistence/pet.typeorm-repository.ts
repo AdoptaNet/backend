@@ -123,6 +123,23 @@ export class PetTypeOrmRepository implements PetRepository {
       });
     }
 
+    if (options.feeType === 'free') {
+      qb.andWhere(
+        "(COALESCE(NULLIF(pet.characteristics->'financial'->>'adoption_fee', ''), '0')::numeric = 0)",
+      );
+    } else if (options.feeType === 'with_fee') {
+      qb.andWhere(
+        "(COALESCE(NULLIF(pet.characteristics->'financial'->>'adoption_fee', ''), '0')::numeric > 0)",
+      );
+    }
+
+    if (options.isSterilized !== undefined) {
+      qb.andWhere(
+        "(COALESCE(pet.characteristics->'medical'->>'is_sterilized', 'false'))::boolean = :isSterilized",
+        { isSterilized: options.isSterilized },
+      );
+    }
+
     qb.orderBy('pet.createdAt', 'DESC')
       .skip(skip)
       .take(limit);
