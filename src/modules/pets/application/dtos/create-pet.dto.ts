@@ -120,6 +120,14 @@ export class CreatePetDto {
   isVaccinated?: boolean;
 
   @ApiPropertyOptional({
+    description: 'Detalle o listado de vacunas aplicadas',
+    example: ['Quíntuple', 'Antirrábica'],
+    type: [String],
+  })
+  @IsOptional()
+  vaccinesApplied?: string[] | string | null;
+
+  @ApiPropertyOptional({
     description: 'Estado de salud general',
     enum: PetHealthStatus,
     example: PetHealthStatus.HEALTHY,

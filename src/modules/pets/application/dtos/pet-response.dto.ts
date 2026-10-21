@@ -101,6 +101,13 @@ export class PetResponseDto {
   @ApiProperty({ example: true })
   isVaccinated: boolean;
 
+  @ApiPropertyOptional({
+    example: ['Quíntuple', 'Antirrábica'],
+    type: [String],
+    nullable: true,
+  })
+  vaccinesApplied?: string[] | string | null;
+
   @ApiProperty({ enum: PetHealthStatus, example: PetHealthStatus.HEALTHY })
   healthStatus: PetHealthStatus;
 
@@ -185,6 +192,7 @@ export class PetResponseDto {
     dto.furLength = medical.fur_length ?? PetFurLength.SHORT;
     dto.isSterilized = medical.is_sterilized ?? false;
     dto.isVaccinated = medical.is_vaccinated ?? false;
+    dto.vaccinesApplied = medical.vaccines_applied ?? null;
     dto.healthStatus = medical.health_status ?? PetHealthStatus.HEALTHY;
     dto.healthNotes = medical.health_notes ?? null;
     dto.energyLevel = behavioral.energy_level ?? 3;

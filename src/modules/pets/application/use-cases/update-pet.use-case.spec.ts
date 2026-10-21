@@ -174,10 +174,14 @@ describe('UpdatePetUseCase', () => {
     const result = await useCase.execute('pet-1', shelterUser, {
       name: 'New Name',
       energyLevel: 4,
+      isVaccinated: true,
+      vaccinesApplied: ['Quíntuple', 'Antirrábica'],
     });
 
     expect(result.name).toBe('New Name');
     expect(result.energyLevel).toBe(4);
+    expect(result.isVaccinated).toBe(true);
+    expect(result.vaccinesApplied).toEqual(['Quíntuple', 'Antirrábica']);
     expect(mockPetRepository.save).toHaveBeenCalled();
     expect(mockEventEmitter.emit).toHaveBeenCalledWith(
       'pet.updated',
