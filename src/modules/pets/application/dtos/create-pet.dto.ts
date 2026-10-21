@@ -8,6 +8,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -231,6 +232,18 @@ export class CreatePetDto {
   @IsInt()
   @Min(0)
   shelterStayMonths?: number;
+
+  @ApiPropertyOptional({
+    description: 'Aporte de recuperación económico o simbólico para el albergue (S/)',
+    example: 50,
+    default: 0,
+    minimum: 0,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  adoptionFee?: number;
 
   @ApiProperty({
     description:

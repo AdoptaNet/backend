@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { PetAgeCategory } from '../../domain/value-objects/pet-age-category.enum';
 import { PetGender } from '../../domain/value-objects/pet-gender.enum';
 import { PetSize } from '../../domain/value-objects/pet-size.enum';
@@ -54,6 +54,26 @@ export class QueryPublicPetsDto {
   @IsOptional()
   @IsString()
   department?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por aporte (all = todos, free = adopción gratuita, with_fee = con aporte)',
+    enum: ['all', 'free', 'with_fee'],
+  })
+  @IsOptional()
+  @IsEnum(['all', 'free', 'with_fee'])
+  feeType?: 'all' | 'free' | 'with_fee';
+
+  @ApiPropertyOptional({
+    description: 'Filtrar si está esterilizado/a',
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true || value === '1') return true;
+    if (value === 'false' || value === false || value === '0') return false;
+    return undefined;
+  })
+  @IsBoolean()
+  isSterilized?: boolean;
 
   @ApiPropertyOptional({
     description: 'Búsqueda por nombre de la mascota',

@@ -116,7 +116,7 @@ export class SearchSimilarPetsUseCase {
     const colorLabelMap: Record<string, string> = {
       negro: 'Negro',
       marron: 'Marrón',
-      crema: 'Dorado / crema',
+      crema: 'Crema',
       gris: 'Gris',
       blanco: 'Blanco',
     };

@@ -20,6 +20,8 @@ export class ListPublicPetsUseCase {
       city: query.city,
       department: query.department,
       search: query.search,
+      feeType: query.feeType,
+      isSterilized: query.isSterilized,
       page,
       limit,
     });

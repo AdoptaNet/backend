@@ -94,6 +94,7 @@ export class UpdatePetUseCase {
     if (
       dto.characteristics !== undefined ||
       dto.colors !== undefined ||
+      dto.adoptionFee !== undefined ||
       dto.furLength !== undefined ||
       dto.isSterilized !== undefined ||
       dto.isVaccinated !== undefined ||
@@ -112,6 +113,7 @@ export class UpdatePetUseCase {
       const prevChars = pet.characteristics || {};
       const prevMed = prevChars.medical || {};
       const prevBeh = prevChars.behavioral || {};
+      const prevFin = prevChars.financial || {};
 
       pet.characteristics = dto.characteristics || {
         ...prevChars,
@@ -159,6 +161,13 @@ export class UpdatePetUseCase {
               : (prevBeh.time_alone_tolerance_hours ?? null),
           shelter_stay_months:
             dto.shelterStayMonths ?? prevBeh.shelter_stay_months ?? 0,
+        },
+        financial: {
+          ...prevFin,
+          adoption_fee:
+            dto.adoptionFee !== undefined && dto.adoptionFee !== null
+              ? Number(dto.adoptionFee)
+              : (prevFin.adoption_fee ?? 0),
         },
       };
     }

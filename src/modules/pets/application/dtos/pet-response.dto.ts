@@ -141,6 +141,13 @@ export class PetResponseDto {
   @ApiProperty({ example: 3 })
   shelterStayMonths: number;
 
+  @ApiPropertyOptional({
+    description: 'Aporte de recuperación económico o simbólico para el albergue (S/)',
+    example: 50,
+    default: 0,
+  })
+  adoptionFee?: number;
+
   @ApiProperty({ example: 'Un perrito muy alegre y sociable.' })
   description: string;
 
@@ -188,6 +195,7 @@ export class PetResponseDto {
     const chars = pet.characteristics || {};
     const medical = chars.medical || {};
     const behavioral = chars.behavioral || {};
+    const financial = chars.financial || {};
 
     dto.furLength = medical.fur_length ?? PetFurLength.SHORT;
     dto.isSterilized = medical.is_sterilized ?? false;
@@ -203,6 +211,10 @@ export class PetResponseDto {
     dto.trainingLevel = behavioral.training_level ?? PetTrainingLevel.NONE;
     dto.timeAloneToleranceHours = behavioral.time_alone_tolerance_hours ?? null;
     dto.shelterStayMonths = behavioral.shelter_stay_months ?? 0;
+    dto.adoptionFee =
+      financial.adoption_fee !== undefined && financial.adoption_fee !== null
+        ? Number(financial.adoption_fee)
+        : 0;
     dto.description = pet.description;
     dto.status = pet.status;
 
