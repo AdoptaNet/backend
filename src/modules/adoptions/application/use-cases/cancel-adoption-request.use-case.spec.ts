@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DataSource } from 'typeorm';
 import { AdoptionRequest } from '../../domain/entities/adoption-request.entity';
 import { AdoptionStatus } from '../../domain/value-objects/adoption-status.enum';
 import { AdoptionCancelledEvent } from '../../domain/events/adoption-cancelled.event';
@@ -18,6 +19,10 @@ describe('CancelAdoptionRequestUseCase', () => {
     save: jest.fn(),
   };
 
+  const mockDataSource = {
+    transaction: jest.fn(),
+  };
+
   const mockEventEmitter = {
     emit: jest.fn(),
   };
@@ -25,10 +30,19 @@ describe('CancelAdoptionRequestUseCase', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
 
+    mockDataSource.transaction.mockImplementation(async (callback: any) => {
+      return await callback({
+        save: jest.fn().mockImplementation((_entityClass, entity) => Promise.resolve(entity)),
+        update: jest.fn().mockResolvedValue(undefined),
+        count: jest.fn().mockResolvedValue(0),
+      });
+    });
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CancelAdoptionRequestUseCase,
         { provide: AdoptionRequestRepository, useValue: mockAdoptionRepo },
+        { provide: DataSource, useValue: mockDataSource },
         { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
@@ -88,7 +102,7 @@ describe('CancelAdoptionRequestUseCase', () => {
     const result = await useCase.execute('req-1', 'adopter-1');
 
     expect(result.status).toBe(AdoptionStatus.CANCELLED);
-    expect(mockAdoptionRepo.save).toHaveBeenCalled();
+    expect(mockDataSource.transaction).toHaveBeenCalled();
     expect(mockEventEmitter.emit).toHaveBeenCalledWith(
       AdoptionCancelledEvent.EVENT_NAME,
       expect.any(AdoptionCancelledEvent),

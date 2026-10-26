@@ -52,11 +52,22 @@ export class ReviewAdoptionRequestUseCase {
     }
 
     if (dto.status === AdoptionStatus.UNDER_REVIEW) {
-      adoption.status = AdoptionStatus.UNDER_REVIEW;
-      if (dto.reviewNotes !== undefined) {
-        adoption.reviewNotes = dto.reviewNotes?.trim() || null;
-      }
-      const saved = await this.adoptionRepo.save(adoption);
+      const saved = await this.dataSource.transaction(async (manager) => {
+        adoption.status = AdoptionStatus.UNDER_REVIEW;
+        if (dto.reviewNotes !== undefined) {
+          adoption.reviewNotes = dto.reviewNotes?.trim() || null;
+        }
+        const savedAdoption = await manager.save(AdoptionRequest, adoption);
+
+        // Actualizar automáticamente estado de la mascota a in_process si está disponible
+        await manager.update(
+          Pet,
+          { id: adoption.petId, status: PetStatus.AVAILABLE },
+          { status: PetStatus.IN_PROCESS },
+        );
+
+        return savedAdoption;
+      });
 
       this.eventEmitter.emit(
         AdoptionStatusChangedEvent.EVENT_NAME,
@@ -81,13 +92,33 @@ export class ReviewAdoptionRequestUseCase {
           'Es obligatorio seleccionar un motivo de rechazo del catálogo oficial.',
         );
       }
+      const rejectionReason = dto.rejectionReason;
 
-      adoption.status = AdoptionStatus.REJECTED;
-      adoption.rejectionReason = dto.rejectionReason;
-      adoption.rejectionNotes = dto.rejectionNotes?.trim() || null;
-      adoption.rejectedAt = new Date();
+      const saved = await this.dataSource.transaction(async (manager) => {
+        adoption.status = AdoptionStatus.REJECTED;
+        adoption.rejectionReason = rejectionReason;
+        adoption.rejectionNotes = dto.rejectionNotes?.trim() || null;
+        adoption.rejectedAt = new Date();
+        const savedAdoption = await manager.save(AdoptionRequest, adoption);
 
-      const saved = await this.adoptionRepo.save(adoption);
+        // Si no quedan otras solicitudes activas en under_review, restaurar mascota a available
+        const remainingUnderReview = await manager.count(AdoptionRequest, {
+          where: {
+            petId: adoption.petId,
+            status: AdoptionStatus.UNDER_REVIEW,
+          },
+        });
+
+        if (remainingUnderReview === 0) {
+          await manager.update(
+            Pet,
+            { id: adoption.petId, status: PetStatus.IN_PROCESS },
+            { status: PetStatus.AVAILABLE },
+          );
+        }
+
+        return savedAdoption;
+      });
 
       this.eventEmitter.emit(
         AdoptionStatusChangedEvent.EVENT_NAME,
