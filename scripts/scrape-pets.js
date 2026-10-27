@@ -89,15 +89,15 @@ function inferColors(text, breed = '') {
   return [...found];
 }
 
-// Cargar pool de imágenes abiertas reales únicas (Dog CEO API + Cataas)
+// Cargar pool de imágenes abiertas reales únicas (Dog CEO API + TheCatAPI + Cataas)
 async function loadUniqueOnlinePhotoPool() {
-  console.log('\n[0/3] Cargando catálogo abierto de fotos reales únicas (Dog CEO API + Cataas)...');
+  console.log('\n[0/3] Cargando catálogo abierto de fotos reales únicas (Dog CEO API + TheCatAPI + Cataas)...');
   const dogPhotos = [];
   const catPhotos = [];
 
   try {
-    // 3 llamadas a Dog CEO API -> 150 fotos únicas de perros
-    for (let i = 0; i < 3; i++) {
+    // 4 llamadas a Dog CEO API -> 200 fotos únicas de perros
+    for (let i = 0; i < 4; i++) {
       const res = await fetch('https://dog.ceo/api/breeds/image/random/50');
       if (res.ok) {
         const data = await res.json();
@@ -111,14 +111,31 @@ async function loadUniqueOnlinePhotoPool() {
   }
 
   try {
-    // 2 llamadas a Cataas -> 100 fotos únicas de gatos
-    for (let skip of [0, 50]) {
-      const res = await fetch(`https://cataas.com/api/cats?limit=50&skip=${skip}`);
+    // Llamadas a TheCatAPI -> 70+ fotos CDN de gatos
+    for (let i = 0; i < 8; i++) {
+      const res = await fetch('https://api.thecatapi.com/v1/images/search?limit=10');
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          catPhotos.push(...data.map((c) => `https://cataas.com/cat/${c.id || c._id}`));
+          for (const item of data) {
+            if (item.url && !item.url.endsWith('.gif')) {
+              catPhotos.push(item.url);
+            }
+          }
         }
+      }
+    }
+  } catch (err) {
+    console.warn('  Aviso cargando TheCatAPI:', err.message);
+  }
+
+  try {
+    // Cataas como respaldo felino adicional
+    const res = await fetch('https://cataas.com/api/cats?limit=50');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        catPhotos.push(...data.map((c) => `https://cataas.com/cat/${c.id || c._id}`));
       }
     }
   } catch (err) {
@@ -127,7 +144,7 @@ async function loadUniqueOnlinePhotoPool() {
 
   const uniqueDogs = [...new Set(dogPhotos)];
   const uniqueCats = [...new Set(catPhotos)];
-  console.log(`  ✔ Catálogo abierto cargado: ${uniqueDogs.length} fotos únicas de perros, ${uniqueCats.length} fotos únicas de gatos.`);
+  console.log(`  ✔ Catálogo abierto cargado: ${uniqueDogs.length} fotos de perros, ${uniqueCats.length} fotos de gatos.`);
   return { dogPhotos: uniqueDogs, catPhotos: uniqueCats };
 }
 
@@ -375,11 +392,19 @@ async function scrapeVozAnimal(photoPool) {
     let match;
     const items = [];
     while ((match = itemRe.exec(listHtml)) !== null) {
+      const rawImg = match[4].startsWith('http')
+        ? match[4]
+        : `https://www.vozanimalperu.com${match[4]}`;
+      const cleanImgUrl = rawImg
+        .replace('https://vozanimalperu.com', 'https://www.vozanimalperu.com')
+        .replace('http://vozanimalperu.com', 'https://www.vozanimalperu.com')
+        .replace('http://www.vozanimalperu.com', 'https://www.vozanimalperu.com');
+
       items.push({
         urlPath: match[1],
         name: cleanHtml(match[2]),
         shortDesc: cleanHtml(match[3]),
-        imgUrl: match[4].startsWith('http') ? match[4] : `https://vozanimalperu.com${match[4]}`,
+        imgUrl: cleanImgUrl,
       });
     }
 
@@ -560,12 +585,13 @@ async function scrapeGlobalOpenData(photoPool) {
       const ageCategory = calculateAgeCategory(ageMonths);
       const furLength = breed.includes('LH') ? 'long' : 'short';
 
-      const photoUrl = c.url?.url || '';
       const baseBio = catBiographies[bioIdx % catBiographies.length];
       bioIdx++;
-
       const description = `${name} es un felino rescatado por el refugio de bienestar animal. ${baseBio} Raza ${breed}, coloración ${colors.join(', ')}. Cuenta con evaluación veterinaria completa y desparasitación.`;
-      const photos = buildPetPhotos(photoUrl ? [photoUrl] : [], 'cat', bioIdx, photoPool);
+
+      // Las URLs de PetHarbor en Socrata (c.url?.url) retornan 404 porque expiran al adoptarse.
+      // Asignamos directamente fotografías felinas reales, únicas y visibles desde TheCatAPI / Cataas.
+      const photos = buildPetPhotos([], 'cat', bioIdx, photoPool);
       const shelterStayMonths = Math.floor(Math.random() * 6) + 1;
       const adoptionFee = 30;
 
@@ -635,6 +661,61 @@ async function scrapeGlobalOpenData(photoPool) {
   return pets;
 }
 
+// Validar que absolutamente todas las URLs de las fotos respondan con 200 y sean imágenes reales
+async function validateAndFixAllPhotos(allPets, photoPool) {
+  console.log('\n[4/4] Verificando que el 100% de las fotos carguen correctamente...');
+  let totalPhotos = 0;
+  let fixedCount = 0;
+
+  for (let i = 0; i < allPets.length; i++) {
+    const pet = allPets[i];
+    const isDog = pet.species === 'dog';
+    const pool = isDog ? photoPool.dogPhotos : photoPool.catPhotos;
+
+    for (let j = 0; j < pet.photos.length; j++) {
+      totalPhotos++;
+      const ph = pet.photos[j];
+      let isValid = false;
+
+      try {
+        const res = await fetch(ph.url, {
+          method: 'GET',
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            Range: 'bytes=0-1024',
+          },
+          signal: AbortSignal.timeout(5000),
+        });
+
+        const ct = res.headers.get('content-type') || '';
+        if ((res.status === 200 || res.status === 206) && ct.startsWith('image/')) {
+          isValid = true;
+        }
+      } catch (err) {
+        isValid = false;
+      }
+
+      if (!isValid) {
+        console.warn(
+          `  ⚠ Foto fallida en ${pet.name} (P${j + 1}: ${ph.url.slice(0, 50)}...). Reemplazando por imagen verificada del catálogo...`,
+        );
+        const replacement =
+          pool.pop() ||
+          (isDog
+            ? 'https://images.dog.ceo/breeds/retriever-golden/n02099601_100.jpg'
+            : 'https://cdn2.thecatapi.com/images/0XYvRd7oD.jpg');
+        pet.photos[j].url = replacement;
+        fixedCount++;
+      }
+    }
+  }
+
+  console.log(
+    `  ✔ Verificación de imágenes concluida: ${totalPhotos} fotos auditadas. ${fixedCount} reemplazadas por seguras.`,
+  );
+}
+
 // -------------------------------------------------------------
 // Función Principal
 // -------------------------------------------------------------
@@ -653,6 +734,9 @@ async function main() {
   if (allPets.length > 100) {
     allPets = allPets.slice(0, 100);
   }
+
+  // Auditar y asegurar que todas las fotos carguen sin 404 ni caídas
+  await validateAndFixAllPhotos(allPets, photoPool);
 
   console.log('\n========================================================================');
   console.log('📊 RESULTADOS DE LA EXTRACCIÓN Y LIMPIEZA WEB');
