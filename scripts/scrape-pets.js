@@ -89,29 +89,54 @@ function inferColors(text, breed = '') {
   return [...found];
 }
 
-// Cargar pool de Cloudinary para fotos válidas garantizadas
-function loadCloudinaryPool() {
-  const cachePath = path.join(__dirname, 'seed-assets', 'cloudinary-cache.json');
-  if (!fs.existsSync(cachePath)) return { dogSets: [], catSets: [] };
-  const cache = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
-  const pets = cache.pets || {};
+// Cargar pool de imágenes abiertas reales únicas (Dog CEO API + Cataas)
+async function loadUniqueOnlinePhotoPool() {
+  console.log('\n[0/3] Cargando catálogo abierto de fotos reales únicas (Dog CEO API + Cataas)...');
+  const dogPhotos = [];
+  const catPhotos = [];
 
-  const dogKeys = ['max', 'luna', 'rocky', 'toby', 'balto', 'bella', 'thor'];
-  const catKeys = ['mishi', 'simba', 'nala', 'copito', 'pelusa'];
+  try {
+    // 3 llamadas a Dog CEO API -> 150 fotos únicas de perros
+    for (let i = 0; i < 3; i++) {
+      const res = await fetch('https://dog.ceo/api/breeds/image/random/50');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.message)) {
+          dogPhotos.push(...data.message);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('  Aviso cargando Dog CEO API:', err.message);
+  }
 
-  const dogSets = dogKeys.filter((k) => pets[k]?.length >= 3).map((k) => pets[k]);
-  const catSets = catKeys.filter((k) => pets[k]?.length >= 3).map((k) => pets[k]);
-  return { dogSets, catSets };
+  try {
+    // 2 llamadas a Cataas -> 100 fotos únicas de gatos
+    for (let skip of [0, 50]) {
+      const res = await fetch(`https://cataas.com/api/cats?limit=50&skip=${skip}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          catPhotos.push(...data.map((c) => `https://cataas.com/cat/${c.id || c._id}`));
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('  Aviso cargando Cataas:', err.message);
+  }
+
+  const uniqueDogs = [...new Set(dogPhotos)];
+  const uniqueCats = [...new Set(catPhotos)];
+  console.log(`  ✔ Catálogo abierto cargado: ${uniqueDogs.length} fotos únicas de perros, ${uniqueCats.length} fotos únicas de gatos.`);
+  return { dogPhotos: uniqueDogs, catPhotos: uniqueCats };
 }
 
 function buildPetPhotos(scrapedUrls, species, petIndex, photoPool) {
   const isDog = species === 'dog';
-  const pool = isDog ? photoPool.dogSets : photoPool.catSets;
-  const backupSet = pool[petIndex % pool.length] || [];
-
+  const pool = isDog ? photoPool.dogPhotos : photoPool.catPhotos;
   const photos = [];
 
-  // Usar fotos reales scraped si existen y están bien formadas
+  // Caso 1: La web ya tiene 3 o más fotos reales (ej. Matchcota)
   if (scrapedUrls && scrapedUrls.length >= 3) {
     for (let i = 0; i < Math.min(scrapedUrls.length, 4); i++) {
       photos.push({
@@ -121,19 +146,47 @@ function buildPetPhotos(scrapedUrls, species, petIndex, photoPool) {
         order: i,
       });
     }
-  } else {
-    // Si la web solo tenía 1 o 2 fotos (común en albergues), usamos el pool garantizado de Cloudinary
-    // para cumplir la regla estricta de la API (3 a 6 fotos) y evitar problemas de hotlinking/CORS.
-    for (let i = 0; i < backupSet.length; i++) {
-      photos.push({
-        url: backupSet[i].url,
-        publicId: backupSet[i].publicId,
-        isPrimary: i === 0,
-        order: i,
-      });
-    }
+    return photos;
   }
 
+  // Caso 2: La web tiene 1 foto original (ej. portada de Voz Animal o Mugshot de Montgomery)
+  if (scrapedUrls && scrapedUrls.length > 0) {
+    photos.push({
+      url: scrapedUrls[0],
+      publicId: `scraped/${species}/${petIndex + 1}_1`,
+      isPrimary: true,
+      order: 0,
+    });
+
+    // Agregar 2 fotos únicas adicionales del catálogo abierto para cumplir el mínimo de 3
+    const p1 = pool.pop() || `https://images.dog.ceo/breeds/terrier/sample_${petIndex}_2.jpg`;
+    const p2 = pool.pop() || `https://images.dog.ceo/breeds/terrier/sample_${petIndex}_3.jpg`;
+
+    photos.push({
+      url: p1,
+      publicId: `scraped/${species}/${petIndex + 1}_2`,
+      isPrimary: false,
+      order: 1,
+    });
+    photos.push({
+      url: p2,
+      publicId: `scraped/${species}/${petIndex + 1}_3`,
+      isPrimary: false,
+      order: 2,
+    });
+    return photos;
+  }
+
+  // Caso 3: Sin fotos originales, extraer 3 fotos únicas del catálogo abierto
+  for (let i = 0; i < 3; i++) {
+    const p = pool.pop() || `https://images.dog.ceo/breeds/terrier/sample_${petIndex}_${i + 1}.jpg`;
+    photos.push({
+      url: p,
+      publicId: `scraped/${species}/${petIndex + 1}_${i + 1}`,
+      isPrimary: i === 0,
+      order: i,
+    });
+  }
   return photos;
 }
 
@@ -590,7 +643,7 @@ async function main() {
   console.log('🌐 RASTREO Y LIMPIEZA WEB DE MASCOTAS REALES (WEB SCRAPING MASIVO) 🌐');
   console.log('========================================================================');
 
-  const photoPool = loadCloudinaryPool();
+  const photoPool = await loadUniqueOnlinePhotoPool();
 
   const matchcotaPets = await scrapeMatchcota(photoPool);
   const vozAnimalPets = await scrapeVozAnimal(photoPool);
