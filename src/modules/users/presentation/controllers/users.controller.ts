@@ -45,7 +45,7 @@ import { UpdateShelterProfileUseCase } from '../../application/use-cases/update-
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { User } from '../../domain/entities/user.entity';
 
-@ApiTags('users')
+@ApiTags('Users')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -152,8 +152,7 @@ export class UsersController {
   @Patch('me/password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary:
-      'Cambiar o definir contraseña del usuario autenticado (US-04 Escenario 3 y 4)',
+    summary: 'Cambiar o definir contraseña del usuario autenticado',
   })
   @ApiResponse({
     status: 200,
@@ -220,7 +219,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'Seleccionar o asignar rol inicial del usuario durante onboarding (US-02 Escenario 2)',
+      'Seleccionar o asignar rol inicial del usuario durante el registro',
     description:
       'Permite al usuario elegir su rol inicial tras el registro con Google. Inmutable una vez asignado.',
   })
@@ -246,7 +245,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'Solicitud de baja definitiva de cuenta y anonimización de datos (US-05 - Ley N° 29733)',
+      'Solicitud de baja definitiva de cuenta y anonimización de datos',
     description:
       'Aplica soft-delete y anonimización irreversible a los datos personales del usuario. Bloquea si existen animales activos en adopción.',
   })

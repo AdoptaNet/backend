@@ -69,7 +69,7 @@ export class AuthController {
   )
   @ApiOperation({
     summary:
-      'Registrar un nuevo usuario con email, contraseña y avatar opcional (US-01)',
+      'Registrar un nuevo usuario con email, contraseña y avatar opcional',
   })
   @ApiConsumes('multipart/form-data', 'application/json')
   @ApiBody({
@@ -114,7 +114,7 @@ export class AuthController {
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Activar cuenta mediante token criptográfico de verificación (US-01 Escenario 2)',
+    summary: 'Activar cuenta mediante token criptográfico de verificación',
   })
   @ApiResponse({ status: 200, description: 'Cuenta activada exitosamente' })
   @ApiResponse({ status: 400, description: 'Token inválido o expirado' })
@@ -127,7 +127,11 @@ export class AuthController {
   @Get('verify-email')
   @ApiOperation({
     summary:
-      'Enlace GET para verificación directa desde el cliente de correo (US-01)',
+      'Enlace GET para verificación directa desde el cliente de correo',
+  })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirige a la página de login del frontend tras la verificación',
   })
   async verifyEmailGet(
     @Query('token') token: string,
@@ -152,7 +156,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'Reenviar enlace de verificación de correo con Rate Limiting de 2 min (US-01 Escenario 3)',
+      'Reenviar enlace de verificación de correo con límite de frecuencia (2 min)',
   })
   @ApiResponse({
     status: 200,
@@ -171,7 +175,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Iniciar sesión con correo electrónico y contraseña (US-03)',
+    summary: 'Iniciar sesión con correo electrónico y contraseña',
   })
   @ApiResponse({
     status: 200,
@@ -194,7 +198,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Renovar y rotar tokens utilizando el refresh token (US-03)',
+    summary: 'Renovar y rotar tokens utilizando el refresh token',
   })
   @ApiResponse({
     status: 200,
@@ -215,7 +219,7 @@ export class AuthController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Cerrar sesión e invalidar el refresh token activo (US-03)',
+    summary: 'Cerrar sesión e invalidar el refresh token activo',
   })
   @ApiResponse({ status: 200, description: 'Sesión cerrada exitosamente' })
   async logout(@CurrentUser() user: User): Promise<{ message: string }> {
@@ -227,7 +231,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'Solicitar restablecimiento de contraseña olvidada vía correo (US-04 Escenario 1)',
+      'Solicitar restablecimiento de contraseña olvidada vía correo electrónico',
   })
   @ApiResponse({
     status: 200,
@@ -243,7 +247,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'Restablecer contraseña con token seguro y revocar sesiones previas (US-04 Escenario 2)',
+      'Restablecer contraseña con token seguro y revocar sesiones previas',
   })
   @ApiResponse({
     status: 200,
@@ -261,7 +265,11 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  @ApiOperation({ summary: 'Iniciar flujo de autenticación con Google (US-02)' })
+  @ApiOperation({ summary: 'Iniciar flujo de autenticación con Google' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirige al proveedor de inicio de sesión de Google',
+  })
   googleAuth() {
     // Redirige automáticamente a Google
   }
@@ -269,7 +277,11 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @UseFilters(OAuthExceptionFilter)
-  @ApiOperation({ summary: 'Callback de autenticación de Google (US-02)' })
+  @ApiOperation({ summary: 'Callback de autenticación de Google' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirige al frontend con los tokens de sesión JWT',
+  })
   googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     const authResult = req.user as AuthResponseDto;
     const frontendUrl =

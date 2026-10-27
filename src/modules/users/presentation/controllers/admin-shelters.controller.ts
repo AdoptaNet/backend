@@ -20,7 +20,7 @@ import { VerifyShelterDto } from '../../application/dtos/verify-shelter.dto';
 import { VerifyShelterUseCase } from '../../application/use-cases/verify-shelter.use-case';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 
-@ApiTags('admin')
+@ApiTags('Admin')
 @Controller('admin/shelters')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)

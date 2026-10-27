@@ -26,7 +26,7 @@ import { UploadMediaResponseDto } from '../../application/dtos/upload-media-resp
 import { MediaService } from '../../application/interfaces/media.service';
 import { UploadImageUseCase } from '../../application/use-cases/upload-image.use-case';
 
-@ApiTags('media')
+@ApiTags('Media')
 @Controller('media')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()

@@ -50,7 +50,7 @@ import { UpdatePetStatusUseCase } from '../../application/use-cases/update-pet-s
 import { UpdatePetUseCase } from '../../application/use-cases/update-pet.use-case';
 import { PetSpecies } from '../../domain/value-objects/pet-species.enum';
 
-@ApiTags('pets')
+@ApiTags('Pets')
 @Controller('pets')
 export class PetsController {
   constructor(

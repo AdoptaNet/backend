@@ -37,7 +37,7 @@ import { GetShelterAdoptionsUseCase } from '../../application/use-cases/get-shel
 import { GetAdoptionByIdUseCase } from '../../application/use-cases/get-adoption-by-id.use-case';
 import { ReviewAdoptionRequestUseCase } from '../../application/use-cases/review-adoption-request.use-case';
 
-@ApiTags('adoptions')
+@ApiTags('Adoptions')
 @Controller('adoptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
@@ -55,7 +55,7 @@ export class AdoptionsController {
   @Roles(UserRole.ADOPTER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Enviar una postulación formal de adopción (US-15 Escenario 1 y 2)',
+    summary: 'Enviar una postulación formal de adopción',
     description:
       'Registra la postulación con snapshot inmutable de compatibilidad, valida el límite de 3 solicitudes concurrentes y que la mascota esté disponible.',
   })
@@ -84,7 +84,7 @@ export class AdoptionsController {
   @Roles(UserRole.ADOPTER)
   @ApiOperation({
     summary:
-      'Listar las postulaciones de adopción del adoptante autenticado (US-15 Escenario 3)',
+      'Listar las postulaciones de adopción del adoptante autenticado',
   })
   @ApiResponse({
     status: 200,
@@ -102,7 +102,7 @@ export class AdoptionsController {
   @Roles(UserRole.SHELTER)
   @ApiOperation({
     summary:
-      'Listar las solicitudes de adopción recibidas por el albergue (US-16 Escenario 1)',
+      'Listar las solicitudes de adopción recibidas por el albergue',
   })
   @ApiResponse({
     status: 200,
@@ -139,7 +139,7 @@ export class AdoptionsController {
   @Roles(UserRole.ADOPTER)
   @ApiOperation({
     summary:
-      'Cancelar o desistir voluntariamente de una postulación en curso (US-15 Escenario 4)',
+      'Cancelar o desistir voluntariamente de una postulación en curso',
   })
   @ApiResponse({
     status: 200,
@@ -161,7 +161,7 @@ export class AdoptionsController {
   @Roles(UserRole.SHELTER)
   @ApiOperation({
     summary:
-      'Dictaminar o resolver una postulación de adopción (Aprobar, Rechazar, Poner en Revisión) (US-16 Escenario 2 y 3)',
+      'Dictaminar o resolver una postulación de adopción (Aprobar, Rechazar, Poner en Revisión)',
   })
   @ApiResponse({
     status: 200,
