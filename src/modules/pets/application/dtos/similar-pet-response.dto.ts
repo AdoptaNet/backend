@@ -1,5 +1,22 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PetResponseDto } from './pet-response.dto';
+
+export class QueryPhotoTraitsDto {
+  @ApiPropertyOptional({ example: 'dog' })
+  species?: string | null;
+
+  @ApiPropertyOptional({ example: 0.94 })
+  speciesConfidence?: number;
+
+  @ApiPropertyOptional({ example: 'short' })
+  fur?: string | null;
+
+  @ApiPropertyOptional({ example: 'medium' })
+  size?: string | null;
+
+  @ApiPropertyOptional({ example: ['marron', 'blanco'], type: [String] })
+  colors?: string[];
+}
 
 export class SimilarPetResponseDto {
   @ApiProperty({ type: PetResponseDto })
@@ -17,4 +34,7 @@ export class SimilarPetResponseDto {
     type: [String],
   })
   matchReasons: string[];
+
+  @ApiPropertyOptional({ type: QueryPhotoTraitsDto, description: 'Rasgos detectados en la foto de búsqueda' })
+  queryTraits?: QueryPhotoTraitsDto;
 }

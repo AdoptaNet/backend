@@ -95,6 +95,13 @@ export class SearchSimilarPetsUseCase {
         detectedSize,
         detectedColors,
       );
+      dto.queryTraits = {
+        species: detectedSpecies,
+        speciesConfidence: detectedSpeciesConfidence,
+        fur: detectedFur,
+        size: detectedSize,
+        colors: detectedColors,
+      };
       return dto;
     });
   }
