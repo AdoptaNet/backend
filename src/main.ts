@@ -30,10 +30,18 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle(appName)
     .setDescription(
-      'Core Backend REST API for rescued animal adoption and ML recommendation matching in Peru',
+      'API RESTful principal para la plataforma de adopción de animales rescatados y matching con Inteligencia Artificial',
     )
     .setVersion('1.0')
     .addBearerAuth()
+    .addTag('Auth', 'Autenticación, registro, recuperación de contraseña y gestión de tokens')
+    .addTag('Users', 'Gestión de usuarios, perfiles de adoptantes y albergues')
+    .addTag('Shelters', 'Ficha pública y verificación de albergues')
+    .addTag('Admin', 'Operaciones administrativas de acreditación y supervisión')
+    .addTag('Pets', 'Registro, catálogo, gestión y búsqueda por similitud visual de mascotas')
+    .addTag('Adoptions', 'Postulaciones, solicitudes, dictamen y seguimiento de adopciones')
+    .addTag('Media', 'Subida y eliminación de imágenes en almacenamiento en la nube')
+    .addTag('Notifications', 'Webhooks y eventos de entrega de correos electrónicos')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

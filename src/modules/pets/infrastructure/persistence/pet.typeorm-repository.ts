@@ -85,7 +85,9 @@ export class PetTypeOrmRepository implements PetRepository {
       .leftJoinAndSelect('pet.photos', 'photos')
       .leftJoinAndSelect('pet.shelter', 'shelter')
       .leftJoinAndSelect('shelter.shelterProfile', 'shelterProfile')
-      .where('pet.status = :status', { status: PetStatus.AVAILABLE });
+      .where('pet.status IN (:...statuses)', {
+        statuses: [PetStatus.AVAILABLE, PetStatus.IN_PROCESS],
+      });
 
     if (options.species) {
       qb.andWhere('pet.species = :species', { species: options.species });
@@ -195,7 +197,9 @@ export class PetTypeOrmRepository implements PetRepository {
         `(1 - (pet.visual_embedding <=> '${vectorString}'))`,
         'similarity_score',
       )
-      .where('pet.status = :status', { status: PetStatus.AVAILABLE })
+      .where('pet.status IN (:...statuses)', {
+        statuses: [PetStatus.AVAILABLE, PetStatus.IN_PROCESS],
+      })
       .andWhere('pet.visual_embedding IS NOT NULL')
       .andWhere(
         `(1 - (pet.visual_embedding <=> '${vectorString}')) >= :threshold`,

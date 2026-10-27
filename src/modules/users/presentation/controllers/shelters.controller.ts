@@ -23,7 +23,7 @@ import { GetPublicShelterUseCase } from '../../application/use-cases/get-public-
 import { VerifyShelterUseCase } from '../../application/use-cases/verify-shelter.use-case';
 import { UserRole } from '../../domain/value-objects/user-role.enum';
 
-@ApiTags('shelters')
+@ApiTags('Shelters')
 @Controller('shelters')
 export class SheltersController {
   constructor(

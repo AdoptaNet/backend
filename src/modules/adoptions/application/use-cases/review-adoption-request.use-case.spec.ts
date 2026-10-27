@@ -32,6 +32,15 @@ describe('ReviewAdoptionRequestUseCase', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
 
+    mockDataSource.transaction.mockImplementation(async (callback: any) => {
+      return await callback({
+        save: jest.fn().mockImplementation((_entityClass, entity) => Promise.resolve(entity)),
+        update: jest.fn().mockResolvedValue(undefined),
+        count: jest.fn().mockResolvedValue(0),
+        find: jest.fn().mockResolvedValue([]),
+      });
+    });
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReviewAdoptionRequestUseCase,
@@ -109,7 +118,7 @@ describe('ReviewAdoptionRequestUseCase', () => {
     });
 
     expect(result.status).toBe(AdoptionStatus.UNDER_REVIEW);
-    expect(mockAdoptionRepo.save).toHaveBeenCalled();
+    expect(mockDataSource.transaction).toHaveBeenCalled();
   });
 
   it('should reject request with valid reason and feedback note', async () => {

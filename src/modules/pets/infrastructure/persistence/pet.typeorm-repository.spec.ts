@@ -130,8 +130,8 @@ describe('PetTypeOrmRepository', () => {
 
     expect(result).toEqual([pets, 1]);
     expect(mockQueryBuilder.where).toHaveBeenCalledWith(
-      'pet.status = :status',
-      { status: PetStatus.AVAILABLE },
+      'pet.status IN (:...statuses)',
+      { statuses: [PetStatus.AVAILABLE, PetStatus.IN_PROCESS] },
     );
     expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
       'pet.species = :species',

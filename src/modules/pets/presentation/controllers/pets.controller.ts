@@ -50,7 +50,7 @@ import { UpdatePetStatusUseCase } from '../../application/use-cases/update-pet-s
 import { UpdatePetUseCase } from '../../application/use-cases/update-pet.use-case';
 import { PetSpecies } from '../../domain/value-objects/pet-species.enum';
 
-@ApiTags('pets')
+@ApiTags('Pets')
 @Controller('pets')
 export class PetsController {
   constructor(
@@ -66,14 +66,11 @@ export class PetsController {
   ) {}
 
   @Post('analyze-photos')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SHELTER)
   @UseInterceptors(
     FilesInterceptor('photos', 6, {
       limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
-  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Analizar fotos con DINOv2 para autocompletar ficha de mascota',
