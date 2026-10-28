@@ -41,8 +41,10 @@
     "@nestjs/jwt": "^12.0.1",
     "@nestjs/passport": "^12.0.0",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.2.8",
     "@nestjs/swagger": "^11.4.7",
     "@nestjs/typeorm": "^12.0.1",
+    "@nestjs/websockets": "^11.2.8",
     "@react-email/components": "^1.0.12",
     "axios": "^1.20.0",
     "bcrypt": "^6.0.0",
@@ -59,6 +61,7 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.28.0",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.4",
     "svix": "^2.5.0",
     "typeorm": "^1.1.1"
   },
