@@ -250,4 +250,18 @@ export class PetTypeOrmRepository implements PetRepository {
   async softDelete(id: string): Promise<void> {
     await this.petRepo.softDelete(id);
   }
+
+  async findAvailableForRecommendations(): Promise<Pet[]> {
+    return this.petRepo.find({
+      where: {
+        status: In([PetStatus.AVAILABLE, PetStatus.IN_PROCESS]),
+      },
+      relations: {
+        photos: true,
+        shelter: {
+          shelterProfile: true,
+        },
+      },
+    });
+  }
 }

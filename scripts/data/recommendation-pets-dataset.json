@@ -1012,8 +1012,8 @@
   },
   {
     "name": "Lua",
-    "species": "dog",
-    "breed": "Mestizo",
+    "species": "cat",
+    "breed": "Común Europeo",
     "gender": "female",
     "ageMonths": 12,
     "ageCategory": "young",
@@ -1022,7 +1022,7 @@
     "isSterilized": true,
     "isVaccinated": true,
     "vaccinesApplied": [
-      "Quíntuple Canina",
+      "Triple Felina",
       "Antirrábica",
       "Desparasitación"
     ],
@@ -1051,7 +1051,7 @@
         "is_sterilized": true,
         "is_vaccinated": true,
         "vaccines_applied": [
-          "Quíntuple Canina",
+          "Triple Felina",
           "Antirrábica",
           "Desparasitación"
         ],
@@ -2484,8 +2484,8 @@
   },
   {
     "name": "Kira",
-    "species": "dog",
-    "breed": "Mestizo",
+    "species": "cat",
+    "breed": "Común Europeo",
     "gender": "female",
     "ageMonths": 36,
     "ageCategory": "adult",
@@ -2494,7 +2494,7 @@
     "isSterilized": true,
     "isVaccinated": true,
     "vaccinesApplied": [
-      "Quíntuple Canina",
+      "Triple Felina",
       "Antirrábica",
       "Desparasitación"
     ],
@@ -2525,7 +2525,7 @@
         "is_sterilized": true,
         "is_vaccinated": true,
         "vaccines_applied": [
-          "Quíntuple Canina",
+          "Triple Felina",
           "Antirrábica",
           "Desparasitación"
         ],
@@ -2579,8 +2579,8 @@
   },
   {
     "name": "Lina",
-    "species": "dog",
-    "breed": "Mestizo",
+    "species": "cat",
+    "breed": "Común Europeo",
     "gender": "female",
     "ageMonths": 36,
     "ageCategory": "adult",
@@ -2589,7 +2589,7 @@
     "isSterilized": true,
     "isVaccinated": true,
     "vaccinesApplied": [
-      "Quíntuple Canina",
+      "Triple Felina",
       "Antirrábica",
       "Desparasitación"
     ],
@@ -2620,7 +2620,7 @@
         "is_sterilized": true,
         "is_vaccinated": true,
         "vaccines_applied": [
-          "Quíntuple Canina",
+          "Triple Felina",
           "Antirrábica",
           "Desparasitación"
         ],
@@ -2674,8 +2674,8 @@
   },
   {
     "name": "Dulce",
-    "species": "dog",
-    "breed": "Mestizo",
+    "species": "cat",
+    "breed": "Común Europeo",
     "gender": "female",
     "ageMonths": 60,
     "ageCategory": "adult",
@@ -2684,7 +2684,7 @@
     "isSterilized": true,
     "isVaccinated": true,
     "vaccinesApplied": [
-      "Quíntuple Canina",
+      "Triple Felina",
       "Antirrábica",
       "Desparasitación"
     ],
@@ -2715,7 +2715,7 @@
         "is_sterilized": true,
         "is_vaccinated": true,
         "vaccines_applied": [
-          "Quíntuple Canina",
+          "Triple Felina",
           "Antirrábica",
           "Desparasitación"
         ],
