@@ -29,7 +29,8 @@
     "seed:api": "node scripts/seed-via-api.js",
     "scrape:pets": "node scripts/scrape-pets.js",
     "seed:recommendations": "node scripts/seed-recommendation-catalog.js",
-    "backfill:embeddings": "node scripts/backfill-pet-embeddings.js"
+    "backfill:embeddings": "node scripts/backfill-pet-embeddings.js",
+    "backfill:recommendations": "node scripts/backfill-recommendations.js"
   },
   "dependencies": {
     "@nestjs/axios": "^12.0.0",

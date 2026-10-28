@@ -40,6 +40,7 @@ async function bootstrap() {
     .addTag('Admin', 'Operaciones administrativas de acreditación y supervisión')
     .addTag('Pets', 'Registro, catálogo, gestión y búsqueda por similitud visual de mascotas')
     .addTag('Adoptions', 'Postulaciones, solicitudes, dictamen y seguimiento de adopciones')
+    .addTag('Recommendations', 'Motor de recomendación híbrido de compatibilidad (EASE, Ordinal y XAI)')
     .addTag('Media', 'Subida y eliminación de imágenes en almacenamiento en la nube')
     .addTag('Notifications', 'Webhooks y eventos de entrega de correos electrónicos')
     .build();

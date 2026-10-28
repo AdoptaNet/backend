@@ -7,6 +7,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { PetsModule } from './modules/pets/pets.module';
 import { UsersModule } from './modules/users/users.module';
 import { AdoptionsModule } from './modules/adoptions/adoptions.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { validate } from './shared/infrastructure/config/env.validation';
 import { DatabaseModule } from './shared/infrastructure/database/database.module';
 
@@ -24,6 +25,7 @@ import { DatabaseModule } from './shared/infrastructure/database/database.module
     NotificationsModule,
     PetsModule,
     AdoptionsModule,
+    RecommendationsModule,
   ],
   controllers: [],
   providers: [],

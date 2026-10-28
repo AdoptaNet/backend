@@ -51,4 +51,5 @@ export abstract class PetRepository {
   ): Promise<SimilarPetResult[]>;
   abstract save(pet: Pet): Promise<Pet>;
   abstract softDelete(id: string): Promise<void>;
+  abstract findAvailableForRecommendations(): Promise<Pet[]>;
 }

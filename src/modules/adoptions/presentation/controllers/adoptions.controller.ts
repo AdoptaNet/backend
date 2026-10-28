@@ -30,12 +30,14 @@ import {
   AdoptionRequestResponseDto,
   PaginatedAdoptionRequestsResponseDto,
 } from '../../application/dtos/adoption-request-response.dto';
+import { AdoptionDossierResponseDto } from '../../application/dtos/adoption-dossier-response.dto';
 import { SubmitAdoptionRequestUseCase } from '../../application/use-cases/submit-adoption-request.use-case';
 import { GetMyAdoptionsUseCase } from '../../application/use-cases/get-my-adoptions.use-case';
 import { CancelAdoptionRequestUseCase } from '../../application/use-cases/cancel-adoption-request.use-case';
 import { GetShelterAdoptionsUseCase } from '../../application/use-cases/get-shelter-adoptions.use-case';
 import { GetAdoptionByIdUseCase } from '../../application/use-cases/get-adoption-by-id.use-case';
 import { ReviewAdoptionRequestUseCase } from '../../application/use-cases/review-adoption-request.use-case';
+import { GetAdoptionDossierUseCase } from '../../application/use-cases/get-adoption-dossier.use-case';
 
 @ApiTags('Adoptions')
 @Controller('adoptions')
@@ -49,6 +51,7 @@ export class AdoptionsController {
     private readonly getShelterAdoptionsUseCase: GetShelterAdoptionsUseCase,
     private readonly getAdoptionByIdUseCase: GetAdoptionByIdUseCase,
     private readonly reviewAdoptionUseCase: ReviewAdoptionRequestUseCase,
+    private readonly getAdoptionDossierUseCase: GetAdoptionDossierUseCase,
   ) {}
 
   @Post()
@@ -133,6 +136,28 @@ export class AdoptionsController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<AdoptionRequestResponseDto> {
     return this.getAdoptionByIdUseCase.execute(id, user.id);
+  }
+
+  @Get(':id/dossier')
+  @Roles(UserRole.SHELTER)
+  @ApiOperation({
+    summary:
+      'Obtener el expediente analítico de compatibilidad con IA para el albergue',
+    description:
+      'Genera el veredicto, factores a favor, alertas para la entrevista y riesgos calculados por el motor de inferencia XAI.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: AdoptionDossierResponseDto,
+    description: 'Expediente analítico con IA generado exitosamente',
+  })
+  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiResponse({ status: 403, description: 'No autorizado para evaluar solicitudes de este albergue' })
+  async getDossier(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AdoptionDossierResponseDto> {
+    return this.getAdoptionDossierUseCase.execute(id, user.id);
   }
 
   @Patch(':id/cancel')

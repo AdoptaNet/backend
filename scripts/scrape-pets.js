@@ -302,22 +302,30 @@ async function scrapeMatchcota(photoPool) {
           ? rawBio
           : `${name} es una mascota noble y rescatada en Lima por ${shelterName}. Cuenta con vacunas y esterilización.`;
 
-        const photos = buildPetPhotos(imgs, 'dog', index, photoPool);
+        const isCat =
+          /\b(gata|gato|gatita|gatito|felino|felina|michis?|arenero)\b/i.test(bioLower) ||
+          /\b(gata|gato|gatita|gatito)\b/i.test(name);
+        const species = isCat ? 'cat' : 'dog';
+        const vaccinesApplied = isCat
+          ? ['Triple Felina', 'Antirrábica', 'Desparasitación']
+          : ['Quíntuple Canina', 'Antirrábica', 'Desparasitación'];
+
+        const photos = buildPetPhotos(imgs, species, index, photoPool);
         const shelterStayMonths = Math.floor(Math.random() * 8) + 2; // 2 a 10 meses
         const adoptionFee = ageCategory === 'senior' ? 0 : 50;
 
         const petPayload = {
           name,
-          species: 'dog',
-          breed: 'Mestizo',
+          species,
+          breed: isCat ? 'Común Europeo' : 'Mestizo',
           gender,
           ageMonths,
           ageCategory,
-          size,
+          size: isCat && size === 'large' ? 'medium' : size,
           furLength,
           isSterilized: true,
           isVaccinated: true,
-          vaccinesApplied: ['Quíntuple Canina', 'Antirrábica', 'Desparasitación'],
+          vaccinesApplied,
           healthStatus,
           healthNotes,
           energyLevel,
@@ -338,7 +346,7 @@ async function scrapeMatchcota(photoPool) {
               fur_length: furLength,
               is_sterilized: true,
               is_vaccinated: true,
-              vaccines_applied: ['Quíntuple Canina', 'Antirrábica', 'Desparasitación'],
+              vaccines_applied: vaccinesApplied,
               health_status: healthStatus,
               health_notes: healthNotes,
             },
@@ -506,7 +514,7 @@ async function scrapeVozAnimal(photoPool) {
               fur_length: furLength,
               is_sterilized: isSterilized,
               is_vaccinated: isVaccinated,
-              vaccines_applied: ['Quíntuple Canina', 'Antirrábica', 'Desparasitación'],
+              vaccines_applied: vaccinesApplied,
               health_status: healthStatus,
               health_notes: healthNotes,
             },
