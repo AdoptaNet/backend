@@ -66,12 +66,12 @@ export class SubmitMilestoneEvidenceUseCase {
       throw new BadRequestException('Este hito ya fue revisado y aprobado exitosamente');
     }
 
-    // Regla de correlatividad en producción (salvo modo demo)
+    // Reglas de correlatividad y ventana estricta en producción (salvo modo demo)
     const isDemo =
-      this.configService.get<string>('FOLLOW_UP_DEMO_MODE') === 'true' ||
-      this.configService.get<string>('NODE_ENV') !== 'production';
+      this.configService.get<string>('FOLLOW_UP_DEMO_MODE') === 'true';
 
     if (!isDemo) {
+      // 1. Regla de correlatividad secuencial
       const sortedMilestones = [...record.milestones].sort((a, b) => a.daysTarget - b.daysTarget);
       const currentIndex = sortedMilestones.findIndex((m) => m.id === milestone.id);
       if (currentIndex > 0) {
@@ -79,6 +79,21 @@ export class SubmitMilestoneEvidenceUseCase {
         if (previousMilestone.status !== MilestoneStatus.COMPLETED) {
           throw new BadRequestException(
             `Debes completar y esperar la aprobación del hito de ${previousMilestone.daysTarget} días antes de reportar este hito`,
+          );
+        }
+      }
+
+      // 2. Regla de ventana de apertura estricta (habilitado 7 días antes del vencimiento)
+      if (milestone.dueDate) {
+        const openDate = new Date(new Date(milestone.dueDate).getTime() - 7 * 24 * 60 * 60 * 1000);
+        if (new Date() < openDate) {
+          const formattedDate = openDate.toLocaleDateString('es-PE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          });
+          throw new BadRequestException(
+            `Este hito estará disponible para envío a partir del ${formattedDate} (7 días antes del vencimiento)`,
           );
         }
       }

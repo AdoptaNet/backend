@@ -95,4 +95,78 @@ describe('SubmitMilestoneEvidenceUseCase', () => {
       }),
     );
   });
+
+  it('should throw BadRequestException if non-demo and current date is before 7-day window', async () => {
+    configService.get.mockReturnValue('false'); // non-demo mode
+
+    // Due date 20 days in future (window opens in 13 days)
+    const futureDueDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
+    const milestone: any = {
+      id: 'm-30',
+      milestoneType: MilestoneType.M30_DAYS,
+      daysTarget: 30,
+      dueDate: futureDueDate,
+      status: MilestoneStatus.PENDING,
+    };
+
+    recordRepo.findOne.mockResolvedValue({
+      id: 'rec-1',
+      adopterId: 'user-adopter',
+      status: FollowUpProcessStatus.IN_PROGRESS,
+      milestones: [milestone],
+      pet: { name: 'Firulais' },
+      shelterId: 'shelter-1',
+      shelter: { email: 'shelter@adopta.pe' },
+      adopter: { email: 'adopter@test.com' },
+    });
+
+    await expect(
+      useCase.execute(
+        'rec-1',
+        'm-30',
+        {
+          adaptationNotes: 'Demasiado pronto',
+          evidences: [{ evidenceType: 'pet_photo', mediaUrl: 'https://test.com/photo.jpg' }],
+        },
+        'user-adopter',
+      ),
+    ).rejects.toThrow('Este hito estará disponible para envío a partir del');
+  });
+
+  it('should allow submission if non-demo and current date is within the 7-day window', async () => {
+    configService.get.mockReturnValue('false'); // non-demo mode
+
+    // Due date 5 days in future (window opened 2 days ago)
+    const openDueDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+    const milestone: any = {
+      id: 'm-30',
+      milestoneType: MilestoneType.M30_DAYS,
+      daysTarget: 30,
+      dueDate: openDueDate,
+      status: MilestoneStatus.PENDING,
+    };
+
+    recordRepo.findOne.mockResolvedValue({
+      id: 'rec-1',
+      adopterId: 'user-adopter',
+      status: FollowUpProcessStatus.IN_PROGRESS,
+      milestones: [milestone],
+      pet: { name: 'Firulais' },
+      shelterId: 'shelter-1',
+      shelter: { email: 'shelter@adopta.pe' },
+      adopter: { email: 'adopter@test.com' },
+    });
+
+    const result = await useCase.execute(
+      'rec-1',
+      'm-30',
+      {
+        adaptationNotes: 'Dentro de la ventana permitida',
+        evidences: [{ evidenceType: 'pet_photo', mediaUrl: 'https://test.com/photo.jpg' }],
+      },
+      'user-adopter',
+    );
+
+    expect(result.status).toBe(MilestoneStatus.SUBMITTED);
+  });
 });
