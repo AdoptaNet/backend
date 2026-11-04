@@ -61,10 +61,13 @@ export class ReviewMilestoneUseCase {
       throw new BadRequestException('Este hito ya fue dictaminado y aprobado previamente');
     }
 
-    const isApproved = dto.decision === 'approved';
+    const rawDecision = dto.decision || dto.status || 'approved';
+    const isApproved = rawDecision === 'approved' || rawDecision === 'completed';
+    const notes = (dto.reviewNotes || dto.shelterFeedback || '').trim() || null;
+
     milestone.reviewedAt = new Date();
     milestone.reviewerId = reviewerId;
-    milestone.reviewNotes = dto.reviewNotes?.trim() || null;
+    milestone.reviewNotes = notes;
     milestone.status = isApproved ? MilestoneStatus.COMPLETED : MilestoneStatus.ACTION_REQUIRED;
 
     const savedMilestone = await this.milestoneRepository.save(milestone);
