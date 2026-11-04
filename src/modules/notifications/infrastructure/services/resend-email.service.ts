@@ -13,6 +13,11 @@ import {
   SendShelterVerificationData,
   SendNewAdoptionRequestData,
   SendAdoptionStatusChangedData,
+  SendFollowUpReminderData,
+  SendFollowUpOverdueData,
+  SendFollowUpReviewData,
+  SendFollowUpCompletedData,
+  SendPetReturnNotificationData,
 } from '../../application/interfaces/email.service';
 import { NotificationRepository } from '../../domain/repositories/notification.repository';
 import { NotificationChannel } from '../../domain/value-objects/notification-channel.enum';
@@ -25,6 +30,11 @@ import { PasswordResetTemplate } from '../../presentation/templates/password-res
 import { ShelterVerificationTemplate } from '../../presentation/templates/shelter-verification.template';
 import { NewAdoptionRequestTemplate } from '../../presentation/templates/new-adoption-request.template';
 import { AdoptionStatusChangedTemplate } from '../../presentation/templates/adoption-status-changed.template';
+import { FollowUpReminderTemplate } from '../../presentation/templates/follow-up-reminder.template';
+import { FollowUpOverdueTemplate } from '../../presentation/templates/follow-up-overdue.template';
+import { FollowUpReviewTemplate } from '../../presentation/templates/follow-up-review.template';
+import { FollowUpCompletedTemplate } from '../../presentation/templates/follow-up-completed.template';
+import { PetReturnTemplate } from '../../presentation/templates/pet-return.template';
 
 @Injectable()
 export class ResendEmailService implements EmailService {
@@ -305,6 +315,162 @@ export class ResendEmailService implements EmailService {
         petName: data.petName,
         isApproved: data.isApproved,
         rejectionReasonText: data.rejectionReasonText,
+      },
+    });
+  }
+
+  /**
+   * Envía recordatorio preventivo para hito de seguimiento a los 30, 90 o 180 días (US-20).
+   */
+  async sendFollowUpReminderEmail(
+    to: string,
+    data: SendFollowUpReminderData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(FollowUpReminderTemplate, {
+      adopterName: data.adopterName,
+      petName: data.petName,
+      milestoneDays: data.milestoneDays,
+      dueDate: data.dueDate,
+      actionUrl: data.actionUrl,
+    });
+
+    return await this.sendEmail({
+      to,
+      subject: `📅 Recordatorio: Hito de ${data.milestoneDays} días para ${data.petName}`,
+      template,
+      userId: data.userId,
+      type: NotificationType.FOLLOW_UP_REMINDER,
+      metadata: {
+        petName: data.petName,
+        milestoneDays: data.milestoneDays,
+      },
+    });
+  }
+
+  /**
+   * Envía alerta de incumplimiento/atraso crítico para hito vencido (US-20).
+   */
+  async sendFollowUpOverdueEmail(
+    to: string,
+    data: SendFollowUpOverdueData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(FollowUpOverdueTemplate, {
+      adopterName: data.adopterName,
+      petName: data.petName,
+      milestoneDays: data.milestoneDays,
+      dueDate: data.dueDate,
+      actionUrl: data.actionUrl,
+    });
+
+    return await this.sendEmail({
+      to,
+      subject: `⚠️ Urgente: Hito de seguimiento de ${data.milestoneDays} días vencido para ${data.petName}`,
+      template,
+      userId: data.userId,
+      type: NotificationType.FOLLOW_UP_OVERDUE,
+      metadata: {
+        petName: data.petName,
+        milestoneDays: data.milestoneDays,
+      },
+    });
+  }
+
+  /**
+   * Envía la resolución o feedback del albergue sobre las evidencias de un hito (US-20).
+   */
+  async sendFollowUpReviewEmail(
+    to: string,
+    data: SendFollowUpReviewData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(FollowUpReviewTemplate, {
+      adopterName: data.adopterName,
+      petName: data.petName,
+      milestoneDays: data.milestoneDays,
+      isApproved: data.isApproved,
+      reviewNotes: data.reviewNotes,
+      actionUrl: data.actionUrl,
+    });
+
+    const subject = data.isApproved
+      ? `🎉 ¡Hito de ${data.milestoneDays} días aprobado para ${data.petName}!`
+      : `⚠️ Observaciones en tu hito de ${data.milestoneDays} días para ${data.petName}`;
+
+    return await this.sendEmail({
+      to,
+      subject,
+      template,
+      userId: data.userId,
+      type: data.isApproved
+        ? NotificationType.FOLLOW_UP_MILESTONE_APPROVED
+        : NotificationType.FOLLOW_UP_ACTION_REQUIRED,
+      metadata: {
+        petName: data.petName,
+        milestoneDays: data.milestoneDays,
+        isApproved: data.isApproved,
+      },
+    });
+  }
+
+  /**
+   * Envía la constancia formal de adopción consolidada al cumplir los 180 días (US-20).
+   */
+  async sendFollowUpCompletedEmail(
+    to: string,
+    data: SendFollowUpCompletedData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(FollowUpCompletedTemplate, {
+      adopterName: data.adopterName,
+      petName: data.petName,
+      certificateCode: data.certificateCode,
+      shelterName: data.shelterName,
+      actionUrl: data.actionUrl,
+    });
+
+    return await this.sendEmail({
+      to,
+      subject: `🏆 ¡Adopción Consolidada! Constancia Oficial para ${data.petName}`,
+      template,
+      userId: data.userId,
+      type: NotificationType.FOLLOW_UP_COMPLETED,
+      metadata: {
+        petName: data.petName,
+        certificateCode: data.certificateCode,
+      },
+    });
+  }
+
+  /**
+   * Envía notificación sobre solicitud o culminación de retorno de mascota (US-21).
+   */
+  async sendPetReturnNotificationEmail(
+    to: string,
+    data: SendPetReturnNotificationData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(PetReturnTemplate, {
+      recipientName: data.recipientName,
+      petName: data.petName,
+      isCompleted: data.isCompleted,
+      isAccepted: data.isAccepted,
+      reasonText: data.reasonText,
+      actionUrl: data.actionUrl,
+    });
+
+    const subject = data.isCompleted
+      ? `🐾 Resolución del retorno de ${data.petName}`
+      : `⚠️ Solicitud formal de retorno recibida para ${data.petName}`;
+
+    return await this.sendEmail({
+      to,
+      subject,
+      template,
+      userId: data.userId,
+      type: data.isCompleted
+        ? NotificationType.PET_RETURN_CONFIRMED
+        : NotificationType.PET_RETURN_REQUESTED,
+      metadata: {
+        petName: data.petName,
+        isCompleted: data.isCompleted,
+        isAccepted: data.isAccepted,
       },
     });
   }

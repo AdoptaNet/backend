@@ -59,6 +59,53 @@ export interface SendAdoptionStatusChangedData {
   actionUrl: string;
 }
 
+export interface SendFollowUpReminderData {
+  userId?: string;
+  adopterName: string;
+  petName: string;
+  milestoneDays: number;
+  dueDate: string;
+  actionUrl: string;
+}
+
+export interface SendFollowUpOverdueData {
+  userId?: string;
+  adopterName: string;
+  petName: string;
+  milestoneDays: number;
+  dueDate: string;
+  actionUrl: string;
+}
+
+export interface SendFollowUpReviewData {
+  userId?: string;
+  adopterName: string;
+  petName: string;
+  milestoneDays: number;
+  isApproved: boolean;
+  reviewNotes?: string | null;
+  actionUrl: string;
+}
+
+export interface SendFollowUpCompletedData {
+  userId?: string;
+  adopterName: string;
+  petName: string;
+  certificateCode: string;
+  shelterName: string;
+  actionUrl: string;
+}
+
+export interface SendPetReturnNotificationData {
+  userId?: string;
+  recipientName: string;
+  petName: string;
+  isCompleted: boolean;
+  isAccepted?: boolean;
+  reasonText?: string;
+  actionUrl: string;
+}
+
 /**
  * Contrato abstracto del servicio de correo electrónico (Clean Architecture).
  * Desacopla la lógica de negocio de la implementación de despacho (Resend, etc.).
@@ -89,5 +136,25 @@ export abstract class EmailService {
   abstract sendAdoptionStatusChangedEmail(
     to: string,
     data: SendAdoptionStatusChangedData,
+  ): Promise<SendEmailResult>;
+  abstract sendFollowUpReminderEmail(
+    to: string,
+    data: SendFollowUpReminderData,
+  ): Promise<SendEmailResult>;
+  abstract sendFollowUpOverdueEmail(
+    to: string,
+    data: SendFollowUpOverdueData,
+  ): Promise<SendEmailResult>;
+  abstract sendFollowUpReviewEmail(
+    to: string,
+    data: SendFollowUpReviewData,
+  ): Promise<SendEmailResult>;
+  abstract sendFollowUpCompletedEmail(
+    to: string,
+    data: SendFollowUpCompletedData,
+  ): Promise<SendEmailResult>;
+  abstract sendPetReturnNotificationEmail(
+    to: string,
+    data: SendPetReturnNotificationData,
   ): Promise<SendEmailResult>;
 }
