@@ -25,7 +25,6 @@ export class RunFollowUpCronUseCase {
   }> {
     const now = new Date();
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     let remindersSent = 0;
     let overdueMarked = 0;
@@ -41,7 +40,11 @@ export class RunFollowUpCronUseCase {
       .leftJoinAndSelect('shelter.shelterProfile', 'shelterProfile')
       .where('record.status = :status', { status: FollowUpProcessStatus.IN_PROGRESS })
       .andWhere('milestone.status IN (:...milestoneStatuses)', {
-        milestoneStatuses: [MilestoneStatus.PENDING, MilestoneStatus.ACTION_REQUIRED],
+        milestoneStatuses: [
+          MilestoneStatus.PENDING,
+          MilestoneStatus.ACTION_REQUIRED,
+          MilestoneStatus.OVERDUE,
+        ],
       })
       .getMany();
 
@@ -56,33 +59,44 @@ export class RunFollowUpCronUseCase {
       const petName = m.record.pet?.name || 'Mascota';
       const actionUrl = `${frontendUrl}/follow-up`;
 
-      // A. Comprobar atraso crítico (+7 días de vencido sin evidencias)
-      if (m.dueDate < sevenDaysAgo && m.status !== MilestoneStatus.OVERDUE) {
-        m.status = MilestoneStatus.OVERDUE;
-        m.overdueNotifiedAt = now;
-        await this.milestoneRepository.save(m);
-        overdueMarked++;
+      // A. Comprobar atraso (fecha límite vencida sin evidencias)
+      if (m.dueDate < now) {
+        let wasChanged = false;
+        if (m.status !== MilestoneStatus.OVERDUE) {
+          m.status = MilestoneStatus.OVERDUE;
+          wasChanged = true;
+          overdueMarked++;
+        }
 
-        this.logger.warn(
-          `Hito de ${m.daysTarget}d para ${petName} marcado como OVERDUE (venció el ${m.dueDate.toISOString()}).`,
-        );
+        if (!m.overdueNotifiedAt) {
+          m.overdueNotifiedAt = now;
+          wasChanged = true;
 
-        // Despachar correo de advertencia
-        try {
-          if (m.record.adopter?.email) {
-            await (this.emailService as any).sendFollowUpOverdueEmail?.(
-              m.record.adopter.email,
-              {
-                adopterName,
-                petName,
-                milestoneDays: m.daysTarget,
-                dueDate: m.dueDate.toLocaleDateString(),
-                actionUrl,
-              },
-            );
+          this.logger.warn(
+            `Hito de ${m.daysTarget}d para ${petName} marcado como OVERDUE (venció el ${m.dueDate.toISOString()}).`,
+          );
+
+          // Despachar correo de advertencia
+          try {
+            if (m.record.adopter?.email) {
+              await (this.emailService as any).sendFollowUpOverdueEmail?.(
+                m.record.adopter.email,
+                {
+                  adopterName,
+                  petName,
+                  milestoneDays: m.daysTarget,
+                  dueDate: m.dueDate.toLocaleDateString(),
+                  actionUrl,
+                },
+              );
+            }
+          } catch (err: any) {
+            this.logger.error(`Error enviando email de overdue a ${m.record.adopter?.email}: ${err.message}`);
           }
-        } catch (err: any) {
-          this.logger.error(`Error enviando email de overdue a ${m.record.adopter?.email}: ${err.message}`);
+        }
+
+        if (wasChanged) {
+          await this.milestoneRepository.save(m);
         }
         continue;
       }

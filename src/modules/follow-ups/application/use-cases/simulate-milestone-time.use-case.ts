@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FollowUpMilestone } from '../../domain/entities/follow-up-milestone.entity';
+import { MilestoneStatus } from '../../domain/value-objects/milestone-status.enum';
 import { SimulateMilestoneTimeDto } from '../dtos/simulate-milestone-time.dto';
 import { RunFollowUpCronUseCase } from './run-follow-up-cron.use-case';
 
@@ -43,14 +44,20 @@ export class SimulateMilestoneTimeUseCase {
       throw new NotFoundException(`No se encontró el hito #${milestoneId}`);
     }
 
-    // Desplazar fecha de vencimiento hacia el pasado (ej. offset 35 días -> vence hace 35 días)
+    // Desplazar fecha de vencimiento hacia el pasado o futuro
     const newDueDate = new Date(Date.now() - dto.daysOffset * 24 * 60 * 60 * 1000);
     milestone.dueDate = newDueDate;
     // Resetear banderas de notificación previa para permitir reenviar en la simulación
     milestone.reminderSentAt = null;
     milestone.overdueNotifiedAt = null;
 
-    const savedMilestone = await this.milestoneRepository.save(milestone);
+    if (newDueDate < new Date()) {
+      milestone.status = MilestoneStatus.OVERDUE;
+    } else {
+      milestone.status = MilestoneStatus.PENDING;
+    }
+
+    await this.milestoneRepository.save(milestone);
 
     // Disparar inmediatamente el escaneo del cron para evaluar el nuevo estado y despachar correo
     const cronResult = await this.runFollowUpCronUseCase.execute();
@@ -60,8 +67,13 @@ export class SimulateMilestoneTimeUseCase {
       where: { id: milestoneId },
     })) as FollowUpMilestone;
 
+    const statusText =
+      reloadedMilestone.status === MilestoneStatus.OVERDUE
+        ? 'PLAZO VENCIDO'
+        : 'EN PLAZO';
+
     return {
-      message: `Fecha de vencimiento simulada con éxito (${dto.daysOffset} días desplazados). Estado actual: ${reloadedMilestone.status}.`,
+      message: `Simulación aplicada: el hito ahora figura como ${statusText} (vencimiento: ${newDueDate.toLocaleDateString()}). Se ejecutó la verificación y el despacho de notificaciones.`,
       milestone: reloadedMilestone,
       cronResult,
     };
