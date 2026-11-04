@@ -38,6 +38,7 @@ async function bootstrap() {
     .addTag('Users', 'Gestión de usuarios, perfiles de adoptantes y albergues')
     .addTag('Shelters', 'Ficha pública y verificación de albergues')
     .addTag('Admin', 'Operaciones administrativas de acreditación y supervisión')
+    .addTag('Health', 'Verificación pública de salud y diagnóstico del servicio')
     .addTag('Pets', 'Registro, catálogo, gestión y búsqueda por similitud visual de mascotas')
     .addTag('Adoptions', 'Postulaciones, solicitudes, dictamen y seguimiento de adopciones')
     .addTag('Recommendations', 'Motor de recomendación híbrido de compatibilidad (EASE, Ordinal y XAI)')

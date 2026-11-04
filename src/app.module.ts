@@ -12,6 +12,7 @@ import { RecommendationsModule } from './modules/recommendations/recommendations
 import { AdminModule } from './modules/admin/admin.module';
 import { validate } from './shared/infrastructure/config/env.validation';
 import { DatabaseModule } from './shared/infrastructure/database/database.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { DatabaseModule } from './shared/infrastructure/database/database.module
     RecommendationsModule,
     AdminModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
