@@ -21,8 +21,7 @@ export class SimulateMilestoneTimeUseCase {
     dto: SimulateMilestoneTimeDto,
   ): Promise<{ message: string; milestone: FollowUpMilestone; cronResult: any }> {
     const isDemoEnabled =
-      this.configService.get<string>('FOLLOW_UP_DEMO_MODE') === 'true' ||
-      this.configService.get<string>('NODE_ENV') !== 'production';
+      this.configService.get<string>('FOLLOW_UP_DEMO_MODE') === 'true';
 
     if (!isDemoEnabled) {
       throw new ForbiddenException(
