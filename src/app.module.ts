@@ -9,8 +9,10 @@ import { UsersModule } from './modules/users/users.module';
 import { AdoptionsModule } from './modules/adoptions/adoptions.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { validate } from './shared/infrastructure/config/env.validation';
 import { DatabaseModule } from './shared/infrastructure/database/database.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -28,8 +30,9 @@ import { DatabaseModule } from './shared/infrastructure/database/database.module
     AdoptionsModule,
     MessagesModule,
     RecommendationsModule,
+    AdminModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
