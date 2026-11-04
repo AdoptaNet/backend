@@ -8,6 +8,7 @@ export interface EvidenceResponseDto {
   id: string;
   evidenceType: string;
   mediaUrl: string;
+  photoUrl?: string;
   caption?: string | null;
   createdAt: string;
 }

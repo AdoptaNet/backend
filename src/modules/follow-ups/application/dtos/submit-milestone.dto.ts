@@ -10,21 +10,29 @@ import {
 } from 'class-validator';
 
 export class EvidenceItemDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'pet_photo',
     description: 'Tipo de evidencia (pet_photo, vaccination_card, home_environment)',
   })
   @IsString()
-  @IsNotEmpty()
-  evidenceType: string;
+  @IsOptional()
+  evidenceType?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://res.cloudinary.com/demo/image/upload/pet.jpg',
     description: 'URL pública de la imagen de evidencia',
   })
   @IsUrl()
-  @IsNotEmpty()
-  mediaUrl: string;
+  @IsOptional()
+  mediaUrl?: string;
+
+  @ApiPropertyOptional({
+    example: 'https://res.cloudinary.com/demo/image/upload/pet.jpg',
+    description: 'URL alternativa para compatibilidad',
+  })
+  @IsUrl()
+  @IsOptional()
+  photoUrl?: string;
 
   @ApiPropertyOptional({
     example: 'Firulais jugando en el patio después de su vacuna',
