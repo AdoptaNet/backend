@@ -11,6 +11,7 @@ import { FollowUpRecord } from '../../domain/entities/follow-up-record.entity';
 import { PetReturn } from '../../domain/entities/pet-return.entity';
 import { FollowUpProcessStatus } from '../../domain/value-objects/follow-up-process-status.enum';
 import { PetReturnStatus } from '../../domain/value-objects/pet-return-status.enum';
+import { PetReturnReason } from '../../domain/value-objects/pet-return-reason.enum';
 import { RequestPetReturnDto } from '../dtos/request-pet-return.dto';
 import { PetReturnRequestedEvent } from '../../domain/events/pet-return-requested.event';
 
@@ -62,13 +63,39 @@ export class RequestPetReturnUseCase {
       throw new BadRequestException('Ya existe una solicitud de retorno en evaluación para esta mascota');
     }
 
+    const mapToCanonicalReason = (rawReason: string): PetReturnReason => {
+      switch (rawReason) {
+        case 'severe_allergy':
+          return PetReturnReason.SEVERE_ALLERGY;
+        case 'behavioral_challenges':
+        case 'behavioral_issue':
+          return PetReturnReason.BEHAVIORAL_ISSUE;
+        case 'housing_restriction':
+        case 'landlord_issue':
+          return PetReturnReason.LANDLORD_ISSUE;
+        case 'financial_hardship':
+        case 'personal_emergency':
+        case 'unforeseen_emergency':
+          return PetReturnReason.UNFORESEEN_EMERGENCY;
+        default:
+          return PetReturnReason.OTHER;
+      }
+    };
+
+    const finalReason = mapToCanonicalReason(dto.reason);
+
+    let fullExplanation = dto.explanation.trim();
+    if (dto.emergencyContactPhone?.trim()) {
+      fullExplanation += `\n\n[Contacto de emergencia: ${dto.emergencyContactPhone.trim()}]`;
+    }
+
     const petReturn = this.petReturnRepository.create({
       followUpRecordId: record.id,
       petId: record.petId,
       adopterId: record.adopterId,
       shelterId: record.shelterId,
-      reason: dto.reason,
-      explanation: dto.explanation.trim(),
+      reason: finalReason,
+      explanation: fullExplanation,
       supportingDocumentUrl: dto.supportingDocumentUrl || null,
       status: PetReturnStatus.REQUESTED,
       requestedAt: new Date(),
