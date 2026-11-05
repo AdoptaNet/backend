@@ -104,8 +104,8 @@ export class SubmitMilestoneEvidenceUseCase {
       const newEvidences = dto.evidences.map((e) =>
         this.evidenceRepository.create({
           milestoneId: milestone.id,
-          evidenceType: e.evidenceType || 'pet_photo',
-          mediaUrl: e.mediaUrl || e.photoUrl || '',
+          evidenceType: e.evidenceType,
+          mediaUrl: e.mediaUrl,
           caption: e.caption || null,
         }),
       );

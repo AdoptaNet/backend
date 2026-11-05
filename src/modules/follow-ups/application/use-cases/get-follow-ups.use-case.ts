@@ -70,7 +70,6 @@ export class GetFollowUpsUseCase {
           id: e.id,
           evidenceType: e.evidenceType,
           mediaUrl: e.mediaUrl,
-          photoUrl: e.mediaUrl,
           caption: e.caption || null,
           createdAt: e.createdAt ? e.createdAt.toISOString() : '',
         }),

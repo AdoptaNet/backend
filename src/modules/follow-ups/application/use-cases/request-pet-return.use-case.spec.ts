@@ -40,7 +40,15 @@ describe('RequestPetReturnUseCase', () => {
     recordRepo.findOne.mockResolvedValue(null);
 
     await expect(
-      useCase.execute('rec-missing', { reason: 'severe_allergy', explanation: 'Test' }, 'user-1'),
+      useCase.execute(
+        'rec-missing',
+        {
+          reason: PetReturnReason.SEVERE_ALLERGY,
+          explanation: 'Test',
+          emergencyContactPhone: '951667124',
+        },
+        'user-1',
+      ),
     ).rejects.toThrow(NotFoundException);
   });
 
@@ -52,11 +60,19 @@ describe('RequestPetReturnUseCase', () => {
     });
 
     await expect(
-      useCase.execute('rec-1', { reason: 'severe_allergy', explanation: 'Test' }, 'user-1'),
+      useCase.execute(
+        'rec-1',
+        {
+          reason: PetReturnReason.SEVERE_ALLERGY,
+          explanation: 'Test',
+          emergencyContactPhone: '951667124',
+        },
+        'user-1',
+      ),
     ).rejects.toThrow(ForbiddenException);
   });
 
-  it('should create return request mapping alias reason and including phone', async () => {
+  it('should create return request mapping canonical reason and including phone', async () => {
     recordRepo.findOne.mockResolvedValue({
       id: 'rec-1',
       adopterId: 'user-1',
@@ -71,7 +87,7 @@ describe('RequestPetReturnUseCase', () => {
     const result = await useCase.execute(
       'rec-1',
       {
-        reason: 'behavioral_challenges',
+        reason: PetReturnReason.BEHAVIORAL_ISSUE,
         explanation: 'Desafíos con otros animales',
         emergencyContactPhone: '951667124',
       },

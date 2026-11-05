@@ -63,26 +63,7 @@ export class RequestPetReturnUseCase {
       throw new BadRequestException('Ya existe una solicitud de retorno en evaluación para esta mascota');
     }
 
-    const mapToCanonicalReason = (rawReason: string): PetReturnReason => {
-      switch (rawReason) {
-        case 'severe_allergy':
-          return PetReturnReason.SEVERE_ALLERGY;
-        case 'behavioral_challenges':
-        case 'behavioral_issue':
-          return PetReturnReason.BEHAVIORAL_ISSUE;
-        case 'housing_restriction':
-        case 'landlord_issue':
-          return PetReturnReason.LANDLORD_ISSUE;
-        case 'financial_hardship':
-        case 'personal_emergency':
-        case 'unforeseen_emergency':
-          return PetReturnReason.UNFORESEEN_EMERGENCY;
-        default:
-          return PetReturnReason.OTHER;
-      }
-    };
-
-    const finalReason = mapToCanonicalReason(dto.reason);
+    const finalReason = dto.reason;
 
     let fullExplanation = dto.explanation.trim();
     if (dto.emergencyContactPhone?.trim()) {

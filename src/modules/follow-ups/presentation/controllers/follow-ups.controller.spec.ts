@@ -68,7 +68,11 @@ describe('FollowUpsController', () => {
 
   it('should request pet return', async () => {
     const user: any = { id: 'u-1', role: UserRole.ADOPTER };
-    const dto = { reason: PetReturnReason.SEVERE_ALLERGY, explanation: 'Alergia severa' };
+    const dto = {
+      reason: PetReturnReason.SEVERE_ALLERGY,
+      explanation: 'Alergia severa',
+      emergencyContactPhone: '951667124',
+    };
     const result = await controller.requestReturn('rec-1', dto, user);
     expect(result).toEqual({ id: 'ret-1' });
     expect(requestPetReturnUseCase.execute).toHaveBeenCalledWith('rec-1', dto, 'u-1');

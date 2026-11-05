@@ -61,9 +61,8 @@ export class ReviewMilestoneUseCase {
       throw new BadRequestException('Este hito ya fue dictaminado y aprobado previamente');
     }
 
-    const rawDecision = dto.decision || dto.status || 'approved';
-    const isApproved = rawDecision === 'approved' || rawDecision === 'completed';
-    const notes = (dto.reviewNotes || dto.shelterFeedback || '').trim() || null;
+    const isApproved = dto.decision === 'approved';
+    const notes = (dto.reviewNotes || '').trim() || null;
 
     milestone.reviewedAt = new Date();
     milestone.reviewerId = reviewerId;
