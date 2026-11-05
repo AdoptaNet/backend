@@ -77,22 +77,32 @@ export class GetFollowUpsUseCase {
       ),
     }));
 
-    const returnsList: PetReturnResponseDto[] = (record.returns || []).map((ret) => ({
-      id: ret.id,
-      followUpRecordId: ret.followUpRecordId,
-      petId: ret.petId,
-      adopterId: ret.adopterId,
-      shelterId: ret.shelterId,
-      reason: ret.reason,
-      explanation: ret.explanation,
-      supportingDocumentUrl: ret.supportingDocumentUrl || null,
-      status: ret.status,
-      requestedAt: ret.requestedAt ? ret.requestedAt.toISOString() : '',
-      coordinationNotes: ret.coordinationNotes || null,
-      scheduledReturnDate: ret.scheduledReturnDate ? ret.scheduledReturnDate.toISOString() : null,
-      completedAt: ret.completedAt ? ret.completedAt.toISOString() : null,
-      shelterObservations: ret.shelterObservations || null,
-    }));
+    const returnsList: PetReturnResponseDto[] = (record.returns || []).map((ret) => {
+      let cleanExplanation = ret.explanation || '';
+      const phoneMatch = cleanExplanation.match(/\[(?:Contacto|Teléfono) de emergencia:\s*([^\]]+)\]/i);
+      const emergencyContactPhone = phoneMatch ? phoneMatch[1].trim() : null;
+      if (phoneMatch) {
+        cleanExplanation = cleanExplanation.replace(phoneMatch[0], '').trim();
+      }
+
+      return {
+        id: ret.id,
+        followUpRecordId: ret.followUpRecordId,
+        petId: ret.petId,
+        adopterId: ret.adopterId,
+        shelterId: ret.shelterId,
+        reason: ret.reason,
+        explanation: cleanExplanation,
+        emergencyContactPhone,
+        supportingDocumentUrl: ret.supportingDocumentUrl || null,
+        status: ret.status,
+        requestedAt: ret.requestedAt ? ret.requestedAt.toISOString() : '',
+        coordinationNotes: ret.coordinationNotes || null,
+        scheduledReturnDate: ret.scheduledReturnDate ? ret.scheduledReturnDate.toISOString() : null,
+        completedAt: ret.completedAt ? ret.completedAt.toISOString() : null,
+        shelterObservations: ret.shelterObservations || null,
+      };
+    });
 
     const activeReturn = returnsList.find(
       (r) => r.status === 'requested' || r.status === 'under_coordination',

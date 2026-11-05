@@ -38,6 +38,7 @@ export interface PetReturnResponseDto {
   shelterId: string;
   reason: PetReturnReason;
   explanation: string;
+  emergencyContactPhone?: string | null;
   supportingDocumentUrl?: string | null;
   status: PetReturnStatus;
   requestedAt: string;
