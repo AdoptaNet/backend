@@ -41,6 +41,8 @@ async function bootstrap() {
     .addTag('Health', 'Verificación pública de salud y diagnóstico del servicio')
     .addTag('Pets', 'Registro, catálogo, gestión y búsqueda por similitud visual de mascotas')
     .addTag('Adoptions', 'Postulaciones, solicitudes, dictamen y seguimiento de adopciones')
+    .addTag('FollowUps', 'Programa integral de seguimiento post-adopción a 30, 90 y 180 días con evidencias')
+    .addTag('PetReturns', 'Protocolo formal de retorno y reubicación de mascotas por fuerza mayor')
     .addTag('Recommendations', 'Motor de recomendación híbrido de compatibilidad (EASE, Ordinal y XAI)')
     .addTag('Media', 'Subida y eliminación de imágenes en almacenamiento en la nube')
     .addTag('Notifications', 'Webhooks y eventos de entrega de correos electrónicos')

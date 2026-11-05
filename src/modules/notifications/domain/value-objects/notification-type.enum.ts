@@ -6,5 +6,11 @@ export enum NotificationType {
   ADOPTION_STATUS_CHANGED = 'adoption_status_changed',
   NEW_ADOPTION_REQUEST = 'new_adoption_request',
   FOLLOW_UP_REMINDER = 'follow_up_reminder',
+  FOLLOW_UP_OVERDUE = 'follow_up_overdue',
+  FOLLOW_UP_MILESTONE_APPROVED = 'follow_up_milestone_approved',
+  FOLLOW_UP_ACTION_REQUIRED = 'follow_up_action_required',
+  FOLLOW_UP_COMPLETED = 'follow_up_completed',
+  PET_RETURN_REQUESTED = 'pet_return_requested',
+  PET_RETURN_CONFIRMED = 'pet_return_confirmed',
   CUSTOM = 'custom',
 }
