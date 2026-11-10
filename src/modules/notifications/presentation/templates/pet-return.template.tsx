@@ -22,13 +22,23 @@ export function PetReturnTemplate({
   reasonText,
   actionUrl,
 }: PetReturnTemplateProps) {
-  const name = recipientName.trim() || 'Usuario';
+  const name = recipientName?.trim() || 'Estimado/a';
+
+  const previewText = !isCompleted
+    ? `Solicitud de retorno responsable para ${petName}`
+    : isAccepted
+      ? `${petName} ya se encuentra bajo el cuidado del albergue`
+      : `Coordinación sobre la solicitud de retorno de ${petName}`;
 
   return (
-    <BaseEmailLayout previewText={`Protocolo de Retorno de Mascota: ${petName}`}>
+    <BaseEmailLayout previewText={previewText}>
       <Section style={{ marginBottom: '16px' }}>
-        <EmailBadge variant="accent">
-          {isCompleted ? 'Resolución de Retorno' : 'Solicitud de Retorno'}
+        <EmailBadge variant={isCompleted && isAccepted ? 'success' : 'accent'}>
+          {!isCompleted
+            ? 'Solicitud de Retorno Responsable 🐾'
+            : isAccepted
+              ? 'Retorno Responsable Confirmado 🐾'
+              : 'Coordinación Requerida 💬'}
         </EmailBadge>
       </Section>
 
@@ -43,9 +53,11 @@ export function PetReturnTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        {isCompleted
-          ? `Actualización del retorno de ${petName}`
-          : `Nueva solicitud formal de retorno para ${petName}`}
+        {!isCompleted
+          ? `Solicitud de retorno responsable para ${petName}`
+          : isAccepted
+            ? `Hola ${name}, ${petName} ya se encuentra bajo el cuidado del albergue`
+            : `Hola ${name}, el albergue desea comunicarse contigo sobre ${petName}`}
       </Heading>
 
       <Text
@@ -56,19 +68,24 @@ export function PetReturnTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        {isCompleted ? (
-          isAccepted ? (
-            <>
-              Hola {name}, el albergue ha confirmado la <strong>recepción física de {petName}</strong>. El proceso de adopción ha sido revocado formalmente y la mascota pasa a evaluación preventiva.
-            </>
-          ) : (
-            <>
-              Hola {name}, el albergue ha revisado la solicitud de retorno de {petName} y determinó que no cumple las causales tipificadas.
-            </>
-          )
+        {!isCompleted ? (
+          <>
+            Hola <strong>{name}</strong>, el adoptante de <strong>{petName}</strong> ha comunicado
+            una situación de fuerza mayor y solicita coordinar el retorno responsable de la mascota.
+          </>
+        ) : isAccepted ? (
+          <>
+            Queremos confirmarte que el albergue ha recibido a <strong>{petName}</strong> y se
+            encuentra a salvo y bien atendido. Entendemos que tomar esta decisión por causas de fuerza
+            mayor ha sido difícil. Te agradecemos por haber actuado con empatía y responsabilidad,
+            priorizando su seguridad en todo momento en lugar de dejarlo desprotegido.
+          </>
         ) : (
           <>
-            Hola {name}, el adoptante ha iniciado una <strong>solicitud de retorno por fuerza mayor</strong> para {petName}.
+            El albergue ha revisado tu mensaje respecto a la situación de <strong>{petName}</strong>.
+            Antes de avanzar con un retorno definitivo, el equipo considera importante explorar
+            juntos alternativas de apoyo (como asesoría en adaptación o cuidados). Por favor
+            comunícate directamente con el albergue para acordar la mejor opción para ambos.
           </>
         )}
       </Text>
@@ -91,7 +108,7 @@ export function PetReturnTemplate({
               margin: '0 0 6px 0',
             }}
           >
-            Motivo declarado:
+            Motivo y circunstancias comunicadas:
           </Text>
           <Text
             style={{
@@ -101,18 +118,48 @@ export function PetReturnTemplate({
               margin: 0,
             }}
           >
-            {reasonText}
+            <em>"{reasonText}"</em>
           </Text>
         </Section>
       )}
 
       <Section style={{ textAlign: 'center', margin: '28px 0' }}>
         <EmailButton href={actionUrl} variant="primary">
-          Gestionar en AdoptaNet
+          {!isCompleted
+            ? 'Revisar y Coordinar Retorno'
+            : isAccepted
+              ? 'Ver Detalle en Mi Perfil'
+              : 'Ver Mensajes y Contacto'}
         </EmailButton>
       </Section>
 
-      <Hr style={{ borderColor: emailTheme.colors.border, margin: '24px 0' }} />
+      <Hr
+        style={{
+          borderColor: emailTheme.colors.border,
+          margin: '24px 0 16px 0',
+        }}
+      />
+
+      <Text
+        style={{
+          color: emailTheme.colors.textMuted,
+          fontSize: '12px',
+          lineHeight: '18px',
+          margin: 0,
+        }}
+      >
+        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+        <br />
+        <a
+          href={actionUrl}
+          style={{
+            color: emailTheme.colors.primary,
+            wordBreak: 'break-all',
+          }}
+        >
+          {actionUrl}
+        </a>
+      </Text>
     </BaseEmailLayout>
   );
 }

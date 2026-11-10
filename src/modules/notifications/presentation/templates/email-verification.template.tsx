@@ -14,7 +14,10 @@ export function EmailVerificationTemplate({
   fullName,
   verificationUrl,
 }: EmailVerificationTemplateProps) {
-  const displayName = fullName?.trim() || 'hola';
+  const trimmedName = fullName?.trim();
+  const headingTitle = trimmedName
+    ? `¡Bienvenido/a, ${trimmedName}!`
+    : '¡Te damos la bienvenida a Adoptanet!';
 
   return (
     <BaseEmailLayout previewText="Confirma tu correo electrónico para activar tu cuenta en Adoptanet">
@@ -33,7 +36,7 @@ export function EmailVerificationTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        ¡Bienvenido/a, {displayName}!
+        {headingTitle}
       </Heading>
 
       <Text

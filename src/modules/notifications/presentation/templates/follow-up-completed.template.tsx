@@ -26,7 +26,7 @@ export function FollowUpCompletedTemplate({
     <BaseEmailLayout previewText={`🏆 ¡Felicidades! Adopción Consolidada Oficialmente para ${petName}`}>
       <Section style={{ marginBottom: '16px' }}>
         <EmailBadge variant="success">
-          ¡Ciclo de 180 Días Culminado con Éxito! 🏆
+          ¡Ciclo de Seguimiento Culminado con Éxito! 🏆
         </EmailBadge>
       </Section>
 
@@ -41,7 +41,7 @@ export function FollowUpCompletedTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        ¡Felicidades {name}! {petName} ya tiene su hogar definitivo
+        ¡Felicidades, {name}! {petName} ya tiene su hogar definitivo 🏡
       </Heading>
 
       <Text
@@ -52,7 +52,7 @@ export function FollowUpCompletedTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        Has completado satisfactoriamente los 3 hitos obligatorios del programa de seguimiento post-adopción a 30, 90 y 180 días. En coordinación con <strong>{shelterName}</strong>, se declara formalmente <strong>consolidada la adopción de {petName}</strong>.
+        Has completado con dedicación y cariño los 3 hitos del programa de acompañamiento post-adopción (30, 90 y 180 días). Junto con el equipo de <strong>{shelterName}</strong>, celebramos que la adopción de <strong>{petName}</strong> es hoy un compromiso consolidado y una hermosa historia con final feliz.
       </Text>
 
       <Section
@@ -95,9 +95,20 @@ export function FollowUpCompletedTemplate({
             margin: '4px 0 0 0',
           }}
         >
-          Acreditado por AdoptaNet y {shelterName}
+          Acreditado con amor por Adoptanet y {shelterName}
         </Text>
       </Section>
+
+      <Text
+        style={{
+          color: emailTheme.colors.textSecondary,
+          fontSize: '14px',
+          lineHeight: '22px',
+          margin: '0 0 16px 0',
+        }}
+      >
+        Gracias por abrir las puertas de tu hogar y darle una segunda oportunidad a un animalito que lo necesitaba. ¡Te deseamos una vida llena de momentos maravillosos junto a <strong>{petName}</strong>!
+      </Text>
 
       <Section style={{ textAlign: 'center', margin: '28px 0' }}>
         <EmailButton href={actionUrl} variant="primary">
@@ -105,7 +116,33 @@ export function FollowUpCompletedTemplate({
         </EmailButton>
       </Section>
 
-      <Hr style={{ borderColor: emailTheme.colors.border, margin: '24px 0' }} />
+      <Hr
+        style={{
+          borderColor: emailTheme.colors.border,
+          margin: '24px 0 16px 0',
+        }}
+      />
+
+      <Text
+        style={{
+          color: emailTheme.colors.textMuted,
+          fontSize: '12px',
+          lineHeight: '18px',
+          margin: 0,
+        }}
+      >
+        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+        <br />
+        <a
+          href={actionUrl}
+          style={{
+            color: emailTheme.colors.primary,
+            wordBreak: 'break-all',
+          }}
+        >
+          {actionUrl}
+        </a>
+      </Text>
     </BaseEmailLayout>
   );
 }
