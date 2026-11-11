@@ -60,6 +60,17 @@ export class ShelterProfileResponseDto {
   })
   isVerified: boolean;
 
+  @ApiProperty({
+    description: 'Indica si el albergue ha solicitado verificación oficial',
+  })
+  verificationRequested: boolean;
+
+  @ApiProperty({
+    description: 'Fecha en la que se solicitó la verificación',
+    nullable: true,
+  })
+  verificationRequestedAt: Date | null;
+
   @ApiProperty({ description: 'Fecha de creación' })
   createdAt: Date;
 

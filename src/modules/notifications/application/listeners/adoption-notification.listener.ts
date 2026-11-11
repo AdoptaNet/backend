@@ -9,17 +9,17 @@ import { EmailService } from '../interfaces/email.service';
 
 const REJECTION_REASON_LABELS: Record<AdoptionRejectionReason, string> = {
   [AdoptionRejectionReason.INCOMPATIBLE_HOUSING]:
-    'Condiciones de vivienda no compatibles con la mascota',
+    'El tipo o espacio de vivienda no se adapta a las necesidades de esta mascota',
   [AdoptionRejectionReason.UNSUITABLE_SCHEDULE]:
-    'Disponibilidad de tiempo y rutina no acordes a los requerimientos del animal',
+    'Los horarios y tiempo disponible no coinciden con la atención diaria que requiere la mascota',
   [AdoptionRejectionReason.FINANCIAL_INCOMPATIBILITY]:
-    'Capacidad de cobertura médica y manutención insuficiente',
+    'Los cuidados veterinarios o de salud requeridos son especiales en este momento',
   [AdoptionRejectionReason.OTHER_APPLICANT_CHOSEN]:
-    'Se ha formalizado la adopción con otro postulante seleccionado para este caso',
+    'Se seleccionó a otra familia que cumplía de forma más inmediata con las necesidades de la mascota',
   [AdoptionRejectionReason.INCOMPLETE_PROFILE]:
-    'Expediente o información de postulación insuficiente',
+    'La información del perfil no estuvo completa para concluir la evaluación',
   [AdoptionRejectionReason.OTHER]:
-    'Otras consideraciones específicas detalladas por el albergue',
+    'Otras observaciones específicas detalladas por el albergue',
 };
 
 @Injectable()

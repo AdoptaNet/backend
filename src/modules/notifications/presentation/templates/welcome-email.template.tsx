@@ -22,8 +22,14 @@ export function WelcomeEmailTemplate({
   frontendUrl = 'http://localhost:3001',
 }: WelcomeEmailProps) {
   const isAdopter = role === UserRole.ADOPTER;
-  const displayName =
-    fullName?.trim() || (isAdopter ? 'adoptante' : 'rescatista');
+  const trimmedName = fullName?.trim();
+  const headingTitle = trimmedName
+    ? `¡Hola, ${trimmedName}!`
+    : '¡Te damos la bienvenida a Adoptanet!';
+  const actionUrl = isAdopter ? `${frontendUrl}/pets` : `${frontendUrl}/home`;
+  const actionLabel = isAdopter
+    ? 'Explorar catálogo de adopción'
+    : 'Ir a mi panel de albergue';
 
   return (
     <BaseEmailLayout
@@ -54,7 +60,7 @@ export function WelcomeEmailTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        ¡Hola, {displayName}!
+        {headingTitle}
       </Heading>
 
       {/* Introducción */}
@@ -174,12 +180,10 @@ export function WelcomeEmailTemplate({
       {/* Botón de acción principal */}
       <Section style={{ textAlign: 'center', margin: '28px 0 20px 0' }}>
         <EmailButton
-          href={`${frontendUrl}/pets`}
+          href={actionUrl}
           variant={isAdopter ? 'primary' : 'secondary'}
         >
-          {isAdopter
-            ? 'Explorar catálogo de adopción'
-            : 'Ir a mi panel de mascotas'}
+          {actionLabel}
         </EmailButton>
       </Section>
 
@@ -195,11 +199,32 @@ export function WelcomeEmailTemplate({
           color: emailTheme.colors.textMuted,
           fontSize: '13px',
           lineHeight: '20px',
-          margin: '0',
+          margin: '0 0 16px 0',
         }}
       >
         ¡Gracias por sumarte a la adopción responsable en el Perú! Si tienes
         alguna duda, responde directamente a este correo.
+      </Text>
+
+      <Text
+        style={{
+          color: emailTheme.colors.textMuted,
+          fontSize: '12px',
+          lineHeight: '18px',
+          margin: 0,
+        }}
+      >
+        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+        <br />
+        <a
+          href={actionUrl}
+          style={{
+            color: emailTheme.colors.primary,
+            wordBreak: 'break-all',
+          }}
+        >
+          {actionUrl}
+        </a>
       </Text>
     </BaseEmailLayout>
   );

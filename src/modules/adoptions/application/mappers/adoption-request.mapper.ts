@@ -42,6 +42,7 @@ export class AdoptionRequestMapper {
             fullName: entity.adopter.fullName,
             email: entity.adopter.email,
             avatarUrl: entity.adopter.avatarUrl,
+            phoneNumber: entity.adopter.adopterProfile?.phoneNumber || null,
             city: entity.adopter.adopterProfile?.department || null,
           }
         : undefined,
@@ -51,6 +52,7 @@ export class AdoptionRequestMapper {
             fullName: entity.shelter.fullName,
             email: entity.shelter.email,
             avatarUrl: entity.shelter.avatarUrl,
+            phoneNumber: entity.shelter.shelterProfile?.phoneNumber || null,
             organizationName:
               entity.shelter.shelterProfile?.organizationName || null,
             city: entity.shelter.shelterProfile?.city || null,

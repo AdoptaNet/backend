@@ -20,7 +20,8 @@ export function FollowUpReminderTemplate({
   dueDate,
   actionUrl,
 }: FollowUpReminderTemplateProps) {
-  const name = adopterName.trim() || 'Adoptante';
+  const trimmedName = adopterName?.trim();
+  const greetingName = trimmedName ? ` ${trimmedName}` : '';
 
   return (
     <BaseEmailLayout previewText={`Recordatorio: Hito de ${milestoneDays} días para ${petName}`}>
@@ -41,7 +42,7 @@ export function FollowUpReminderTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        ¡Hola {name}! ¿Cómo está {petName}?
+        ¡Hola{greetingName}! ¿Cómo está {petName}?
       </Heading>
 
       <Text
@@ -52,7 +53,8 @@ export function FollowUpReminderTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        Se aproxima la fecha límite para el <strong>hito de seguimiento a los {milestoneDays} días</strong> ({dueDate}) desde que formalizaste la adopción de <strong>{petName}</strong>.
+        Se acerca la fecha para el <strong>hito de seguimiento a los {milestoneDays} días</strong> ({dueDate}) desde que formalizaste la adopción de <strong>{petName}</strong>.
+        Queremos saber cómo le está yendo y celebrar sus avances en casa.
       </Text>
 
       <Section
@@ -72,7 +74,7 @@ export function FollowUpReminderTemplate({
             margin: '0 0 8px 0',
           }}
         >
-          ¿Qué necesitas subir a la plataforma?
+          ¿Qué puedes compartir en esta actualización?
         </Text>
         <Text
           style={{
@@ -82,15 +84,15 @@ export function FollowUpReminderTemplate({
             margin: 0,
           }}
         >
-          • 1 o 2 fotografías claras de {petName} en casa.<br />
-          • Foto del carnet de vacunación o control veterinario periódico.<br />
-          • Unas breves líneas contándonos sobre su apetito, energía y adaptación.
+          • 1 o 2 fotografías recientes de {petName} disfrutando en su hogar o paseando.<br />
+          • Foto de su carnet de vacunación o control veterinario periódico.<br />
+          • Unas breves líneas contándonos sobre su apetito, ánimo y adaptación en familia.
         </Text>
       </Section>
 
       <Section style={{ textAlign: 'center', margin: '28px 0' }}>
         <EmailButton href={actionUrl} variant="primary">
-          Subir Evidencias de Seguimiento
+          Compartir Fotos y Novedades
         </EmailButton>
       </Section>
 
@@ -102,10 +104,36 @@ export function FollowUpReminderTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        Este proceso garantiza el bienestar del animal y es parte de tu compromiso de tenencia responsable con el albergue custodio.
+        Este seguimiento asegura el bienestar integral de {petName} y nos llena de alegría ver cómo crece y se adapta con su nueva familia.
       </Text>
 
-      <Hr style={{ borderColor: emailTheme.colors.border, margin: '24px 0' }} />
+      <Hr
+        style={{
+          borderColor: emailTheme.colors.border,
+          margin: '24px 0 16px 0',
+        }}
+      />
+
+      <Text
+        style={{
+          color: emailTheme.colors.textMuted,
+          fontSize: '12px',
+          lineHeight: '18px',
+          margin: 0,
+        }}
+      >
+        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+        <br />
+        <a
+          href={actionUrl}
+          style={{
+            color: emailTheme.colors.primary,
+            wordBreak: 'break-all',
+          }}
+        >
+          {actionUrl}
+        </a>
+      </Text>
     </BaseEmailLayout>
   );
 }

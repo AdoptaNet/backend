@@ -14,6 +14,7 @@ import {
   SendNewAdoptionRequestData,
   SendAdoptionStatusChangedData,
   SendFollowUpReminderData,
+  SendMilestoneSubmittedData,
   SendFollowUpOverdueData,
   SendFollowUpReviewData,
   SendFollowUpCompletedData,
@@ -31,6 +32,7 @@ import { ShelterVerificationTemplate } from '../../presentation/templates/shelte
 import { NewAdoptionRequestTemplate } from '../../presentation/templates/new-adoption-request.template';
 import { AdoptionStatusChangedTemplate } from '../../presentation/templates/adoption-status-changed.template';
 import { FollowUpReminderTemplate } from '../../presentation/templates/follow-up-reminder.template';
+import { MilestoneSubmittedTemplate } from '../../presentation/templates/milestone-submitted.template';
 import { FollowUpOverdueTemplate } from '../../presentation/templates/follow-up-overdue.template';
 import { FollowUpReviewTemplate } from '../../presentation/templates/follow-up-review.template';
 import { FollowUpCompletedTemplate } from '../../presentation/templates/follow-up-completed.template';
@@ -348,6 +350,35 @@ export class ResendEmailService implements EmailService {
   }
 
   /**
+   * Envía notificación al albergue cuando un adoptante remite fotos y actualización de un hito (US-20).
+   */
+  async sendMilestoneSubmittedEmail(
+    to: string,
+    data: SendMilestoneSubmittedData,
+  ): Promise<SendEmailResult> {
+    const template = React.createElement(MilestoneSubmittedTemplate, {
+      shelterName: data.shelterName,
+      adopterName: data.adopterName,
+      petName: data.petName,
+      milestoneDays: data.milestoneDays,
+      actionUrl: data.actionUrl,
+    });
+
+    return await this.sendEmail({
+      to,
+      subject: `📸 Nuevas fotos y actualización de ${data.petName} (${data.milestoneDays} días)`,
+      template,
+      userId: data.userId,
+      type: NotificationType.CUSTOM,
+      metadata: {
+        petName: data.petName,
+        milestoneDays: data.milestoneDays,
+        adopterName: data.adopterName,
+      },
+    });
+  }
+
+  /**
    * Envía alerta de incumplimiento/atraso crítico para hito vencido (US-20).
    */
   async sendFollowUpOverdueEmail(
@@ -393,7 +424,7 @@ export class ResendEmailService implements EmailService {
 
     const subject = data.isApproved
       ? `🎉 ¡Hito de ${data.milestoneDays} días aprobado para ${data.petName}!`
-      : `⚠️ Observaciones en tu hito de ${data.milestoneDays} días para ${data.petName}`;
+      : `📝 Actualización requerida: Hito de ${data.milestoneDays} días para ${data.petName}`;
 
     return await this.sendEmail({
       to,
@@ -456,8 +487,10 @@ export class ResendEmailService implements EmailService {
     });
 
     const subject = data.isCompleted
-      ? `🐾 Resolución del retorno de ${data.petName}`
-      : `⚠️ Solicitud formal de retorno recibida para ${data.petName}`;
+      ? data.isAccepted
+        ? `🐾 Retorno confirmado: ${data.petName} ya está bajo el cuidado del albergue`
+        : `💬 Coordinación sobre la solicitud de retorno de ${data.petName}`
+      : `🐾 Solicitud de retorno responsable recibida para ${data.petName}`;
 
     return await this.sendEmail({
       to,

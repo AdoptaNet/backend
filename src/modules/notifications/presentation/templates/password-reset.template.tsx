@@ -14,7 +14,8 @@ export function PasswordResetTemplate({
   fullName,
   resetUrl,
 }: PasswordResetTemplateProps) {
-  const displayName = fullName?.trim() || 'hola';
+  const trimmedName = fullName?.trim();
+  const greeting = trimmedName ? `Hola, ${trimmedName}.` : 'Hola.';
 
   return (
     <BaseEmailLayout previewText="Restablece tu contraseña en Adoptanet">
@@ -44,9 +45,9 @@ export function PasswordResetTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        Hola, {displayName}. Hemos recibido una solicitud para restablecer la
-        contraseña de tu cuenta en Adoptanet. Para crear una nueva contraseña, haz
-        clic en el botón a continuación:
+        {greeting} Hemos recibido una solicitud para restablecer la contraseña de
+        tu cuenta en Adoptanet. Para crear una nueva contraseña, haz clic en el
+        botón a continuación:
       </Text>
 
       <Section style={{ textAlign: 'center', margin: '28px 0' }}>

@@ -80,14 +80,34 @@ export class AdminController {
     type: Boolean,
     description: 'Filtrar por estado de verificación (true / false)',
   })
+  @ApiQuery({
+    name: 'pending',
+    required: false,
+    type: Boolean,
+    description: 'Filtrar por solicitudes de verificación pendientes (true / false)',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Listado de albergues obtenido exitosamente',
   })
-  async getShelters(@Query('verified') verified?: string) {
+  async getShelters(
+    @Query('verified') verified?: string,
+    @Query('pending') pending?: string,
+  ) {
     let isVerified: boolean | undefined = undefined;
     if (verified === 'true') isVerified = true;
     else if (verified === 'false') isVerified = false;
+
+    let verificationRequested: boolean | undefined = undefined;
+    if (pending === 'true') verificationRequested = true;
+    else if (pending === 'false') verificationRequested = false;
+
+    if (verificationRequested !== undefined) {
+      return this.getAdminSheltersUseCase.execute(
+        isVerified,
+        verificationRequested,
+      );
+    }
 
     return this.getAdminSheltersUseCase.execute(isVerified);
   }

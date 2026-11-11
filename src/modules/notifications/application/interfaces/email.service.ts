@@ -68,6 +68,15 @@ export interface SendFollowUpReminderData {
   actionUrl: string;
 }
 
+export interface SendMilestoneSubmittedData {
+  userId?: string;
+  shelterName?: string | null;
+  adopterName: string;
+  petName: string;
+  milestoneDays: number;
+  actionUrl: string;
+}
+
 export interface SendFollowUpOverdueData {
   userId?: string;
   adopterName: string;
@@ -140,6 +149,10 @@ export abstract class EmailService {
   abstract sendFollowUpReminderEmail(
     to: string,
     data: SendFollowUpReminderData,
+  ): Promise<SendEmailResult>;
+  abstract sendMilestoneSubmittedEmail(
+    to: string,
+    data: SendMilestoneSubmittedData,
   ): Promise<SendEmailResult>;
   abstract sendFollowUpOverdueEmail(
     to: string,

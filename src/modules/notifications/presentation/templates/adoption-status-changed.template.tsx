@@ -22,19 +22,29 @@ export function AdoptionStatusChangedTemplate({
   rejectionNotes,
   actionUrl,
 }: AdoptionStatusChangedTemplateProps) {
-  const name = adopterName.trim() || 'Adoptante';
+  const trimmedName = adopterName?.trim();
+
+  const previewText = isApproved
+    ? trimmedName
+      ? `¡Felicidades ${trimmedName}! Tu solicitud de adopción para ${petName} fue aprobada`
+      : `¡Felicidades! Tu solicitud de adopción para ${petName} fue aprobada`
+    : trimmedName
+      ? `Novedades sobre tu postulación para adoptar a ${petName}`
+      : `Actualización sobre tu solicitud de adopción para ${petName}`;
+
+  const headingTitle = isApproved
+    ? trimmedName
+      ? `🎉 ¡Excelentes noticias, ${trimmedName}!`
+      : '🎉 ¡Excelentes noticias sobre tu adopción!'
+    : trimmedName
+      ? `Hola ${trimmedName}, novedades sobre tu postulación`
+      : 'Novedades sobre tu postulación de adopción';
 
   return (
-    <BaseEmailLayout
-      previewText={
-        isApproved
-          ? `¡Felicidades ${name}! Tu solicitud de adopción para ${petName} fue aprobada`
-          : `Actualización sobre tu solicitud de adopción para ${petName}`
-      }
-    >
+    <BaseEmailLayout previewText={previewText}>
       <Section style={{ marginBottom: '16px' }}>
         <EmailBadge variant={isApproved ? 'success' : 'accent'}>
-          {isApproved ? '¡Adopción Aprobada! 🎉' : 'Actualización de Solicitud'}
+          {isApproved ? '¡Adopción Aprobada! 🎉' : 'Actualización de Solicitud 🐾'}
         </EmailBadge>
       </Section>
 
@@ -49,9 +59,7 @@ export function AdoptionStatusChangedTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        {isApproved
-          ? `🎉 ¡Buenas noticias, ${name}!`
-          : `Hola ${name}, información sobre tu solicitud`}
+        {headingTitle}
       </Heading>
 
       <Text
@@ -64,17 +72,20 @@ export function AdoptionStatusChangedTemplate({
       >
         {isApproved ? (
           <>
-            Nos alegra comunicarte que el albergue ha evaluado favorablemente tu
-            expediente y <strong>ha aprobado tu solicitud de adopción para {petName}</strong>.
-            La mascota ha sido reservada para ti y ahora puedes coordinar los detalles de entrega
-            y formalización.
+            Nos alegra mucho contarte que el albergue ha evaluado favorablemente
+            tu solicitud y{' '}
+            <strong>ha aprobado la adopción de {petName}</strong>. La mascota ha
+            sido reservada para ti y ahora puedes coordinar los detalles de
+            bienvenida y formalización.
           </>
         ) : (
           <>
-            Queremos agradecerte por tu tiempo y compromiso al postular para la
-            adopción de <strong>{petName}</strong>. El albergue custodio ha
-            evaluado las postulaciones y en esta ocasión ha dictaminado que no es
-            posible proceder con esta solicitud.
+            Queremos agradecerte sinceramente por tu tiempo, interés y
+            compromiso al postular para la adopción de{' '}
+            <strong>{petName}</strong>. El albergue ha evaluado con mucho
+            cuidado las postulaciones recibidas y, en esta ocasión, ha decidido
+            continuar con otra opción que se ajusta de manera más inmediata a las
+            necesidades de la mascota.
           </>
         )}
       </Text>
@@ -98,7 +109,7 @@ export function AdoptionStatusChangedTemplate({
                 margin: '0 0 8px 0',
               }}
             >
-              Motivo principal: {rejectionReasonText}
+              Detalle de la evaluación: {rejectionReasonText}
             </Text>
           )}
           {rejectionNotes && (
@@ -133,8 +144,8 @@ export function AdoptionStatusChangedTemplate({
         }}
       >
         {isApproved
-          ? 'Recuerda que la tenencia responsable y el programa de seguimiento aseguran el bienestar integral de tu nuevo compañero.'
-          : 'Te animamos a continuar explorando nuestro catálogo; hay muchos otros animalitos rescatados esperando por un hogar lleno de cariño.'}
+          ? 'Recuerda que la tenencia responsable y el programa de acompañamiento aseguran el bienestar integral de tu nuevo compañero.'
+          : '¡No te desanimes! Te invitamos a seguir explorando el catálogo; hay muchos otros perritos y gatitos rescatados esperando una familia con tanto cariño como la tuya.'}
       </Text>
 
       <Hr
@@ -152,7 +163,7 @@ export function AdoptionStatusChangedTemplate({
           margin: 0,
         }}
       >
-        Enlace de acceso directo:
+        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
         <br />
         <a
           href={actionUrl}

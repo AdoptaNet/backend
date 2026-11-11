@@ -118,4 +118,17 @@ describe('ResendEmailService', () => {
     expect(result.success).toBe(true);
     expect(result.id).toBe('dry-run-preview-id');
   });
+
+  it('should send milestone submitted email for a shelter successfully in dry-run mode', async () => {
+    const result = await service.sendMilestoneSubmittedEmail('shelter@example.com', {
+      shelterName: 'Albergue Huellitas',
+      adopterName: 'Juan Pérez',
+      petName: 'Rocky',
+      milestoneDays: 30,
+      actionUrl: 'http://localhost:3001/follow-up',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.id).toBe('dry-run-preview-id');
+  });
 });

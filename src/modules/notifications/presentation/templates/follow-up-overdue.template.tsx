@@ -20,20 +20,21 @@ export function FollowUpOverdueTemplate({
   dueDate,
   actionUrl,
 }: FollowUpOverdueTemplateProps) {
-  const name = adopterName.trim() || 'Adoptante';
+  const trimmedName = adopterName?.trim();
+  const greetingName = trimmedName ? ` ${trimmedName}` : '';
 
   return (
-    <BaseEmailLayout previewText={`⚠️ Urgente: Hito de seguimiento vencido para ${petName}`}>
+    <BaseEmailLayout previewText={`⚠️ Actualización pendiente: Hito de seguimiento de ${petName}`}>
       <Section style={{ marginBottom: '16px' }}>
         <EmailBadge variant="accent">
-          Hito Vencido ({milestoneDays} días) ⚠️
+          Hito Pendiente de Seguimiento ({milestoneDays} días) ⚠️
         </EmailBadge>
       </Section>
 
       <Heading
         as="h1"
         style={{
-          color: '#B91C1C',
+          color: emailTheme.colors.textPrimary,
           fontSize: '22px',
           fontWeight: 700,
           lineHeight: '28px',
@@ -41,7 +42,7 @@ export function FollowUpOverdueTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        Atención {name}: Regulariza el expediente de {petName}
+        ¡Hola{greetingName}! ¿Cómo está {petName}? Tenemos una actualización pendiente
       </Heading>
 
       <Text
@@ -52,13 +53,13 @@ export function FollowUpOverdueTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        Te informamos que el plazo máximo para remitir las evidencias del <strong>hito de {milestoneDays} días</strong> para <strong>{petName}</strong> venció el {dueDate} y actualmente registra más de 7 días de retraso sin novedades.
+        Esperamos que todo esté marchando muy bien en casa. Te escribimos porque la fecha programada para el <strong>hito de seguimiento a los {milestoneDays} días</strong> de <strong>{petName}</strong> venció el {dueDate} y aún no hemos recibido noticias de su adaptación.
       </Text>
 
       <Section
         style={{
-          backgroundColor: '#FEF2F2',
-          border: '1px solid #FCA5A5',
+          backgroundColor: '#FFFBEB',
+          border: '1px solid #FDE68A',
           borderRadius: '12px',
           padding: '16px',
           margin: '20px 0',
@@ -66,33 +67,70 @@ export function FollowUpOverdueTemplate({
       >
         <Text
           style={{
-            color: '#991B1B',
+            color: '#92400E',
             fontSize: '14px',
             fontWeight: 600,
             margin: '0 0 6px 0',
           }}
         >
-          Compromiso Contractual de Adopción
+          El albergue está al tanto y pendiente de su bienestar
         </Text>
         <Text
           style={{
-            color: '#7F1D1D',
+            color: '#78350F',
             fontSize: '13px',
             lineHeight: '20px',
             margin: 0,
           }}
         >
-          El albergue custodio ha sido notificado de esta mora. Para evitar visitas inopinadas o medidas de fiscalización presencial, por favor ingresa y carga las fotos y notas de salud a la brevedad posible.
+          Para el equipo que cuidó de su rescate es indispensable confirmar que {petName} se encuentra sano, seguro y adaptándose bien a su nuevo hogar. Si has tenido días ocupados o algún inconveniente, por favor tómate un par de minutos para subir 1 o 2 fotos recientes y una breve nota sobre su estado.
         </Text>
       </Section>
 
       <Section style={{ textAlign: 'center', margin: '28px 0' }}>
         <EmailButton href={actionUrl} variant="primary">
-          Regularizar Evidencias Ahora
+          Subir Fotos y Actualización
         </EmailButton>
       </Section>
 
-      <Hr style={{ borderColor: emailTheme.colors.border, margin: '24px 0' }} />
+      <Text
+        style={{
+          color: emailTheme.colors.textMuted,
+          fontSize: '13px',
+          lineHeight: '20px',
+          margin: '0 0 16px 0',
+        }}
+      >
+        Tu compromiso de tenencia responsable es el corazón de Adoptanet. Si necesitas apoyo o tienes alguna consulta sobre la adaptación de {petName}, puedes responder directamente a este correo.
+      </Text>
+
+      <Hr
+        style={{
+          borderColor: emailTheme.colors.border,
+          margin: '24px 0 16px 0',
+        }}
+      />
+
+      <Text
+        style={{
+          color: emailTheme.colors.textMuted,
+          fontSize: '12px',
+          lineHeight: '18px',
+          margin: 0,
+        }}
+      >
+        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+        <br />
+        <a
+          href={actionUrl}
+          style={{
+            color: emailTheme.colors.primary,
+            wordBreak: 'break-all',
+          }}
+        >
+          {actionUrl}
+        </a>
+      </Text>
     </BaseEmailLayout>
   );
 }

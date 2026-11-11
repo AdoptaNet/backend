@@ -20,22 +20,31 @@ export class FollowUpNotificationListener {
   @OnEvent(MilestoneSubmittedEvent.EVENT_NAME, { async: true })
   async handleMilestoneSubmitted(event: MilestoneSubmittedEvent): Promise<void> {
     this.logger.log(
-      `Notificando al albergue ${event.shelterEmail} sobre evidencias subidas para ${event.petName} (${event.milestoneType}).`,
+      `Notificando al albergue ${event.shelterEmail} sobre fotos y actualización para ${event.petName} (${event.milestoneType}).`,
     );
 
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
 
+    const milestoneDays =
+      event.milestoneType === '30_days'
+        ? 30
+        : event.milestoneType === '90_days'
+          ? 90
+          : 180;
+
     try {
-      await this.emailService.sendEmail({
-        to: event.shelterEmail,
-        subject: `📸 Nuevas evidencias de seguimiento para ${event.petName}`,
-        template: null as any,
-        text: `Hola, el adoptante ${event.adopterName} ha remitido nuevas evidencias para el hito de ${event.milestoneType} de ${event.petName}. Puedes revisarlas y emitir dictamen en: ${frontendUrl}/follow-up`,
+      await this.emailService.sendMilestoneSubmittedEmail(event.shelterEmail, {
         userId: event.shelterId,
+        adopterName: event.adopterName,
+        petName: event.petName,
+        milestoneDays,
+        actionUrl: `${frontendUrl}/follow-up`,
       });
     } catch (err: any) {
-      this.logger.error(`Error notificando evidencias enviadas a ${event.shelterEmail}: ${err.message}`);
+      this.logger.error(
+        `Error notificando fotos de seguimiento a ${event.shelterEmail}: ${err.message}`,
+      );
     }
   }
 

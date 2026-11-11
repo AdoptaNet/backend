@@ -25,6 +25,7 @@ export class VerifyShelterUseCase {
     }
 
     user.shelterProfile.isVerified = dto.isVerified;
+    user.shelterProfile.verificationRequested = false;
     const updatedProfile = await this.shelterProfileRepository.save(
       user.shelterProfile,
     );
@@ -53,6 +54,7 @@ export class VerifyShelterUseCase {
       userId: user.id,
       organizationName: updatedProfile.organizationName,
       isVerified: updatedProfile.isVerified,
+      verificationRequested: updatedProfile.verificationRequested,
     };
   }
 }

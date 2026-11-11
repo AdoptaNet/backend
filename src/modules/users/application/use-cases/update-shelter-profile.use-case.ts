@@ -60,6 +60,8 @@ export class UpdateShelterProfileUseCase {
       latitude: saved.latitude,
       longitude: saved.longitude,
       isVerified: saved.isVerified,
+      verificationRequested: saved.verificationRequested,
+      verificationRequestedAt: saved.verificationRequestedAt,
       createdAt: saved.createdAt,
       updatedAt: saved.updatedAt,
     };

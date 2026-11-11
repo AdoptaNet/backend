@@ -83,12 +83,35 @@ export function SampleEmailTemplate({
           color: emailTheme.colors.textMuted,
           fontSize: '13px',
           lineHeight: '20px',
-          margin: '0',
+          margin: '0 0 12px 0',
         }}
       >
         Si tienes alguna pregunta, no dudes en responder a este correo o ponerte en
         contacto con nuestro equipo de soporte.
       </Text>
+
+      {actionUrl && (
+        <Text
+          style={{
+            color: emailTheme.colors.textMuted,
+            fontSize: '12px',
+            lineHeight: '18px',
+            margin: 0,
+          }}
+        >
+          Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+          <br />
+          <a
+            href={actionUrl}
+            style={{
+              color: emailTheme.colors.primary,
+              wordBreak: 'break-all',
+            }}
+          >
+            {actionUrl}
+          </a>
+        </Text>
+      )}
     </BaseEmailLayout>
   );
 }

@@ -43,6 +43,9 @@ export class AdoptionUserSummaryDto {
   avatarUrl?: string | null;
 
   @ApiPropertyOptional()
+  phoneNumber?: string | null;
+
+  @ApiPropertyOptional()
   organizationName?: string | null;
 
   @ApiPropertyOptional()

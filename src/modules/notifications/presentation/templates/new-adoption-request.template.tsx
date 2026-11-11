@@ -17,9 +17,9 @@ export function NewAdoptionRequestTemplate({
   applicationUrl,
 }: NewAdoptionRequestTemplateProps) {
   return (
-    <BaseEmailLayout previewText={`Nueva postulación recibida para ${petName}`}>
+    <BaseEmailLayout previewText={`🐾 ¡Nueva postulación recibida para ${petName}!`}>
       <Section style={{ marginBottom: '16px' }}>
-        <EmailBadge variant="success">Nueva Solicitud de Adopción</EmailBadge>
+        <EmailBadge variant="success">Nueva Solicitud de Adopción 🐾</EmailBadge>
       </Section>
 
       <Heading
@@ -33,7 +33,7 @@ export function NewAdoptionRequestTemplate({
           fontFamily: emailTheme.typography.fontFamily,
         }}
       >
-        🐾 ¡Postulación recibida para {petName}!
+        🐾 ¡Nueva postulación recibida para {petName}!
       </Heading>
 
       <Text
@@ -44,12 +44,50 @@ export function NewAdoptionRequestTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        El adoptante <strong>{adopterName}</strong> ha postulado formalmente a la adopción de <strong>{petName}</strong>, adjuntando su carta de motivación y congelando sus respuestas de compatibilidad (vivienda, familia y rutina).
+        ¡Buenas noticias! <strong>{adopterName}</strong> ha enviado una solicitud
+        para adoptar a <strong>{petName}</strong>, compartiendo su carta de
+        motivación y los detalles sobre su tipo de vivienda, familia y rutina
+        diaria.
       </Text>
+
+      <Section
+        style={{
+          backgroundColor: '#F8FAF9',
+          border: `1px solid ${emailTheme.colors.border}`,
+          borderRadius: '12px',
+          padding: '16px',
+          margin: '20px 0',
+        }}
+      >
+        <Text
+          style={{
+            color: emailTheme.colors.textPrimary,
+            fontSize: '14px',
+            fontWeight: 600,
+            margin: '0 0 6px 0',
+          }}
+        >
+          ¿Qué puedes hacer desde tu panel?
+        </Text>
+        <Text
+          style={{
+            color: emailTheme.colors.textSecondary,
+            fontSize: '13px',
+            lineHeight: '20px',
+            margin: 0,
+          }}
+        >
+          • Conocer al postulante y su experiencia previa con mascotas.
+          <br />
+          • Revisar su compatibilidad con el nivel de energía de {petName}.
+          <br />
+          • Iniciar una conversación directa o dar respuesta a su postulación.
+        </Text>
+      </Section>
 
       <Section style={{ textAlign: 'center', margin: '28px 0' }}>
         <EmailButton href={applicationUrl} variant="primary">
-          Examinar Expediente de Adopción
+          Revisar Solicitud de Adopción
         </EmailButton>
       </Section>
 
@@ -61,7 +99,8 @@ export function NewAdoptionRequestTemplate({
           margin: '0 0 16px 0',
         }}
       >
-        Recuerda que puedes examinar las condiciones del adoptante y dictaminar la aprobación o rechazo constructivo desde tu panel de gestión.
+        Responder a tiempo a los adoptantes mantiene viva su motivación y ayuda
+        a que más rescatados encuentren un hogar definitivo.
       </Text>
 
       <Hr
@@ -79,7 +118,7 @@ export function NewAdoptionRequestTemplate({
           margin: 0,
         }}
       >
-        Acceso directo a la bandeja:
+        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
         <br />
         <a
           href={applicationUrl}

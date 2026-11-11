@@ -67,4 +67,10 @@ export class ShelterProfile extends AuditableEntity {
 
   @Column({ type: 'boolean', default: false })
   isVerified: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  verificationRequested: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  verificationRequestedAt: Date | null;
 }
