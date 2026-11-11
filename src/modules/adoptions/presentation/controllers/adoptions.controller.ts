@@ -31,6 +31,7 @@ import {
   PaginatedAdoptionRequestsResponseDto,
 } from '../../application/dtos/adoption-request-response.dto';
 import { AdoptionDossierResponseDto } from '../../application/dtos/adoption-dossier-response.dto';
+import { AdopterHistoryResponseDto } from '../../application/dtos/adopter-history-response.dto';
 import { SubmitAdoptionRequestUseCase } from '../../application/use-cases/submit-adoption-request.use-case';
 import { GetMyAdoptionsUseCase } from '../../application/use-cases/get-my-adoptions.use-case';
 import { CancelAdoptionRequestUseCase } from '../../application/use-cases/cancel-adoption-request.use-case';
@@ -38,6 +39,7 @@ import { GetShelterAdoptionsUseCase } from '../../application/use-cases/get-shel
 import { GetAdoptionByIdUseCase } from '../../application/use-cases/get-adoption-by-id.use-case';
 import { ReviewAdoptionRequestUseCase } from '../../application/use-cases/review-adoption-request.use-case';
 import { GetAdoptionDossierUseCase } from '../../application/use-cases/get-adoption-dossier.use-case';
+import { GetAdoptionApplicantHistoryUseCase } from '../../application/use-cases/get-adoption-applicant-history.use-case';
 
 @ApiTags('Adoptions')
 @Controller('adoptions')
@@ -52,6 +54,7 @@ export class AdoptionsController {
     private readonly getAdoptionByIdUseCase: GetAdoptionByIdUseCase,
     private readonly reviewAdoptionUseCase: ReviewAdoptionRequestUseCase,
     private readonly getAdoptionDossierUseCase: GetAdoptionDossierUseCase,
+    private readonly getAdoptionApplicantHistoryUseCase: GetAdoptionApplicantHistoryUseCase,
   ) {}
 
   @Post()
@@ -99,6 +102,26 @@ export class AdoptionsController {
     @Query() query: QueryAdoptionRequestsDto,
   ): Promise<PaginatedAdoptionRequestsResponseDto> {
     return this.getMyAdoptionsUseCase.execute(user.id, query);
+  }
+
+  @Get('my-history')
+  @Roles(UserRole.ADOPTER)
+  @ApiOperation({
+    summary:
+      'Consultar historial, métricas y nivel de confiabilidad del adoptante autenticado',
+  })
+  @ApiResponse({
+    status: 200,
+    type: AdopterHistoryResponseDto,
+    description: 'Historial y confiabilidad del adoptante en la plataforma',
+  })
+  async getMyHistory(
+    @CurrentUser() user: User,
+  ): Promise<AdopterHistoryResponseDto> {
+    return this.getAdoptionApplicantHistoryUseCase.getHistoryForAdopter(
+      user.id,
+      user.fullName,
+    );
   }
 
   @Get('shelter')
@@ -158,6 +181,34 @@ export class AdoptionsController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<AdoptionDossierResponseDto> {
     return this.getAdoptionDossierUseCase.execute(id, user.id);
+  }
+
+  @Get(':id/applicant-history')
+  @Roles(UserRole.SHELTER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Obtener el historial y métricas de confiabilidad del adoptante postulado',
+    description:
+      'Devuelve el resumen de adopciones previas, seguimientos completados, solicitudes activas y retornos registrados.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: AdopterHistoryResponseDto,
+    description: 'Historial del adoptante obtenido exitosamente',
+  })
+  @ApiResponse({ status: 404, description: 'Solicitud no encontrada' })
+  @ApiResponse({
+    status: 403,
+    description: 'No autorizado para consultar el historial de este postulante',
+  })
+  async getApplicantHistory(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AdopterHistoryResponseDto> {
+    return this.getAdoptionApplicantHistoryUseCase.execute(
+      id,
+      user.id,
+      user.role,
+    );
   }
 
   @Patch(':id/cancel')

@@ -14,6 +14,7 @@ import { GetShelterAdoptionsUseCase } from './application/use-cases/get-shelter-
 import { GetAdoptionByIdUseCase } from './application/use-cases/get-adoption-by-id.use-case';
 import { ReviewAdoptionRequestUseCase } from './application/use-cases/review-adoption-request.use-case';
 import { GetAdoptionDossierUseCase } from './application/use-cases/get-adoption-dossier.use-case';
+import { GetAdoptionApplicantHistoryUseCase } from './application/use-cases/get-adoption-applicant-history.use-case';
 import { AdoptionsController } from './presentation/controllers/adoptions.controller';
 
 @Module({
@@ -37,6 +38,7 @@ import { AdoptionsController } from './presentation/controllers/adoptions.contro
     GetAdoptionByIdUseCase,
     ReviewAdoptionRequestUseCase,
     GetAdoptionDossierUseCase,
+    GetAdoptionApplicantHistoryUseCase,
   ],
   exports: [
     AdoptionRequestRepository,
@@ -47,6 +49,7 @@ import { AdoptionsController } from './presentation/controllers/adoptions.contro
     GetAdoptionByIdUseCase,
     ReviewAdoptionRequestUseCase,
     GetAdoptionDossierUseCase,
+    GetAdoptionApplicantHistoryUseCase,
   ],
 })
 export class AdoptionsModule {}

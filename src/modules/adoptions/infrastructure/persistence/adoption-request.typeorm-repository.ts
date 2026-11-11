@@ -72,6 +72,8 @@ export class AdoptionRequestTypeOrmRepository
       .createQueryBuilder('ar')
       .leftJoinAndSelect('ar.pet', 'pet')
       .leftJoinAndSelect('pet.photos', 'photos')
+      .leftJoinAndSelect('ar.adopter', 'adopter')
+      .leftJoinAndSelect('adopter.adopterProfile', 'adopterProfile')
       .leftJoinAndSelect('ar.shelter', 'shelter')
       .leftJoinAndSelect('shelter.shelterProfile', 'shelterProfile')
       .where('ar.adopterId = :adopterId', { adopterId });
@@ -113,6 +115,8 @@ export class AdoptionRequestTypeOrmRepository
       .leftJoinAndSelect('pet.photos', 'photos')
       .leftJoinAndSelect('ar.adopter', 'adopter')
       .leftJoinAndSelect('adopter.adopterProfile', 'adopterProfile')
+      .leftJoinAndSelect('ar.shelter', 'shelter')
+      .leftJoinAndSelect('shelter.shelterProfile', 'shelterProfile')
       .where('ar.shelterId = :shelterId', { shelterId });
 
     if (options.status) {
