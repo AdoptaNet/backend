@@ -81,4 +81,12 @@ describe('AdminController', () => {
     await controller.getShelters('true');
     expect(getAdminSheltersUseCaseMock.execute).toHaveBeenCalledWith(true);
   });
+
+  it('should call GetAdminSheltersUseCase with pending flag when requested', async () => {
+    await controller.getShelters(undefined, 'true');
+    expect(getAdminSheltersUseCaseMock.execute).toHaveBeenCalledWith(
+      undefined,
+      true,
+    );
+  });
 });

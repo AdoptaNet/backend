@@ -7,6 +7,8 @@ export interface AdminShelterItemDto {
   address?: string;
   city?: string;
   isVerified: boolean;
+  verificationRequested: boolean;
+  verificationRequestedAt?: Date | null;
   petCount: number;
   createdAt: Date;
 }

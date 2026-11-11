@@ -61,6 +61,7 @@ describe('VerifyShelterUseCase', () => {
     profile.id = 'prof-1';
     profile.organizationName = 'Refugio Huellitas';
     profile.isVerified = false;
+    profile.verificationRequested = true;
     shelterUser.shelterProfile = profile;
 
     mockUserRepository.findByIdWithProfile.mockResolvedValue(shelterUser);
@@ -75,8 +76,9 @@ describe('VerifyShelterUseCase', () => {
     const result = await useCase.execute('shelter-1', { isVerified: true });
 
     expect(result.isVerified).toBe(true);
+    expect(result.verificationRequested).toBe(false);
     expect(mockShelterProfileRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ isVerified: true }),
+      expect.objectContaining({ isVerified: true, verificationRequested: false }),
     );
     expect(mockEmailService.sendShelterVerificationEmail).toHaveBeenCalledWith(
       'shelter@example.com',

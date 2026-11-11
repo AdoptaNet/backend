@@ -83,6 +83,8 @@ export class GetMyProfileUseCase {
             latitude: user.shelterProfile.latitude,
             longitude: user.shelterProfile.longitude,
             isVerified: user.shelterProfile.isVerified,
+            verificationRequested: user.shelterProfile.verificationRequested,
+            verificationRequestedAt: user.shelterProfile.verificationRequestedAt,
             createdAt: user.shelterProfile.createdAt,
             updatedAt: user.shelterProfile.updatedAt,
           }

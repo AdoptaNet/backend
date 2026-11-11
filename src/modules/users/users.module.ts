@@ -12,6 +12,7 @@ import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-
 import { GetPublicShelterUseCase } from './application/use-cases/get-public-shelter.use-case';
 import { SelectUserRoleUseCase } from './application/use-cases/select-user-role.use-case';
 import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
+import { RequestShelterVerificationUseCase } from './application/use-cases/request-shelter-verification.use-case';
 import { UpdateAvatarUseCase } from './application/use-cases/update-avatar.use-case';
 import { UpdateShelterProfileUseCase } from './application/use-cases/update-shelter-profile.use-case';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
@@ -61,6 +62,7 @@ import { UsersController } from './presentation/controllers/users.controller';
     UpdateShelterProfileUseCase,
     GetPublicShelterUseCase,
     VerifyShelterUseCase,
+    RequestShelterVerificationUseCase,
     SelectUserRoleUseCase,
     DeleteAccountUseCase,
   ],
@@ -71,6 +73,7 @@ import { UsersController } from './presentation/controllers/users.controller';
     GetMyProfileUseCase,
     GetPublicShelterUseCase,
     VerifyShelterUseCase,
+    RequestShelterVerificationUseCase,
     SelectUserRoleUseCase,
     DeleteAccountUseCase,
   ],
